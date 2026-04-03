@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung Tâm Tiếng Anh Cô Thuý - Bài Kiểm Tra Online</title>
+    <meta name="description" content="Hệ thống luyện thi trực tuyến KET & IELTS tại Trung tâm Tiếng Anh Cô Thuý - Hoài An Nhiên Education">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: rgba(255,255,255,0.04);
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-subtle: rgba(255,255,255,0.06);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: 
+                radial-gradient(ellipse 60% 50% at 10% 20%, rgba(59,130,246,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 80% 70%, rgba(139,92,246,0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 50% 90%, rgba(6,182,212,0.08) 0%, transparent 60%);
+            animation: meshMove 20s ease-in-out infinite alternate;
+        }
+        @keyframes meshMove {
+            0% { transform: scale(1) translate(0,0); }
+            100% { transform: scale(1.05) translate(-2%,-3%); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Header */
+        .site-header {
+            text-align: center;
+            padding: 4rem 0 3rem;
+            position: relative;
+        }
+        .site-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 3px;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 1.5rem;
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 20px 60px -15px rgba(59,130,246,0.4);
+            animation: breathe 4s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .site-header h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        .site-header .subtitle {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            margin-top: 0.75rem;
+            opacity: 0.8;
+        }
+        .site-header .company-info {
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            line-height: 1.8;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-item .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-item .stat-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Exam Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .exam-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+        .exam-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .exam-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 32px 64px -16px rgba(0,0,0,0.5);
+        }
+        .exam-card:hover::before { opacity: 1; }
+
+        .exam-card.card-ket::before {
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(6,182,212,0.04));
+        }
+        .exam-card.card-ielts1::before {
+            background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(59,130,246,0.04));
+        }
+        .exam-card.card-ielts2::before {
+            background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.04));
+        }
+
+        .card-icon {
+            width: 56px; height: 56px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .card-ket .card-icon { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+        .card-ielts1 .card-icon { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+        .card-ielts2 .card-icon { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+
+        .card-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .card-ket .card-badge { background: rgba(59,130,246,0.12); color: #60a5fa; }
+        .card-ielts1 .card-badge { background: rgba(139,92,246,0.12); color: #a78bfa; }
+        .card-ielts2 .card-badge { background: rgba(16,185,129,0.12); color: #34d399; }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .card-meta span {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-meta .meta-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .card-ket .meta-dot { background: var(--accent-blue); }
+        .card-ielts1 .meta-dot { background: var(--accent-purple); }
+        .card-ielts2 .meta-dot { background: var(--accent-green); }
+
+        .card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.9rem 2rem;
+            border-radius: 0.875rem;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+            border: none;
+            cursor: pointer;
+        }
+        .card-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px -8px rgba(0,0,0,0.4);
+        }
+        .card-btn:active { transform: translateY(0); }
+
+        .card-ket .card-btn { background: linear-gradient(135deg, var(--accent-blue), #2563eb); }
+        .card-ielts1 .card-btn { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); }
+        .card-ielts2 .card-btn { background: linear-gradient(135deg, var(--accent-green), #059669); }
+
+        .card-btn svg { width: 18px; height: 18px; }
+
+        /* Features section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+        .feature-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 1.75rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .feature-item:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.08);
+        }
+        .feature-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .feature-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .feature-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Branches */
+        .branches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        .branch-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s;
+        }
+        .branch-card:hover {
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
+        }
+        .branch-pin {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .branch-name {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 0.35rem;
+        }
+        .branch-addr {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .site-footer p {
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: rgba(148,163,184,0.4);
+            font-weight: 700;
+        }
+        .site-footer .phone-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: color 0.3s;
+        }
+        .site-footer .phone-link:hover { color: var(--accent-blue); }
+
+        /* Scroll animations */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s ease forwards;
+        }
+        .fade-up:nth-child(1) { animation-delay: 0s; }
+        .fade-up:nth-child(2) { animation-delay: 0.15s; }
+        .fade-up:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .site-header h1 { font-size: 1.6rem; }
+            .stats-bar { gap: 1.5rem; }
+            .stat-item .stat-value { font-size: 1.5rem; }
+            .cards-grid { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-mesh"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="site-header">
+            <div class="logo-badge">AN</div>
+            <h1>TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+            <div class="subtitle">Online Exam Platform</div>
+            <div class="company-info">
+                CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN<br>
+                MST: 0318842992
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value">03</div>
+                <div class="stat-label">Bài thi có sẵn</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">85+</div>
+                <div class="stat-label">Câu hỏi tổng</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">AI</div>
+                <div class="stat-label">Chấm điểm thông minh</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">∞</div>
+                <div class="stat-label">Luyện tập miễn phí</div>
+            </div>
+        </div>
+
+        <!-- Exam Cards -->
+        <div class="section-title">Chọn bài thi để bắt đầu</div>
+
+        <div class="cards-grid">
+            <!-- KET Card -->
+            <div class="exam-card card-ket fade-up">
+                <div class="card-icon">📝</div>
+                <div class="card-badge">
+                    <span class="meta-dot"></span> Có tích hợp AI
+                </div>
+                <h2 class="card-title">A2 Key (KET) Exam</h2>
+                <p class="card-desc">Bài thi thử KET đầy đủ với chấm điểm AI, giải thích chi tiết từng câu hỏi và phân tích bài viết tự động.</p>
+                <div class="card-meta">
+                    <span><span class="meta-dot"></span> 4 Parts</span>
+                    <span><span class="meta-dot"></span> 60 Phút</span>
+                    <span><span class="meta-dot"></span> Reading & Writing</span>
+                </div>
+                <a href="index.html" class="card-btn">
+                    Vào thi ngay
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
+
+            <!-- IELTS 1 Card -->
+            <div class="exam-card card-ielts1 fade-up">
+                <div class="card-icon">📖</div>
+                <div class="card-badge">
+                    <span class="meta-dot"></span> Offline Mode
+                </div>
+                <h2 class="card-title">IELTS Reading Test 1</h2>
+                <p class="card-desc">Bài thi thử IELTS Reading Academic hoàn chỉnh với 3 Passages, 40 câu hỏi và giải thích đáp án chi tiết.</p>
+                <div class="card-meta">
+                    <span><span class="meta-dot"></span> 3 Passages</span>
+                    <span><span class="meta-dot"></span> 40 Câu</span>
+                    <span><span class="meta-dot"></span> 60 Phút</span>
+                </div>
+                <a href="IE_001.html" class="card-btn">
+                    Vào thi ngay
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
+
+            <!-- IELTS 2 Card -->
+            <div class="exam-card card-ielts2 fade-up">
+                <div class="card-icon">☁️</div>
+                <div class="card-badge">
+                    <span class="meta-dot"></span> Cloud + Firebase
+                </div>
+                <h2 class="card-title">IELTS Reading Test 2</h2>
+                <p class="card-desc">Phiên bản nâng cấp với tích hợp Firebase — tự động lưu kết quả lên đám mây để giáo viên theo dõi tiến độ.</p>
+                <div class="card-meta">
+                    <span><span class="meta-dot"></span> 3 Passages</span>
+                    <span><span class="meta-dot"></span> 40 Câu</span>
+                    <span><span class="meta-dot"></span> Lưu kết quả</span>
+                </div>
+                <a href="ielts_thu002.html" class="card-btn">
+                    Vào thi ngay
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="section-title">Tính năng nổi bật</div>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">⏱️</div>
+                <div class="feature-title">Đếm giờ thực</div>
+                <div class="feature-desc">Hệ thống bấm giờ chính xác, tự động nộp bài khi hết thời gian</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">AI Chấm bài</div>
+                <div class="feature-desc">Gemini AI phân tích & chấm điểm bài viết chi tiết (KET)</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Kết quả tức thời</div>
+                <div class="feature-desc">Xem điểm, giải thích và đáp án ngay sau khi nộp bài</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">☁️</div>
+                <div class="feature-title">Lưu đám mây</div>
+                <div class="feature-desc">Kết quả được lưu trữ an toàn trên Firebase (Test 2)</div>
+            </div>
+        </div>
+
+        <!-- Branches -->
+        <div class="section-title">Hệ thống cơ sở</div>
+        <div class="branches-grid">
+            <div class="branch-card">
+                <div class="branch-pin">📍</div>
+                <div>
+                    <div class="branch-name">Cơ sở 1 — Củ Chi</div>
+                    <div class="branch-addr">202/1 Nguyễn Thị Lắng, Tân Phú Trung, Củ Chi, TP. HCM</div>
+                </div>
+            </div>
+            <div class="branch-card">
+                <div class="branch-pin">📍</div>
+                <div>
+                    <div class="branch-name">Cơ sở 2 — Tân Phú</div>
+                    <div class="branch-addr">61 Lê Đình Thám, Khu Phố 23, Tân Phú, TP. HCM</div>
+                </div>
+            </div>
+            <div class="branch-card">
+                <div class="branch-pin">📍</div>
+                <div>
+                    <div class="branch-name">Cơ sở 3 — Hóc Môn</div>
+                    <div class="branch-addr">325/5T Nguyễn Thị Thảnh, Hóc Môn, TP. HCM</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <a href="tel:0773117254" class="phone-link">📞 0773 117 254</a>
+            <p>© 2026 Hoài An Nhiên Education • Online Exam Platform v1.0</p>
+        </footer>
+    </div>
+</body>
+</html>
