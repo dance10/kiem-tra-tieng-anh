@@ -210,49 +210,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- Google Sheets Integration -->
+    <script>
+        // ⚠️ QUAN TRỌNG: Dán URL Google Apps Script của bạn vào đây
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
 
-        // Configuration and Initialization
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        let currentUser = null;
-
-        // Auth Logic (Rule 3)
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth failed", error);
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('cloud-status').innerText = "Sẵn sàng (Online)";
-                document.getElementById('cloud-status').className = "text-xl font-bold text-green-600";
-                const btn = document.getElementById('btn-start');
-                btn.disabled = false;
-                btn.innerText = "BẮT ĐẦU LÀM BÀI";
-                btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-16 rounded-full shadow-lg transform transition active:scale-95 text-lg cursor-pointer";
-            }
-        });
-
-        initAuth();
-
-        // Exam Data
         const answerKey = {
             1: { ans: "TRUE", expl: "Phát minh năm 1817 bởi Baron Karl von Drais tại Đức." },
             2: { ans: "FALSE", expl: "Dandy horse không có bàn đạp (pedals)." },
@@ -309,41 +271,59 @@
             return (score / 4).toFixed(1);
         }
 
-        // Exposed functions to window for onclick handlers
-        window.startTest = function() {
+        // Check Google Sheet connection on page load
+        (function checkConnection() {
+            const statusEl = document.getElementById('cloud-status');
+            const btn = document.getElementById('btn-start');
+
+            if (GOOGLE_SHEET_URL === "PASTE_YOUR_URL_HERE" || !GOOGLE_SHEET_URL) {
+                statusEl.innerText = "⚠️ Chưa cấu hình";
+                statusEl.className = "text-xl font-bold text-orange-500";
+                // Still allow test but warn about no saving
+                btn.disabled = false;
+                btn.innerText = "BẮT ĐẦU (Không lưu)";
+                btn.className = "bg-orange-500 hover:bg-orange-600 text-white font-black py-4 px-16 rounded-full shadow-lg transform transition active:scale-95 text-lg cursor-pointer";
+            } else {
+                statusEl.innerText = "Sẵn sàng ✅";
+                statusEl.className = "text-xl font-bold text-green-600";
+                btn.disabled = false;
+                btn.innerText = "BẮT ĐẦU LÀM BÀI";
+                btn.className = "bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-16 rounded-full shadow-lg transform transition active:scale-95 text-lg cursor-pointer";
+            }
+        })();
+
+        let studentName = "";
+
+        function startTest() {
             const nameInput = document.getElementById('student-name');
-            if(!nameInput.value.trim()) {
+            if (!nameInput.value.trim()) {
                 alert("Bạn vui lòng nhập họ tên!");
                 return;
             }
-            window.studentName = nameInput.value;
-            document.getElementById('display-name').innerText = window.studentName;
-            document.getElementById('user-initial').innerText = window.studentName.charAt(0).toUpperCase();
+            studentName = nameInput.value.trim();
+            document.getElementById('display-name').innerText = studentName;
+            document.getElementById('user-initial').innerText = studentName.charAt(0).toUpperCase();
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('test-container').classList.remove('hidden');
-            window.scrollTo(0,0);
-            
+            window.scrollTo(0, 0);
+
             // Start Timer
             let timerSeconds = 3600;
             window.timerInterval = setInterval(() => {
                 timerSeconds--;
                 if (timerSeconds <= 0) {
                     clearInterval(window.timerInterval);
-                    window.submitTest();
+                    submitTest();
                     return;
                 }
                 const mins = Math.floor(timerSeconds / 60);
                 const secs = timerSeconds % 60;
                 document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                if (timerSeconds < 300) document.getElementById('timer').className = "text-3xl font-mono font-black text-red-600 animate-pulse";
             }, 1000);
-        };
+        }
 
-        window.submitTest = async function() {
-            if (!currentUser) {
-                alert("Chưa kết nối được máy chủ. Vui lòng thử lại sau giây lát.");
-                return;
-            }
-
+        async function submitTest() {
             document.getElementById('loading-spinner').style.display = 'flex';
             clearInterval(window.timerInterval);
 
@@ -355,55 +335,87 @@
                 const qId = input.getAttribute('data-id');
                 const userVal = input.value.trim().toUpperCase();
                 answersSubmitted[qId] = userVal;
-                if(userVal === answerKey[qId].ans.toUpperCase()) score++;
+                if (userVal === answerKey[qId].ans.toUpperCase()) score++;
             });
 
             const band = calculateBand(score);
 
-            // Save to Firestore (Rule 1)
-            try {
-                // Public collection for center to monitor
-                const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'test_results');
-                await addDoc(resultsCol, {
-                    student_name: window.studentName,
-                    score: score,
-                    band: band,
-                    timestamp: serverTimestamp(),
-                    user_id: currentUser.uid,
-                    answers: answersSubmitted
-                });
-            } catch (e) {
-                console.error("Error saving result:", e);
-                document.getElementById('save-status').innerText = "❌ Lỗi lưu kết quả, nhưng bạn vẫn xem được điểm!";
-                document.getElementById('save-status').className = "text-sm text-red-600 font-bold mb-4";
+            // Save to Google Sheet
+            const saveStatus = document.getElementById('save-status');
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== "PASTE_YOUR_URL_HERE") {
+                try {
+                    await fetch(GOOGLE_SHEET_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_name: studentName,
+                            score: score,
+                            band: band,
+                            answers: answersSubmitted
+                        })
+                    });
+                    saveStatus.innerText = "✅ Kết quả đã được lưu vào Google Sheet!";
+                    saveStatus.className = "text-sm text-green-700 font-bold mb-4";
+                } catch (e) {
+                    console.error("Error saving:", e);
+                    saveStatus.innerText = "⚠️ Không gửi được kết quả, nhưng bạn vẫn xem được điểm!";
+                    saveStatus.className = "text-sm text-orange-600 font-bold mb-4";
+                }
+            } else {
+                saveStatus.innerText = "ℹ️ Chế độ offline — kết quả không được lưu trữ.";
+                saveStatus.className = "text-sm text-gray-500 font-bold mb-4";
             }
 
             // UI Update
             document.getElementById('loading-spinner').style.display = 'none';
             document.getElementById('test-container').classList.add('hidden');
             document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('result-name').innerText = `Học sinh: ${window.studentName}`;
-            
+            document.getElementById('result-name').innerText = `Học sinh: ${studentName}`;
+
             // Score circle
             const circle = document.getElementById('score-circle');
             circle.style.strokeDashoffset = 552.92 - (552.92 * score / 40);
-            document.getElementById('score-display').innerText = score;
+
+            // Score animation
+            let cur = 0;
+            const step = setInterval(() => {
+                if (cur >= score) {
+                    document.getElementById('score-display').innerText = score;
+                    clearInterval(step);
+                } else {
+                    cur++;
+                    document.getElementById('score-display').innerText = cur;
+                }
+            }, 30);
+
             document.getElementById('band-display').innerText = `IELTS Band Score: ${band}`;
 
             // Explanations
             const explanationList = document.getElementById('explanation-list');
+            explanationList.innerHTML = "";
             userInputs.forEach(input => {
                 const qId = input.getAttribute('data-id');
                 const userVal = input.value.trim().toUpperCase();
                 const isCorrect = userVal === answerKey[qId].ans.toUpperCase();
                 const div = document.createElement('div');
-                div.className = `p-4 rounded-xl border-l-4 ${isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`;
-                div.innerHTML = `<p class="font-bold">Câu ${qId}: ${isCorrect ? '✅' : '❌'}</p><p class="text-sm">Đúng: ${answerKey[qId].ans}</p><p class="text-xs text-gray-600">💡 ${answerKey[qId].expl}</p>`;
+                div.className = `p-4 rounded-xl border-l-4 shadow-sm ${isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-black text-gray-800">CÂU ${qId}</span>
+                        <span class="px-2 py-0.5 rounded text-xs font-bold ${isCorrect ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}">
+                            ${isCorrect ? 'ĐÚNG' : 'SAI'}
+                        </span>
+                    </div>
+                    <p class="text-sm"><b>Bạn chọn:</b> <span class="${isCorrect ? 'text-green-700' : 'text-red-700'}">${userVal || '(Để trống)'}</span></p>
+                    <p class="text-sm"><b>Đáp án:</b> <span class="text-blue-700 font-bold">${answerKey[qId].ans}</span></p>
+                    <p class="text-xs text-gray-600 mt-2 bg-white/50 p-2 rounded border border-gray-100">💡 ${answerKey[qId].expl}</p>
+                `;
                 explanationList.appendChild(div);
             });
 
-            window.scrollTo(0,0);
-        };
+            window.scrollTo(0, 0);
+        }
     </script>
 </body>
 </html>
