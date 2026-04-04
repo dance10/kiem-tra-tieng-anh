@@ -17,6 +17,7 @@
             --accent-purple: #8b5cf6;
             --accent-green: #10b981;
             --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
             --border-subtle: rgba(255,255,255,0.06);
@@ -200,6 +201,9 @@
         .exam-card.card-ielts2::before {
             background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.04));
         }
+        .exam-card.card-custom::before {
+            background: linear-gradient(135deg, rgba(244,63,94,0.08), rgba(245,158,11,0.04));
+        }
 
         .card-icon {
             width: 56px; height: 56px;
@@ -215,6 +219,7 @@
         .card-ket .card-icon { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
         .card-ielts1 .card-icon { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
         .card-ielts2 .card-icon { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+        .card-custom .card-icon { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
 
         .card-badge {
             display: inline-flex;
@@ -233,6 +238,7 @@
         .card-ket .card-badge { background: rgba(59,130,246,0.12); color: #60a5fa; }
         .card-ielts1 .card-badge { background: rgba(139,92,246,0.12); color: #a78bfa; }
         .card-ielts2 .card-badge { background: rgba(16,185,129,0.12); color: #34d399; }
+        .card-custom .card-badge { background: rgba(244,63,94,0.12); color: #fb7185; }
 
         .card-title {
             font-size: 1.5rem;
@@ -277,6 +283,7 @@
         .card-ket .meta-dot { background: var(--accent-blue); }
         .card-ielts1 .meta-dot { background: var(--accent-purple); }
         .card-ielts2 .meta-dot { background: var(--accent-green); }
+        .card-custom .meta-dot { background: var(--accent-rose); }
 
         .card-btn {
             display: inline-flex;
@@ -305,8 +312,381 @@
         .card-ket .card-btn { background: linear-gradient(135deg, var(--accent-blue), #2563eb); }
         .card-ielts1 .card-btn { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); }
         .card-ielts2 .card-btn { background: linear-gradient(135deg, var(--accent-green), #059669); }
+        .card-custom .card-btn { background: linear-gradient(135deg, var(--accent-rose), #e11d48); }
 
         .card-btn svg { width: 18px; height: 18px; }
+
+        /* Delete button for custom cards */
+        .card-delete-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px; height: 32px;
+            border-radius: 0.5rem;
+            background: rgba(244,63,94,0.15);
+            border: 1px solid rgba(244,63,94,0.2);
+            color: #fb7185;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            transition: all 0.3s;
+            opacity: 0;
+        }
+        .exam-card:hover .card-delete-btn { opacity: 1; }
+        .card-delete-btn:hover {
+            background: rgba(244,63,94,0.3);
+            transform: scale(1.1);
+        }
+
+        /* ========== LEADERBOARD SECTION ========== */
+        .leaderboard-section {
+            margin-bottom: 4rem;
+        }
+
+        .leaderboard-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Tabs */
+        .lb-tabs {
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-subtle);
+            scrollbar-width: none;
+        }
+        .lb-tabs::-webkit-scrollbar { display: none; }
+
+        .lb-tab {
+            flex: 1;
+            min-width: 160px;
+            padding: 1.1rem 1.5rem;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            white-space: nowrap;
+        }
+        .lb-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.02); }
+        .lb-tab.active { color: var(--accent-cyan); }
+        .lb-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 2px;
+        }
+
+        /* Leaderboard content */
+        .lb-panel {
+            display: none;
+            padding: 1.5rem;
+        }
+        .lb-panel.active { display: block; }
+
+        .lb-loading {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .lb-loading .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid var(--border-subtle);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lb-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .lb-empty .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+        /* Podium top 3 */
+        .lb-podium {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
+        }
+        .podium-item {
+            text-align: center;
+            padding: 1.25rem 1rem 1rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s;
+            flex: 1;
+            max-width: 200px;
+        }
+        .podium-item:hover { transform: translateY(-4px); }
+        .podium-item.gold {
+            background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04));
+            border-color: rgba(245,158,11,0.2);
+            order: 2;
+        }
+        .podium-item.silver {
+            background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.04));
+            border-color: rgba(148,163,184,0.15);
+            order: 1;
+        }
+        .podium-item.bronze {
+            background: linear-gradient(135deg, rgba(180,83,9,0.12), rgba(180,83,9,0.04));
+            border-color: rgba(180,83,9,0.15);
+            order: 3;
+        }
+        .podium-medal {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+        .gold .podium-medal { animation: glow 2s ease-in-out infinite; }
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(245,158,11,0.4)); }
+            50% { filter: drop-shadow(0 0 12px rgba(245,158,11,0.7)); }
+        }
+        .podium-name {
+            font-size: 0.85rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .podium-score {
+            font-size: 1.1rem;
+            font-weight: 900;
+            margin-bottom: 0.15rem;
+        }
+        .gold .podium-score { color: var(--accent-amber); }
+        .silver .podium-score { color: #94a3b8; }
+        .bronze .podium-score { color: #b45309; }
+        .podium-band {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+        }
+
+        /* Rest of leaderboard rows */
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.25s;
+            border: 1px solid transparent;
+        }
+        .lb-row:hover {
+            background: rgba(255,255,255,0.03);
+            border-color: var(--border-subtle);
+        }
+        .lb-rank {
+            width: 28px; height: 28px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 900;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .lb-name {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .lb-score {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+        }
+        .lb-band {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            min-width: 60px;
+            text-align: right;
+        }
+        .lb-time {
+            font-size: 0.6rem;
+            color: rgba(148,163,184,0.5);
+            flex-shrink: 0;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        /* ========== ADD EXAM SECTION ========== */
+        .add-exam-section {
+            margin-bottom: 4rem;
+        }
+        .add-exam-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1.5rem;
+            padding: 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .add-exam-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-rose), var(--accent-amber), var(--accent-purple));
+        }
+
+        .add-exam-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .add-exam-header .header-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .add-exam-header h3 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+        .add-exam-header p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .add-exam-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+        }
+        .form-group input, .form-group textarea {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 0.8rem 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.3s;
+            outline: none;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(148,163,184,0.4);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .add-exam-submit {
+            grid-column: 1 / -1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.9rem 2.5rem;
+            border-radius: 0.875rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: white;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent-rose), var(--accent-amber));
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+        }
+        .add-exam-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px -8px rgba(244,63,94,0.4);
+        }
+        .add-exam-submit:active { transform: translateY(0); }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(16,185,129,0.95);
+            color: white;
+            padding: 0.85rem 1.5rem;
+            border-radius: 0.875rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 16px 48px -12px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.error { background: rgba(244,63,94,0.95); }
 
         /* Features section */
         .features-grid {
@@ -417,6 +797,7 @@
         .fade-up:nth-child(1) { animation-delay: 0s; }
         .fade-up:nth-child(2) { animation-delay: 0.15s; }
         .fade-up:nth-child(3) { animation-delay: 0.3s; }
+        .fade-up:nth-child(4) { animation-delay: 0.45s; }
 
         @keyframes fadeUp {
             to { opacity: 1; transform: translateY(0); }
@@ -429,6 +810,11 @@
             .stat-item .stat-value { font-size: 1.5rem; }
             .cards-grid { grid-template-columns: 1fr; }
             .container { padding: 1rem; }
+            .lb-podium { flex-direction: column; align-items: center; }
+            .podium-item { order: unset !important; max-width: 300px; width: 100%; }
+            .add-exam-form { grid-template-columns: 1fr; }
+            .lb-time { display: none; }
+            .lb-row { gap: 0.5rem; padding: 0.7rem 0.5rem; }
         }
     </style>
 </head>
@@ -450,7 +836,7 @@
         <!-- Stats -->
         <div class="stats-bar">
             <div class="stat-item">
-                <div class="stat-value">03</div>
+                <div class="stat-value" id="stat-exam-count">03</div>
                 <div class="stat-label">Bài thi có sẵn</div>
             </div>
             <div class="stat-item">
@@ -470,7 +856,7 @@
         <!-- Exam Cards -->
         <div class="section-title">Chọn bài thi để bắt đầu</div>
 
-        <div class="cards-grid">
+        <div class="cards-grid" id="cards-grid">
             <!-- KET Card -->
             <div class="exam-card card-ket fade-up">
                 <div class="card-icon">📝</div>
@@ -529,6 +915,66 @@
             </div>
         </div>
 
+        <!-- ========== LEADERBOARD ========== -->
+        <div class="leaderboard-section">
+            <div class="section-title">🏆 Bảng xếp hạng</div>
+            <div class="leaderboard-container">
+                <div class="lb-tabs" id="lb-tabs">
+                    <button class="lb-tab active" data-exam="all" id="tab-all">Tổng hợp</button>
+                    <button class="lb-tab" data-exam="KET A2 Exam" id="tab-ket">KET A2</button>
+                    <button class="lb-tab" data-exam="IELTS Reading Test 1" id="tab-ielts1">IELTS Test 1</button>
+                    <button class="lb-tab" data-exam="IELTS Reading Test 2" id="tab-ielts2">IELTS Test 2</button>
+                </div>
+                <div class="lb-panel active" id="lb-content">
+                    <div class="lb-loading">
+                        <div class="spinner"></div>
+                        Đang tải bảng xếp hạng...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ADD CUSTOM EXAM ========== -->
+        <div class="add-exam-section">
+            <div class="section-title">✨ Thêm bài kiểm tra tự tạo</div>
+            <div class="add-exam-container">
+                <div class="add-exam-header">
+                    <div class="header-icon">🎨</div>
+                    <h3>Thêm bài kiểm tra của riêng bạn</h3>
+                    <p>Dán link URL bài kiểm tra được tạo từ Gemini Canvas hoặc bất kỳ nguồn nào. Bài thi sẽ xuất hiện ngay trên trang chủ!</p>
+                </div>
+                <form class="add-exam-form" id="add-exam-form">
+                    <div class="form-group">
+                        <label for="exam-name">Tên bài thi *</label>
+                        <input type="text" id="exam-name" placeholder="VD: Grammar Test Level 3" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-icon">Emoji icon</label>
+                        <input type="text" id="exam-icon" placeholder="VD: 🎯" maxlength="4" value="🎯">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="exam-url">Link bài kiểm tra (URL) *</label>
+                        <input type="url" id="exam-url" placeholder="https://... (paste link từ Gemini Canvas)" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="exam-desc">Mô tả ngắn</label>
+                        <textarea id="exam-desc" placeholder="VD: Bài tập ngữ pháp tiếng Anh trình độ B1..." rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-badge">Nhãn hiển thị</label>
+                        <input type="text" id="exam-badge" placeholder="VD: Gemini Canvas" value="Gemini Canvas">
+                    </div>
+                    <div class="form-group">
+                        <label for="exam-info">Thông tin thêm</label>
+                        <input type="text" id="exam-info" placeholder="VD: 30 Câu • 20 Phút">
+                    </div>
+                    <button type="submit" class="add-exam-submit" id="btn-add-exam">
+                        ➕ Thêm bài kiểm tra
+                    </button>
+                </form>
+            </div>
+        </div>
+
         <!-- Features -->
         <div class="section-title">Tính năng nổi bật</div>
         <div class="features-grid">
@@ -550,7 +996,7 @@
             <div class="feature-item">
                 <div class="feature-icon">☁️</div>
                 <div class="feature-title">Lưu đám mây</div>
-                <div class="feature-desc">Kết quả được lưu trữ an toàn trên Firebase (Test 2)</div>
+                <div class="feature-desc">Kết quả được lưu trữ an toàn trên Google Sheets</div>
             </div>
         </div>
 
@@ -583,8 +1029,279 @@
         <!-- Footer -->
         <footer class="site-footer">
             <a href="tel:0773117254" class="phone-link">📞 0773 117 254</a>
-            <p>© 2026 Hoài An Nhiên Education • Online Exam Platform v1.0</p>
+            <p>© 2026 Hoài An Nhiên Education • Online Exam Platform v2.0</p>
         </footer>
     </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ==========================================
+        // CONFIG
+        // ==========================================
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
+        const CUSTOM_EXAMS_KEY = "custom_exams_v1";
+
+        // ==========================================
+        // TOAST
+        // ==========================================
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast' + (isError ? ' error' : '');
+            requestAnimationFrame(() => t.classList.add('show'));
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ==========================================
+        // CUSTOM EXAMS (localStorage)
+        // ==========================================
+        function getCustomExams() {
+            try {
+                return JSON.parse(localStorage.getItem(CUSTOM_EXAMS_KEY)) || [];
+            } catch { return []; }
+        }
+
+        function saveCustomExams(exams) {
+            localStorage.setItem(CUSTOM_EXAMS_KEY, JSON.stringify(exams));
+        }
+
+        function renderCustomExams() {
+            const grid = document.getElementById('cards-grid');
+            // Remove existing custom cards
+            grid.querySelectorAll('.custom-exam-card').forEach(c => c.remove());
+
+            const exams = getCustomExams();
+            exams.forEach((exam, index) => {
+                const card = document.createElement('div');
+                card.className = 'exam-card card-custom fade-up custom-exam-card';
+                card.style.animationDelay = `${0.45 + index * 0.15}s`;
+                card.innerHTML = `
+                    <button class="card-delete-btn" onclick="deleteCustomExam(${index})" title="Xóa bài thi này">✕</button>
+                    <div class="card-icon">${exam.icon || '🎯'}</div>
+                    <div class="card-badge">
+                        <span class="meta-dot"></span> ${exam.badge || 'Custom'}
+                    </div>
+                    <h2 class="card-title">${escapeHtml(exam.name)}</h2>
+                    <p class="card-desc">${escapeHtml(exam.desc || 'Bài kiểm tra được thêm bởi giáo viên.')}</p>
+                    ${exam.info ? `<div class="card-meta"><span><span class="meta-dot"></span> ${escapeHtml(exam.info)}</span></div>` : ''}
+                    <a href="${escapeHtml(exam.url)}" class="card-btn" target="_blank" rel="noopener">
+                        Vào thi ngay
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Update exam count
+            const totalExams = 3 + exams.length;
+            document.getElementById('stat-exam-count').textContent = totalExams.toString().padStart(2, '0');
+        }
+
+        function deleteCustomExam(index) {
+            if (!confirm('Bạn có chắc muốn xóa bài thi này?')) return;
+            const exams = getCustomExams();
+            exams.splice(index, 1);
+            saveCustomExams(exams);
+            renderCustomExams();
+            showToast('🗑️ Đã xóa bài kiểm tra');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Form handler
+        document.getElementById('add-exam-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('exam-name').value.trim();
+            const url = document.getElementById('exam-url').value.trim();
+            const icon = document.getElementById('exam-icon').value.trim() || '🎯';
+            const desc = document.getElementById('exam-desc').value.trim();
+            const badge = document.getElementById('exam-badge').value.trim() || 'Custom';
+            const info = document.getElementById('exam-info').value.trim();
+
+            if (!name || !url) {
+                showToast('⚠️ Vui lòng điền tên và URL bài thi!', true);
+                return;
+            }
+
+            // Validate URL
+            try {
+                new URL(url);
+            } catch {
+                showToast('⚠️ URL không hợp lệ!', true);
+                return;
+            }
+
+            const exams = getCustomExams();
+            exams.push({ name, url, icon, desc, badge, info, addedAt: new Date().toISOString() });
+            saveCustomExams(exams);
+            renderCustomExams();
+
+            // Reset form
+            this.reset();
+            document.getElementById('exam-icon').value = '🎯';
+            document.getElementById('exam-badge').value = 'Gemini Canvas';
+
+            showToast('✅ Đã thêm bài kiểm tra thành công!');
+        });
+
+        // ==========================================
+        // LEADERBOARD
+        // ==========================================
+        let leaderboardData = [];
+        let currentFilter = 'all';
+
+        async function loadLeaderboard() {
+            const content = document.getElementById('lb-content');
+            try {
+                const response = await fetch(GOOGLE_SHEET_URL + '?action=getResults');
+                if (!response.ok) throw new Error('Network error');
+                const result = await response.json();
+                
+                if (result.status === 'success' && Array.isArray(result.data)) {
+                    leaderboardData = result.data;
+                    renderLeaderboard();
+                } else {
+                    throw new Error('Invalid data');
+                }
+            } catch (error) {
+                console.warn('Leaderboard fetch failed:', error);
+                // Show empty state instead of error 
+                content.innerHTML = `
+                    <div class="lb-empty">
+                        <div class="empty-icon">📋</div>
+                        <strong>Chưa có dữ liệu xếp hạng</strong><br>
+                        <span style="font-size:0.75rem; margin-top:0.5rem; display:block;">
+                            Dữ liệu sẽ hiển thị khi có học viên nộp bài.<br>
+                            <span style="color:rgba(148,163,184,0.4); font-size:0.65rem;">
+                                (Cần cập nhật Apps Script — xem hướng dẫn bên dưới)
+                            </span>
+                        </span>
+                    </div>
+                `;
+            }
+        }
+
+        function parseScore(scoreStr) {
+            // Handle formats like "35/40", "120/160", etc.
+            if (!scoreStr) return { correct: 0, total: 1, percent: 0 };
+            const parts = String(scoreStr).split('/');
+            const correct = parseFloat(parts[0]) || 0;
+            const total = parseFloat(parts[1]) || 1;
+            return { correct, total, percent: (correct / total) * 100 };
+        }
+
+        function renderLeaderboard() {
+            const content = document.getElementById('lb-content');
+            
+            // Filter data
+            let filteredData = leaderboardData;
+            if (currentFilter !== 'all') {
+                filteredData = leaderboardData.filter(r => r.exam === currentFilter);
+            }
+
+            // Sort by percentage score (descending), then by time (latest first)
+            filteredData.sort((a, b) => {
+                const sa = parseScore(a.score);
+                const sb = parseScore(b.score);
+                if (sb.percent !== sa.percent) return sb.percent - sa.percent;
+                return 0;
+            });
+
+            // Deduplicate: keep each student's best score per exam type
+            const bestScores = new Map();
+            filteredData.forEach(row => {
+                const key = (row.name || '').trim().toLowerCase() + '|' + (currentFilter === 'all' ? '' : row.exam);
+                if (!bestScores.has(key)) {
+                    bestScores.set(key, row);
+                } else {
+                    const existing = parseScore(bestScores.get(key).score);
+                    const current = parseScore(row.score);
+                    if (current.percent > existing.percent) {
+                        bestScores.set(key, row);
+                    }
+                }
+            });
+            
+            const uniqueData = Array.from(bestScores.values());
+            uniqueData.sort((a, b) => parseScore(b.score).percent - parseScore(a.score).percent);
+
+            if (uniqueData.length === 0) {
+                content.innerHTML = `
+                    <div class="lb-empty">
+                        <div class="empty-icon">🏅</div>
+                        <strong>Chưa có kết quả nào</strong><br>
+                        <span style="font-size:0.75rem;">Hãy là người đầu tiên chinh phục bảng xếp hạng!</span>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            // Top 3 podium
+            const top3 = uniqueData.slice(0, 3);
+            if (top3.length >= 1) {
+                const medals = ['🥇', '🥈', '🥉'];
+                const classes = ['gold', 'silver', 'bronze'];
+                html += '<div class="lb-podium">';
+                top3.forEach((row, i) => {
+                    const score = parseScore(row.score);
+                    html += `
+                        <div class="podium-item ${classes[i]}">
+                            <div class="podium-medal">${medals[i]}</div>
+                            <div class="podium-name" title="${escapeHtml(row.name || 'Ẩn danh')}">${escapeHtml(row.name || 'Ẩn danh')}</div>
+                            <div class="podium-score">${row.score || '—'}</div>
+                            <div class="podium-band">${escapeHtml(row.band || '')}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            // Rest of the list
+            const rest = uniqueData.slice(3, 20);
+            if (rest.length > 0) {
+                rest.forEach((row, i) => {
+                    html += `
+                        <div class="lb-row">
+                            <div class="lb-rank">${i + 4}</div>
+                            <div class="lb-name">${escapeHtml(row.name || 'Ẩn danh')}</div>
+                            <div class="lb-score">${row.score || '—'}</div>
+                            <div class="lb-band">${escapeHtml(row.band || '')}</div>
+                            <div class="lb-time">${escapeHtml(row.time || '')}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            content.innerHTML = html;
+        }
+
+        // Tab switching
+        document.getElementById('lb-tabs').addEventListener('click', function(e) {
+            const tab = e.target.closest('.lb-tab');
+            if (!tab) return;
+            
+            this.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            currentFilter = tab.dataset.exam;
+            renderLeaderboard();
+        });
+
+        // ==========================================
+        // INIT
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCustomExams();
+            loadLeaderboard();
+        });
+    </script>
 </body>
 </html>
