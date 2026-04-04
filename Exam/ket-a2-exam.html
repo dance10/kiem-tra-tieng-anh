@@ -75,13 +75,6 @@
             const [currentPart, setCurrentPart] = useState(0);
             const [answers, setAnswers] = useState({});
             const [isFinished, setIsFinished] = useState(false);
-            
-            // AI States
-            const [aiLoading, setAiLoading] = useState(false);
-            const [aiFeedback, setAiFeedback] = useState(null);
-            const [explanationId, setExplanationId] = useState(null);
-            const [explanations, setExplanations] = useState({});
-            const apiKey = atob('QUl6YVN5REZkc1dIZU90VktGT0Zvb1dWTW9Dbl9SY3V0c3JtelBj');
             const [studentName, setStudentName] = useState('');
             const [sheetStatus, setSheetStatus] = useState('checking'); // checking, ready, offline
 
@@ -164,82 +157,6 @@
                 }
             ];
 
-
-
-            // Gemini API Integration
-            const callGemini = async (prompt, systemInstruction = "") => {
-                let delay = 1000;
-                for (let i = 0; i < 3; i++) {
-                    try {
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: prompt }] }],
-                                systemInstruction: { parts: [{ text: systemInstruction }] }
-                            })
-                        });
-                        const data = await response.json();
-                        if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                            return data.candidates[0].content.parts[0].text;
-                        }
-                        if (data.error) {
-                            throw new Error(data.error.message || "API Error");
-                        }
-                        throw new Error("Không có phản hồi từ AI");
-                    } catch (err) {
-                        if (i === 2) throw err;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
-                    }
-                }
-            };
-
-            const analyzeWriting = async () => {
-                const studentResponse = answers['part3'] || '';
-                if (studentResponse.trim().split(/\s+/).length < 5) {
-                    alert("Vui lòng viết bài (ít nhất 5 từ) trước khi yêu cầu chấm điểm!");
-                    return;
-                }
-
-                setAiLoading(true);
-                const systemPrompt = "Bạn là một giám khảo chấm thi KET (A2 Key) chuyên nghiệp tại Trung tâm Hoài An Nhiên. Hãy đưa ra nhận xét bằng tiếng Việt.";
-                const userPrompt = `Hãy chấm bài viết của học sinh cho đề bài: "${ketParts[3].instruction}". 
-                Bài viết của học sinh: "${studentResponse}". 
-                Hãy đánh giá: 
-                1. Điểm số (trên thang điểm 5).
-                2. Nhận xét về Ngữ pháp và Từ vựng.
-                3. Đưa ra một phiên bản sửa lỗi hoàn chỉnh tốt hơn.
-                Hãy trình bày đẹp mắt bằng markdown.`;
-
-                try {
-                    const result = await callGemini(userPrompt, systemPrompt);
-                    setAiFeedback(result);
-                } catch (error) {
-                    console.error(error);
-                    alert("Lỗi: " + error.message);
-                } finally {
-                    setAiLoading(false);
-                }
-            };
-
-            const getExplanation = async (questionId, questionText, correctAnswer, studentAnswer, options) => {
-                setExplanationId(questionId);
-                const systemPrompt = "Bạn là trợ giảng tiếng Anh tại Hoài An Nhiên. Giải thích ngắn gọn, dễ hiểu bằng tiếng Việt.";
-                const userPrompt = `Giải thích tại sao đáp án "${correctAnswer}" là đúng cho câu hỏi KET này: "${questionText}". 
-                Các lựa chọn là: ${options.join(', ')}. 
-                Học sinh đã chọn: "${studentAnswer}".`;
-
-                try {
-                    const result = await callGemini(userPrompt, systemPrompt);
-                    setExplanations(prev => ({ ...prev, [questionId]: result }));
-                } catch (error) {
-                    console.error(error);
-                    setExplanations(prev => ({ ...prev, [questionId]: "Lỗi: " + error.message }));
-                } finally {
-                    setExplanationId(null);
-                }
-            };
 
             // Timer logic
             useEffect(() => {
@@ -341,9 +258,6 @@
                                 >
                                     🏠 Trang Chủ
                                 </a>
-                                <span className="text-[10px] px-3 py-1.5 rounded-full font-black uppercase tracking-widest bg-green-50 text-green-600 border border-green-100">
-                                    ✨ AI Sẵn Sàng
-                                </span>
                                 {currentStep === 'exam' && (
                                     <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono font-bold border-2 transition-all ${timeLeft < 300 ? 'bg-red-50 border-red-200 text-red-600 animate-pulse' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
                                         <Clock size={16} />
@@ -364,7 +278,7 @@
                                     <div className="relative z-10">
                                         <span className="bg-white/20 backdrop-blur-md px-6 py-2 rounded-full text-xs font-black uppercase tracking-[4px] mb-6 inline-block">Preparation Toolkit</span>
                                         <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter leading-none">A2 Key (KET) Exam</h2>
-                                        <p className="text-blue-100 text-lg md:text-xl font-medium opacity-90 max-w-2xl mx-auto italic">Nâng tầm kỹ năng tiếng Anh với sự hỗ trợ của Trí Tuệ Nhân Tạo được cá nhân hóa tại Hoài An Nhiên. ✨</p>
+                                        <p className="text-blue-100 text-lg md:text-xl font-medium opacity-90 max-w-2xl mx-auto italic">Nâng tầm kỹ năng tiếng Anh với hệ thống thi thử trực tuyến tại Hoài An Nhiên. ✨</p>
                                     </div>
                                 </div>
                                 <div className="p-8 md:p-16">
@@ -379,24 +293,24 @@
                                                     <span className="font-bold text-slate-700 text-lg">Reading & Writing (60)</span>
                                                 </li>
                                                 <li className="flex items-center gap-5 group">
-                                                    <div className="bg-blue-100 text-blue-600 p-3 rounded-2xl shadow-sm group-hover:scale-110 transition-transform"><Sparkles size={20}/></div>
+                                                    <div className="bg-blue-100 text-blue-600 p-3 rounded-2xl shadow-sm group-hover:scale-110 transition-transform"><BookOpen size={20}/></div>
                                                     <div>
-                                                      <span className="font-black text-blue-700 text-lg block leading-none">AI Writing Feedback</span>
-                                                      <span className="text-xs text-blue-400 font-bold uppercase tracking-widest mt-1 inline-block">Chấm điểm & Sửa lỗi</span>
+                                                      <span className="font-black text-blue-700 text-lg block leading-none">Nội dung bám sát</span>
+                                                      <span className="text-xs text-blue-400 font-bold uppercase tracking-widest mt-1 inline-block">Đề thi chuẩn hóa</span>
                                                     </div>
                                                 </li>
                                                 <li className="flex items-center gap-5 group">
-                                                    <div className="bg-purple-100 text-purple-600 p-3 rounded-2xl shadow-sm group-hover:scale-110 transition-transform"><MessageSquareText size={20}/></div>
+                                                    <div className="bg-purple-100 text-purple-600 p-3 rounded-2xl shadow-sm group-hover:scale-110 transition-transform"><CheckCircle size={20}/></div>
                                                     <div>
-                                                      <span className="font-black text-purple-700 text-lg block leading-none">AI Explainer</span>
-                                                      <span className="text-xs text-purple-400 font-bold uppercase tracking-widest mt-1 inline-block">Giải thích thông minh</span>
+                                                      <span className="font-black text-purple-700 text-lg block leading-none">Chấm điểm tức thì</span>
+                                                      <span className="text-xs text-purple-400 font-bold uppercase tracking-widest mt-1 inline-block">Nhanh chóng & Chính xác</span>
                                                     </div>
                                                 </li>
                                             </ul>
                                         </div>
                                         <div className="bg-slate-50 p-12 rounded-[2rem] border-2 border-dashed border-slate-200 flex flex-col justify-center shadow-inner">
                                             <p className="text-slate-500 mb-6 text-center italic text-lg leading-relaxed font-medium">
-                                                "Sẵn sàng vượt qua kỳ thi KET với độ tự tin cao nhất cùng hệ thống luyện thi tích hợp AI đầu tiên tại khu vực."
+                                                "Sẵn sàng vượt qua kỳ thi KET với độ tự tin cao nhất cùng hệ thống luyện thi của Hoài An Nhiên."
                                             </p>
                                             <div className="mb-6">
                                                 <label className="block text-left text-slate-700 font-bold mb-2 text-sm">Họ và tên học sinh:</label>
@@ -551,54 +465,15 @@
                                         </div>
                                         <div className="bg-slate-50/80 backdrop-blur-sm p-12 rounded-[3rem] border-4 border-white relative shadow-inner group">
                                            <h4 className="font-black text-blue-900 text-[10px] mb-6 uppercase tracking-[4px] flex items-center gap-3">
-                                             <Sparkles size={20} className="text-blue-500 animate-pulse" /> AI Performance Summary
+                                             <Sparkles size={20} className="text-blue-500 animate-pulse" /> Performance Summary
                                            </h4>
                                            <div className="text-slate-600 font-bold text-xl leading-relaxed italic opacity-80 group-hover:opacity-100 transition-opacity">
-                                             "Phần Reading của bạn có tỉ lệ chính xác là <span className="text-blue-600">{Math.round(score/total*100)}%</span>. Đây là nền tảng tốt. Hãy thực hiện Chấm điểm AI cho bài viết để hoàn thiện kỹ năng."
+                                             "Phần Reading của bạn có tỉ lệ chính xác là <span className="text-blue-600">{Math.round(score/total*100)}%</span>. Đây là kết quả đáng khích lệ. Hãy tiếp tục luyện tập để hoàn thiện các kỹ năng tiếp theo."
                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="p-12 md:p-16 space-y-20">
-                                        {/* Writing AI Section */}
-                                        <section>
-                                            <h3 className="text-4xl font-black text-slate-900 mb-10 flex items-center gap-5 tracking-tighter">
-                                                <MessageSquareText className="text-blue-600" size={40} /> ✨ Writing Analysis
-                                            </h3>
-                                            <div className="bg-slate-100 rounded-[3rem] p-10 md:p-16 border-4 border-white relative shadow-inner">
-                                                {!aiFeedback && !aiLoading && (
-                                                    <div className="text-center py-10">
-                                                        <p className="text-slate-500 mb-12 font-bold text-2xl leading-relaxed max-w-xl mx-auto">Click bên dưới để Trợ lý AI thực hiện <span className="underline decoration-blue-500 decoration-4 underline-offset-8">chấm điểm chuyên sâu</span> cho bài viết của bạn.</p>
-                                                        <button 
-                                                            onClick={analyzeWriting}
-                                                            className="bg-blue-600 hover:bg-blue-700 text-white font-black py-6 px-16 rounded-[2rem] shadow-[0_20px_40px_-12px_rgba(59,130,246,0.5)] transition-all hover:scale-105 flex items-center gap-4 mx-auto uppercase tracking-[4px] text-lg active:scale-95"
-                                                        >
-                                                            <Sparkles size={24} /> Phân Tích AI
-                                                        </button>
-                                                    </div>
-                                                )}
-                                                
-                                                {aiLoading && (
-                                                    <div className="text-center py-20 space-y-10">
-                                                        <Loader2 size={80} className="text-blue-500 animate-spin mx-auto opacity-50" />
-                                                        <p className="text-blue-600 font-black text-2xl animate-pulse uppercase tracking-[8px]">AI Evaluator Processing...</p>
-                                                    </div>
-                                                )}
-
-                                                {aiFeedback && (
-                                                    <div className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-500">
-                                                        <div className="prose prose-slate prose-lg max-w-none prose-headings:font-black prose-p:font-medium prose-p:leading-loose text-slate-700" 
-                                                             dangerouslySetInnerHTML={{ __html: marked.parse(aiFeedback) }} />
-                                                        <button 
-                                                            onClick={() => setAiFeedback(null)}
-                                                            className="mt-16 text-[10px] font-black text-slate-300 hover:text-red-500 uppercase tracking-[6px] flex items-center gap-3 transition-colors mx-auto"
-                                                        >
-                                                            Làm mới phân tích từ AI
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </section>
 
                                         {/* Review MCQ Section */}
                                         <section>
@@ -620,23 +495,7 @@
                                                                 <div className="text-sm font-black text-slate-400 mb-8 bg-white px-6 py-4 rounded-2xl border-2 border-dashed border-slate-100 inline-flex items-center gap-3 uppercase tracking-widest">
                                                                     Official Answer: <span className="text-green-600 text-lg">{q.options[q.correct]}</span>
                                                                 </div>
-                                                                
-                                                                {!explanations[q.id] ? (
-                                                                    <button 
-                                                                        onClick={() => getExplanation(q.id, q.text, q.options[q.correct], q.options[answers[q.id]] || "Chưa trả lời", q.options)}
-                                                                        disabled={explanationId === q.id}
-                                                                        className="flex items-center gap-4 text-xs font-black text-blue-600 hover:text-blue-800 transition-all uppercase tracking-[4px] border-b-2 border-transparent hover:border-blue-600 pb-1 disabled:opacity-30"
-                                                                    >
-                                                                        {explanationId === q.id ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />} 
-                                                                        AI Explain Solution
-                                                                    </button>
-                                                                ) : (
-                                                                    <div className="mt-8 p-10 bg-blue-600 text-white rounded-[2rem] shadow-2xl animate-in slide-in-from-top-6 duration-500 relative overflow-hidden">
-                                                                        <div className="absolute top-0 right-0 p-6 opacity-10"><Sparkles size={60} /></div>
-                                                                        <p className="font-black mb-6 flex items-center gap-3 uppercase tracking-[4px] text-[10px] text-blue-100 leading-none"><Sparkles size={16} /> AI Explanation:</p>
-                                                                        <div className="font-bold text-xl leading-relaxed whitespace-pre-wrap">{explanations[q.id]}</div>
-                                                                    </div>
-                                                                )}
+
                                                             </div>
                                                         ))}
                                                     </div>
@@ -704,7 +563,7 @@
                             </div>
                             <div className="mt-32 pt-12 border-t border-slate-50 text-center">
                                 <p className="text-[10px] text-slate-200 uppercase tracking-[12px] font-black">
-                                    © {new Date().getFullYear()} Hoài An Nhiên Education • AI System v2.1 Platinum
+                                    © {new Date().getFullYear()} Hoài An Nhiên Education
                                 </p>
                             </div>
                         </div>
