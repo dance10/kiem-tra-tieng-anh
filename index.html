@@ -201,9 +201,7 @@
         .exam-card.card-ielts2::before {
             background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.04));
         }
-        .exam-card.card-custom::before {
-            background: linear-gradient(135deg, rgba(244,63,94,0.08), rgba(245,158,11,0.04));
-        }
+
 
         .card-icon {
             width: 56px; height: 56px;
@@ -219,7 +217,7 @@
         .card-ket .card-icon { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
         .card-ielts1 .card-icon { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
         .card-ielts2 .card-icon { background: rgba(16,185,129,0.15); color: var(--accent-green); }
-        .card-custom .card-icon { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
+
 
         .card-badge {
             display: inline-flex;
@@ -238,7 +236,7 @@
         .card-ket .card-badge { background: rgba(59,130,246,0.12); color: #60a5fa; }
         .card-ielts1 .card-badge { background: rgba(139,92,246,0.12); color: #a78bfa; }
         .card-ielts2 .card-badge { background: rgba(16,185,129,0.12); color: #34d399; }
-        .card-custom .card-badge { background: rgba(244,63,94,0.12); color: #fb7185; }
+
 
         .card-title {
             font-size: 1.5rem;
@@ -283,7 +281,7 @@
         .card-ket .meta-dot { background: var(--accent-blue); }
         .card-ielts1 .meta-dot { background: var(--accent-purple); }
         .card-ielts2 .meta-dot { background: var(--accent-green); }
-        .card-custom .meta-dot { background: var(--accent-rose); }
+
 
         .card-btn {
             display: inline-flex;
@@ -312,34 +310,11 @@
         .card-ket .card-btn { background: linear-gradient(135deg, var(--accent-blue), #2563eb); }
         .card-ielts1 .card-btn { background: linear-gradient(135deg, var(--accent-purple), #7c3aed); }
         .card-ielts2 .card-btn { background: linear-gradient(135deg, var(--accent-green), #059669); }
-        .card-custom .card-btn { background: linear-gradient(135deg, var(--accent-rose), #e11d48); }
+
 
         .card-btn svg { width: 18px; height: 18px; }
 
-        /* Delete button for custom cards */
-        .card-delete-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 32px; height: 32px;
-            border-radius: 0.5rem;
-            background: rgba(244,63,94,0.15);
-            border: 1px solid rgba(244,63,94,0.2);
-            color: #fb7185;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-            transition: all 0.3s;
-            opacity: 0;
-        }
-        .exam-card:hover .card-delete-btn { opacity: 1; }
-        .card-delete-btn:hover {
-            background: rgba(244,63,94,0.3);
-            transform: scale(1.1);
-        }
+
 
         /* ========== LEADERBOARD SECTION ========== */
         .leaderboard-section {
@@ -554,119 +529,7 @@
             text-align: right;
         }
 
-        /* ========== ADD EXAM SECTION ========== */
-        .add-exam-section {
-            margin-bottom: 4rem;
-        }
-        .add-exam-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 1.5rem;
-            padding: 2.5rem 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .add-exam-container::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-rose), var(--accent-amber), var(--accent-purple));
-        }
 
-        .add-exam-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .add-exam-header .header-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-        }
-        .add-exam-header h3 {
-            font-size: 1.3rem;
-            font-weight: 900;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-        }
-        .add-exam-header p {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .add-exam-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-        .form-group label {
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--text-secondary);
-        }
-        .form-group input, .form-group textarea {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-subtle);
-            border-radius: 0.75rem;
-            padding: 0.8rem 1rem;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            transition: all 0.3s;
-            outline: none;
-        }
-        .form-group input:focus, .form-group textarea:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-        }
-        .form-group input::placeholder, .form-group textarea::placeholder {
-            color: rgba(148,163,184,0.4);
-        }
-        .form-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        .add-exam-submit {
-            grid-column: 1 / -1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            padding: 0.9rem 2.5rem;
-            border-radius: 0.875rem;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: white;
-            border: none;
-            cursor: pointer;
-            background: linear-gradient(135deg, var(--accent-rose), var(--accent-amber));
-            transition: all 0.3s;
-            margin-top: 0.5rem;
-        }
-        .add-exam-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px -8px rgba(244,63,94,0.4);
-        }
-        .add-exam-submit:active { transform: translateY(0); }
 
         /* Toast notification */
         .toast {
@@ -812,7 +675,7 @@
             .container { padding: 1rem; }
             .lb-podium { flex-direction: column; align-items: center; }
             .podium-item { order: unset !important; max-width: 300px; width: 100%; }
-            .add-exam-form { grid-template-columns: 1fr; }
+
             .lb-time { display: none; }
             .lb-row { gap: 0.5rem; padding: 0.7rem 0.5rem; }
         }
@@ -934,46 +797,7 @@
             </div>
         </div>
 
-        <!-- ========== ADD CUSTOM EXAM ========== -->
-        <div class="add-exam-section">
-            <div class="section-title">✨ Thêm bài kiểm tra tự tạo</div>
-            <div class="add-exam-container">
-                <div class="add-exam-header">
-                    <div class="header-icon">🎨</div>
-                    <h3>Thêm bài kiểm tra của riêng bạn</h3>
-                    <p>Dán link URL bài kiểm tra được tạo từ Gemini Canvas hoặc bất kỳ nguồn nào. Bài thi sẽ xuất hiện ngay trên trang chủ!</p>
-                </div>
-                <form class="add-exam-form" id="add-exam-form">
-                    <div class="form-group">
-                        <label for="exam-name">Tên bài thi *</label>
-                        <input type="text" id="exam-name" placeholder="VD: Grammar Test Level 3" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="exam-icon">Emoji icon</label>
-                        <input type="text" id="exam-icon" placeholder="VD: 🎯" maxlength="4" value="🎯">
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="exam-url">Link bài kiểm tra (URL) *</label>
-                        <input type="url" id="exam-url" placeholder="https://... (paste link từ Gemini Canvas)" required>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="exam-desc">Mô tả ngắn</label>
-                        <textarea id="exam-desc" placeholder="VD: Bài tập ngữ pháp tiếng Anh trình độ B1..." rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="exam-badge">Nhãn hiển thị</label>
-                        <input type="text" id="exam-badge" placeholder="VD: Gemini Canvas" value="Gemini Canvas">
-                    </div>
-                    <div class="form-group">
-                        <label for="exam-info">Thông tin thêm</label>
-                        <input type="text" id="exam-info" placeholder="VD: 30 Câu • 20 Phút">
-                    </div>
-                    <button type="submit" class="add-exam-submit" id="btn-add-exam">
-                        ➕ Thêm bài kiểm tra
-                    </button>
-                </form>
-            </div>
-        </div>
+
 
         <!-- Features -->
         <div class="section-title">Tính năng nổi bật</div>
@@ -1041,7 +865,7 @@
         // CONFIG
         // ==========================================
         const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
-        const CUSTOM_EXAMS_KEY = "custom_exams_v1";
+
 
         // ==========================================
         // TOAST
@@ -1054,101 +878,11 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // ==========================================
-        // CUSTOM EXAMS (localStorage)
-        // ==========================================
-        function getCustomExams() {
-            try {
-                return JSON.parse(localStorage.getItem(CUSTOM_EXAMS_KEY)) || [];
-            } catch { return []; }
-        }
-
-        function saveCustomExams(exams) {
-            localStorage.setItem(CUSTOM_EXAMS_KEY, JSON.stringify(exams));
-        }
-
-        function renderCustomExams() {
-            const grid = document.getElementById('cards-grid');
-            // Remove existing custom cards
-            grid.querySelectorAll('.custom-exam-card').forEach(c => c.remove());
-
-            const exams = getCustomExams();
-            exams.forEach((exam, index) => {
-                const card = document.createElement('div');
-                card.className = 'exam-card card-custom fade-up custom-exam-card';
-                card.style.animationDelay = `${0.45 + index * 0.15}s`;
-                card.innerHTML = `
-                    <button class="card-delete-btn" onclick="deleteCustomExam(${index})" title="Xóa bài thi này">✕</button>
-                    <div class="card-icon">${exam.icon || '🎯'}</div>
-                    <div class="card-badge">
-                        <span class="meta-dot"></span> ${exam.badge || 'Custom'}
-                    </div>
-                    <h2 class="card-title">${escapeHtml(exam.name)}</h2>
-                    <p class="card-desc">${escapeHtml(exam.desc || 'Bài kiểm tra được thêm bởi giáo viên.')}</p>
-                    ${exam.info ? `<div class="card-meta"><span><span class="meta-dot"></span> ${escapeHtml(exam.info)}</span></div>` : ''}
-                    <a href="${escapeHtml(exam.url)}" class="card-btn" target="_blank" rel="noopener">
-                        Vào thi ngay
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </a>
-                `;
-                grid.appendChild(card);
-            });
-
-            // Update exam count
-            const totalExams = 3 + exams.length;
-            document.getElementById('stat-exam-count').textContent = totalExams.toString().padStart(2, '0');
-        }
-
-        function deleteCustomExam(index) {
-            if (!confirm('Bạn có chắc muốn xóa bài thi này?')) return;
-            const exams = getCustomExams();
-            exams.splice(index, 1);
-            saveCustomExams(exams);
-            renderCustomExams();
-            showToast('🗑️ Đã xóa bài kiểm tra');
-        }
-
         function escapeHtml(str) {
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
         }
-
-        // Form handler
-        document.getElementById('add-exam-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('exam-name').value.trim();
-            const url = document.getElementById('exam-url').value.trim();
-            const icon = document.getElementById('exam-icon').value.trim() || '🎯';
-            const desc = document.getElementById('exam-desc').value.trim();
-            const badge = document.getElementById('exam-badge').value.trim() || 'Custom';
-            const info = document.getElementById('exam-info').value.trim();
-
-            if (!name || !url) {
-                showToast('⚠️ Vui lòng điền tên và URL bài thi!', true);
-                return;
-            }
-
-            // Validate URL
-            try {
-                new URL(url);
-            } catch {
-                showToast('⚠️ URL không hợp lệ!', true);
-                return;
-            }
-
-            const exams = getCustomExams();
-            exams.push({ name, url, icon, desc, badge, info, addedAt: new Date().toISOString() });
-            saveCustomExams(exams);
-            renderCustomExams();
-
-            // Reset form
-            this.reset();
-            document.getElementById('exam-icon').value = '🎯';
-            document.getElementById('exam-badge').value = 'Gemini Canvas';
-
-            showToast('✅ Đã thêm bài kiểm tra thành công!');
-        });
 
         // ==========================================
         // LEADERBOARD
@@ -1299,7 +1033,6 @@
         // INIT
         // ==========================================
         document.addEventListener('DOMContentLoaded', function() {
-            renderCustomExams();
             loadLeaderboard();
         });
     </script>
