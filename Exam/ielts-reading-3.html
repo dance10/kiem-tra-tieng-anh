@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Skill Test - Cô Thuý English Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .sticky-timer { position: sticky; top: 0; z-index: 50; }
+        .passage-content { line-height: 1.8; text-align: justify; font-size: 1.05rem; color: #374151; }
+        .question-box { border-left: 4px solid #3b82f6; padding-left: 1rem; margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; }
+        input[type="text"]:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-12">
+
+    <div id="loading-spinner" class="loading-overlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
+        <p class="font-bold text-blue-800">Đang xử lý kết quả...</p>
+    </div>
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-md border-b-4 border-blue-600 p-6 text-center relative">
+        <a href="../index.html" class="absolute left-4 top-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-full transition-all no-underline inline-flex items-center gap-1">🏠 Trang Chủ</a>
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN</h2>
+        <h1 class="text-4xl font-extrabold text-blue-800 my-2">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+        <p class="text-sm text-gray-600 font-medium">MST: 0318842992</p>
+        <div class="mt-3 text-xs text-gray-500 flex flex-wrap justify-center gap-6">
+            <span class="flex items-center gap-1">📍 <b>CS1:</b> 202/1 Nguyễn Thị Lắng, Củ Chi</span>
+            <span class="flex items-center gap-1">📍 <b>CS2:</b> 61 Lê Đình Thám, Tân Phú</span>
+            <span class="flex items-center gap-1">📍 <b>CS3:</b> 325/5T Nguyễn Thị Thảnh, Hóc Môn</span>
+        </div>
+    </header>
+
+    <div id="app" class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Start Screen -->
+        <div id="start-screen" class="bg-white p-10 rounded-2xl shadow-xl text-center border border-gray-100">
+            <div class="mb-6 inline-block p-4 bg-blue-50 rounded-full">
+                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <h3 class="text-3xl font-black text-gray-900 mb-6 uppercase">IELTS READING SKILL TEST</h3>
+            
+            <div class="max-w-md mx-auto mb-8">
+                <label class="block text-left text-gray-700 font-bold mb-2">Họ và tên học sinh:</label>
+                <input type="text" id="student-name" placeholder="Nhập tên của bạn để bắt đầu..." 
+                    class="w-full p-4 border-2 border-blue-100 rounded-xl focus:border-blue-500 transition-all text-lg shadow-inner">
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 max-w-2xl mx-auto">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Thời gian</p>
+                    <p class="text-xl font-bold text-blue-700">60 Phút</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Số bài đọc</p>
+                    <p class="text-xl font-bold text-blue-700">03 Passages</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Tổng số câu</p>
+                    <p class="text-xl font-bold text-blue-700">40 Câu</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Trạng thái</p>
+                    <p id="cloud-status" class="text-xl font-bold text-green-600 italic">Sẵn sàng</p>
+                </div>
+            </div>
+
+            <button id="btn-start" onclick="startTest()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-16 rounded-full shadow-lg transform transition active:scale-95 text-lg cursor-pointer">
+                BẮT ĐẦU LÀM BÀI
+            </button>
+        </div>
+
+        <!-- Test Content -->
+        <div id="test-container" class="hidden">
+            <div class="sticky-timer bg-white/95 backdrop-blur-md shadow-lg p-4 rounded-xl flex justify-between items-center mb-8 border border-blue-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold" id="user-initial">?</div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-bold uppercase">Thí sinh</p>
+                        <p id="display-name" class="font-bold text-gray-800"></p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-gray-500 font-bold uppercase">Thời gian còn lại</p>
+                    <div id="timer" class="text-3xl font-mono font-black text-red-600">60:00</div>
+                </div>
+            </div>
+
+            <!-- PASSAGE 1 -->
+            <section class="bg-white p-8 rounded-2xl shadow-sm mb-12 border border-gray-100" id="p1">
+                <div class="mb-8">
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Passage 1</span>
+                    <h1 class="text-3xl font-black text-gray-900 mt-2">The Desolenator: producing clean water</h1>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div class="passage-content">
+                        <p class="mb-4">Travel around the world and you will soon find that clean water is a luxury. According to the United Nations, more than 800 million people lack access to clean water. In many regions, the problem isn't just a lack of water, but rather that the available water is salty or contaminated. This is where the Desolenator comes in.</p>
+                        <p class="mb-4">Developed by a team in the UK, the Desolenator is a solar-powered device that can turn seawater or contaminated water into drinking water. Unlike large-scale desalination plants that require massive amounts of energy and expensive infrastructure, the Desolenator is small, portable, and runs entirely on solar power. It uses a combination of solar panels and a thermal system to heat the water until it boils.</p>
+                        <p class="mb-4">The steam is then condensed into pure water, while the salt and other impurities are left behind. The device can produce up to 15 litres of water a day, which is enough for a small family's cooking and drinking needs. Because it has no moving parts and doesn't require filters, it is extremely low-maintenance and can last for up to 20 years.</p>
+                    </div>
+                    <div class="questions-section">
+                        <h3 class="font-bold text-lg mb-4 text-blue-800 border-b-2 border-blue-100 pb-2">Questions 1-6: One Word Only</h3>
+                        <div class="space-y-4">
+                            <div class="question-box"><p>1. The Desolenator was developed by a team in the <input type="text" class="user-ans border-b-2 border-blue-300 w-32 uppercase px-1" data-id="1">.</p></div>
+                            <div class="question-box"><p>2. The device uses solar <input type="text" class="user-ans border-b-2 border-blue-300 w-32 uppercase px-1" data-id="2"> to generate power.</p></div>
+                            <div class="question-box"><p>3. It utilizes a thermal system to <input type="text" class="user-ans border-b-2 border-blue-300 w-32 uppercase px-1" data-id="3"> the water.</p></div>
+                            <div class="question-box"><p>4. The Desolenator can produce about 15 <input type="text" class="user-ans border-b-2 border-blue-300 w-32 uppercase px-1" data-id="4"> per day.</p></div>
+                            <div class="question-box"><p>5. The device is described as being extremely low <input type="text" class="user-ans border-b-2 border-blue-300 w-32 uppercase px-1" data-id="5">.</p></div>
+                            <div class="question-box"><p>6. It is expected to function for a period of 20 <input type="text" class="user-ans border-b-2 border-blue-300 w-32 uppercase px-1" data-id="6">.</p></div>
+                        </div>
+                        <h3 class="font-bold text-lg mt-8 mb-4 text-blue-800 border-b-2 border-blue-100 pb-2">Questions 7-13: True/False/Not Given</h3>
+                        <div class="space-y-4">
+                            <div class="question-box"><p>7. More than 800 million people lack clean water access.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="7"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>8. The Desolenator is cheaper than large desalination plants.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="8"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>9. The device requires monthly filter changes.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="9"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>10. The Desolenator was first tested in India.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="10"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>11. Impurities are removed during the boiling process.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="11"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>12. The device is too heavy to be moved by one person.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="12"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>13. It can be used with both seawater and river water.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="13"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASSAGE 2 -->
+            <section class="bg-white p-8 rounded-2xl shadow-sm mb-12 border border-gray-100" id="p2">
+                <div class="mb-8"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Passage 2</span><h1 class="text-3xl font-black text-gray-900 mt-2">Why we need to protect polar bears</h1></div>
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div class="passage-content">
+                        <p class="mb-4">Polar bears are being increasingly threatened by the effects of climate change, but their disappearance could have far-reaching consequences. They are uniquely adapted to the extreme conditions of the Arctic Circle, where temperatures can drop to -40°C. One of their most remarkable adaptations is their ability to survive with high levels of body fat.</p>
+                        <p class="mb-4">Unlike humans, for whom excessive fat often leads to heart disease or diabetes, polar bears remain healthy despite their fat reserves. Researchers have found that this is due to a genetic mutation in a gene called APOB, which helps clear low-density lipoproteins (LDLs) - or "bad" cholesterol - from their blood. Understanding how polar bears manage this could lead to breakthroughs in treating human heart disease.</p>
+                        <p class="mb-4">Furthermore, polar bears are highly intelligent animals. Studies have shown they are capable of complex problem-solving and have been observed using tools, a trait once thought to be unique to humans and primates. If the sea ice continues to melt, these magnificent creatures may lose their hunting grounds and face extinction.</p>
+                    </div>
+                    <div class="questions-section">
+                        <h3 class="font-bold text-lg mb-4 text-green-800 border-b-2 border-green-100 pb-2">Questions 14-20: True/False/Not Given</h3>
+                        <div class="space-y-4">
+                            <div class="question-box"><p>14. Polar bears can survive temperatures as low as -40°C.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="14"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>15. High levels of fat cause heart disease in polar bears.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="15"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>16. The APOB gene helps remove bad cholesterol.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="16"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>17. Polar bears are more intelligent than primates.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="17"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>18. Polar bears have been seen using tools to hunt.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="18"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>19. Female polar bears hibernate longer than males.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="19"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                            <div class="question-box"><p>20. Melting sea ice is the main threat to their survival.</p><select class="user-ans mt-2 w-full p-2 border rounded" data-id="20"><option value="">-- Select --</option><option value="TRUE">TRUE</option><option value="FALSE">FALSE</option><option value="NOT GIVEN">NOT GIVEN</option></select></div>
+                        </div>
+                        <h3 class="font-bold text-lg mt-8 mb-4 text-green-800 border-b-2 border-green-100 pb-2">Questions 21-26: Summary Completion</h3>
+                        <div class="space-y-4">
+                            <div class="question-box"><p>21. Polar bears are threatened by <input type="text" class="user-ans border-b-2 border-green-300 w-32 uppercase" data-id="21"> change.</p></div>
+                            <div class="question-box"><p>22. They have a genetic mutation in the <input type="text" class="user-ans border-b-2 border-green-300 w-32 uppercase" data-id="22"> gene.</p></div>
+                            <div class="question-box"><p>23. LDL stands for low-density <input type="text" class="user-ans border-b-2 border-green-300 w-32 uppercase" data-id="23">.</p></div>
+                            <div class="question-box"><p>24. This research could help treat human <input type="text" class="user-ans border-b-2 border-green-300 w-32 uppercase" data-id="24"> disease.</p></div>
+                            <div class="question-box"><p>25. Polar bears are capable of complex <input type="text" class="user-ans border-b-2 border-green-300 w-32 uppercase" data-id="25">.</p></div>
+                            <div class="question-box"><p>26. They lose their hunting grounds when <input type="text" class="user-ans border-b-2 border-green-300 w-32 uppercase" data-id="26"> melts.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASSAGE 3 -->
+            <section class="bg-white p-8 rounded-2xl shadow-sm mb-12 border border-gray-100" id="p3">
+                <div class="mb-8"><span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Passage 3</span><h1 class="text-3xl font-black text-gray-900 mt-2">The step pyramid of Djoser</h1></div>
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div class="passage-content">
+                        <p class="mb-4"><strong>[Paragraph A]</strong> The step pyramid of Djoser was the first pyramid built in Ancient Egypt. Constructed around 2670 BC, it marked a significant shift from the traditional mud-brick mastaba tombs to monumental stone architecture. The architect responsible for this masterpiece was Imhotep, a man of such talent that he was later deified as a god of healing.</p>
+                        <p class="mb-4"><strong>[Paragraph B]</strong> The pyramid was built for King Djoser, the second king of the Third Dynasty. Unlike later pyramids with smooth sides, this structure consists of six tiers or "steps" that rise to a height of 62 metres. It was originally encased in fine white limestone, making it a dazzling sight in the desert sun.</p>
+                        <p class="mb-4"><strong>[Paragraph C]</strong> Beneath the pyramid lies a labyrinth of tunnels and chambers, spanning nearly 6 kilometres. These were designed to store grave goods and to house the king's family. The burial chamber itself was lined with pink granite, and the entrance was sealed with a massive stone block weighing 3.5 tons.</p>
+                        <p class="mb-4"><strong>[Paragraph D]</strong> Despite the ingenuity of its design, the pyramid was not immune to tomb robbers. Most of the treasures were stolen centuries ago. However, the structure remains one of the most important archaeological sites in the world, representing the birth of pyramid building.</p>
+                    </div>
+                    <div class="questions-section">
+                        <h3 class="font-bold text-lg mb-4 text-purple-800 border-b-2 border-purple-100 pb-2">Questions 27-30: Matching Headings</h3>
+                        <div class="space-y-4">
+                            <div class="question-box"><p>27. Paragraph A: <select class="user-ans mt-1 w-full p-1 border rounded" data-id="27"><option value="">--</option><option value="i">i. The architect's legacy</option><option value="ii">ii. Underground complexity</option><option value="iii">iii. Architectural innovation</option><option value="iv">iv. Structural appearance</option></select></p></div>
+                            <div class="question-box"><p>28. Paragraph B: <select class="user-ans mt-1 w-full p-1 border rounded" data-id="28"><option value="">--</option><option value="i">i. The architect's legacy</option><option value="ii">ii. Underground complexity</option><option value="iii">iii. Architectural innovation</option><option value="iv">iv. Structural appearance</option></select></p></div>
+                            <div class="question-box"><p>29. Paragraph C: <select class="user-ans mt-1 w-full p-1 border rounded" data-id="29"><option value="">--</option><option value="i">i. The architect's legacy</option><option value="ii">ii. Underground complexity</option><option value="iii">iii. Architectural innovation</option><option value="iv">iv. Structural appearance</option></select></p></div>
+                            <div class="question-box"><p>30. Paragraph D: <select class="user-ans mt-1 w-full p-1 border rounded" data-id="30"><option value="">--</option><option value="v">v. Vulnerability to theft</option><option value="vi">vi. Royal family burial</option></select></p></div>
+                        </div>
+                        <h3 class="font-bold text-lg mt-8 mb-4 text-purple-800 border-b-2 border-purple-100 pb-2">Questions 31-40: Fill in the Blanks</h3>
+                        <div class="space-y-3">
+                            <div class="question-box"><p>31. Shift from mud-brick <input type="text" class="user-ans border-b w-32 uppercase" data-id="31">.</p></div>
+                            <div class="question-box"><p>32. Architect was <input type="text" class="user-ans border-b w-32 uppercase" data-id="32">.</p></div>
+                            <div class="question-box"><p>33. King of the <input type="text" class="user-ans border-b w-32 uppercase" data-id="33"> Dynasty.</p></div>
+                            <div class="question-box"><p>34. Height of 62 <input type="text" class="user-ans border-b w-24 uppercase" data-id="34">.</p></div>
+                            <div class="question-box"><p>35. Encased in white <input type="text" class="user-ans border-b w-32 uppercase" data-id="35">.</p></div>
+                            <div class="question-box"><p>36. Tunnels span nearly 6 <input type="text" class="user-ans border-b w-24 uppercase" data-id="36">.</p></div>
+                            <div class="question-box"><p>37. Lined with pink <input type="text" class="user-ans border-b w-32 uppercase" data-id="37">.</p></div>
+                            <div class="question-box"><p>38. Entrance block weighed 3.5 <input type="text" class="user-ans border-b w-24 uppercase" data-id="38">.</p></div>
+                            <div class="question-box"><p>39. Treasures stolen by tomb <input type="text" class="user-ans border-b w-32 uppercase" data-id="39">.</p></div>
+                            <div class="question-box"><p>40. Represents the <input type="text" class="user-ans border-b w-32 uppercase" data-id="40"> of pyramid building.</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-12 text-center p-8 bg-blue-50 rounded-2xl">
+                    <button onclick="submitTest()" id="submit-btn" class="bg-green-600 hover:bg-green-700 text-white font-black py-5 px-16 rounded-xl text-2xl shadow-2xl transition-all">NỘP BÀI (SUBMIT)</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden">
+            <div class="bg-white p-10 rounded-2xl shadow-xl text-center mb-8 border-t-8 border-green-500">
+                <h3 class="text-4xl font-black text-gray-900 mb-2">HOÀN THÀNH!</h3>
+                <p id="result-name" class="text-blue-600 text-xl font-bold"></p>
+                <div class="my-8 relative inline-block">
+                    <svg class="w-48 h-48"><circle cx="96" cy="96" r="88" stroke="#e2e8f0" stroke-width="12" fill="none" /><circle cx="96" cy="96" r="88" stroke="#22c55e" stroke-width="12" fill="none" stroke-dasharray="552.92" id="score-circle" /></svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="score-display" class="text-6xl font-black">0</span><span class="text-gray-400 font-bold uppercase tracking-widest text-sm">/ 40</span></div>
+                </div>
+                <div id="band-display" class="text-2xl font-bold text-green-600 mb-4">Estimated Band: 1.0</div>
+                <p id="save-status" class="text-sm text-gray-400 font-bold mb-4"></p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl shadow-md"><h4 class="text-2xl font-bold mb-6">📋 Đáp án & Giải thích</h4><div id="explanation-list" class="grid md:grid-cols-2 gap-4"></div></div>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ QUAN TRỌNG: URL Google Apps Script
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
+
+        // Check Google Sheet connection on page load
+        (function checkConnection() {
+            const statusEl = document.getElementById('cloud-status');
+            const btn = document.getElementById('btn-start');
+            if (GOOGLE_SHEET_URL === "PASTE_YOUR_URL_HERE" || !GOOGLE_SHEET_URL) {
+                statusEl.innerText = "⚠️ Chưa cấu hình";
+                statusEl.className = "text-xl font-bold text-orange-500";
+                btn.innerText = "BẮT ĐẦU (Không lưu)";
+                btn.className = "bg-orange-500 hover:bg-orange-600 text-white font-black py-4 px-16 rounded-full shadow-lg transform transition active:scale-95 text-lg cursor-pointer";
+            } else {
+                statusEl.innerText = "Sẵn sàng ✅";
+                statusEl.className = "text-xl font-bold text-green-600";
+            }
+        })();
+
+        const answerKey = {
+            1: { ans: "UK", expl: "Phát minh bởi đội ngũ tại UK (Vương quốc Anh)." },
+            2: { ans: "PANELS", expl: "Sử dụng các tấm pin mặt trời (solar panels)." },
+            3: { ans: "HEAT", expl: "Sử dụng hệ thống nhiệt để làm nóng (heat) nước." },
+            4: { ans: "LITRES", expl: "Sản xuất được 15 lít nước mỗi ngày." },
+            5: { ans: "MAINTENANCE", expl: "Thiết bị cực kỳ ít bảo trì (low-maintenance)." },
+            6: { ans: "YEARS", expl: "Có thể hoạt động trong 20 năm." },
+            7: { ans: "TRUE", expl: "Đúng theo số liệu UN trong bài." },
+            8: { ans: "TRUE", expl: "Bài viết nhấn mạnh nó không đắt đỏ như các nhà máy lớn." },
+            9: { ans: "FALSE", expl: "Nó không yêu cầu thay bộ lọc (no filters)." },
+            10: { ans: "NOT GIVEN", expl: "Không nhắc tới nơi thử nghiệm đầu tiên." },
+            11: { ans: "TRUE", expl: "Tạp chất bị giữ lại khi nước sôi thành hơi." },
+            12: { ans: "NOT GIVEN", expl: "Không nhắc tới trọng lượng của nó." },
+            13: { ans: "TRUE", expl: "Dùng cho cả seawater và contaminated water." },
+            14: { ans: "TRUE", expl: "Arctic temperatures can drop to -40°C." },
+            15: { ans: "FALSE", expl: "Chúng vẫn khỏe mạnh dù có nhiều mỡ." },
+            16: { ans: "TRUE", expl: "APOB giúp làm sạch LDL (bad cholesterol)." },
+            17: { ans: "NOT GIVEN", expl: "Không so sánh trí thông minh với linh trưởng." },
+            18: { ans: "TRUE", expl: "Observed using tools (quan sát thấy dùng công cụ)." },
+            19: { ans: "NOT GIVEN", expl: "Không nhắc tới thời gian ngủ đông của con cái." },
+            20: { ans: "TRUE", expl: "Mất băng biển là mối đe dọa chính." },
+            21: { ans: "CLIMATE", expl: "Threatened by climate change." },
+            22: { ans: "APOB", expl: "Đột biến gen APOB." },
+            23: { ans: "LIPOPROTEINS", expl: "LDL là low-density lipoproteins." },
+            24: { ans: "HEART", expl: "Breakthroughs in human heart disease." },
+            25: { ans: "PROBLEM-SOLVING", expl: "Có khả năng giải quyết vấn đề phức tạp." },
+            26: { ans: "ICE", expl: "Mất vùng săn bắn khi băng tan." },
+            27: { ans: "iii", expl: "Đoạn A nói về sự đổi mới kiến trúc từ mud-brick sang đá." },
+            28: { ans: "iv", expl: "Đoạn B mô tả hình dáng cấu trúc 6 bậc." },
+            29: { ans: "ii", expl: "Đoạn C mô tả hệ thống hầm ngầm phức tạp." },
+            30: { ans: "v", expl: "Đoạn D nói về việc bị trộm cướp hầm mộ." },
+            31: { ans: "MASTABA", expl: "Shift from traditional mastaba tombs." },
+            32: { ans: "IMHOTEP", expl: "Architect responsible was Imhotep." },
+            33: { ans: "THIRD", expl: "Second king of the Third Dynasty." },
+            34: { ans: "METRES", expl: "Height of 62 metres." },
+            35: { ans: "LIMESTONE", expl: "Encased in white limestone." },
+            36: { ans: "KILOMETRES", expl: "Tunnels spanning nearly 6 km." },
+            37: { ans: "GRANITE", expl: "Lined with pink granite." },
+            38: { ans: "TONS", expl: "Weighing 3.5 tons." },
+            39: { ans: "ROBBERS", expl: "Stolen by tomb robbers." },
+            40: { ans: "BIRTH", expl: "Representing the birth of pyramid building." }
+        };
+
+        function calculateBand(score) {
+            if(score >= 39) return 9.0;
+            if(score >= 37) return 8.5;
+            if(score >= 35) return 8.0;
+            if(score >= 33) return 7.5;
+            if(score >= 30) return 7.0;
+            if(score >= 27) return 6.5;
+            if(score >= 23) return 6.0;
+            if(score >= 19) return 5.5;
+            if(score >= 15) return 5.0;
+            if(score >= 12) return 4.5;
+            return (score / 4).toFixed(1);
+        }
+
+        window.startTest = function() {
+            const nameInput = document.getElementById('student-name');
+            if(!nameInput.value.trim()) { alert("Vui lòng nhập họ tên!"); return; }
+            window.studentName = nameInput.value;
+            document.getElementById('display-name').innerText = window.studentName;
+            document.getElementById('user-initial').innerText = window.studentName.charAt(0).toUpperCase();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-container').classList.remove('hidden');
+            window.scrollTo(0,0);
+            
+            let seconds = 3600;
+            window.timerInterval = setInterval(() => {
+                seconds--;
+                if(seconds <= 0) { clearInterval(window.timerInterval); submitTest(); return; }
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        };
+
+        window.submitTest = async function() {
+            document.getElementById('loading-spinner').style.display = 'flex';
+            clearInterval(window.timerInterval);
+
+            let score = 0;
+            const userInputs = document.querySelectorAll('.user-ans');
+            const explanationList = document.getElementById('explanation-list');
+            explanationList.innerHTML = '';
+            const answersSubmitted = {};
+
+            userInputs.forEach(input => {
+                const qId = input.getAttribute('data-id');
+                const userVal = input.value.trim().toUpperCase();
+                answersSubmitted[qId] = userVal;
+                const correctAns = answerKey[qId].ans.toUpperCase();
+                const isCorrect = userVal === correctAns;
+                if(isCorrect) score++;
+
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-xl border-l-4 ${isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`;
+                div.innerHTML = `<p class="font-bold">Câu ${qId}: ${isCorrect ? '✅' : '❌'}</p><p class="text-sm">Đúng: ${answerKey[qId].ans}</p><p class="text-xs text-gray-600 italic">${answerKey[qId].expl}</p>`;
+                explanationList.appendChild(div);
+            });
+
+            const band = calculateBand(score);
+
+            // Save to Google Sheet
+            const saveStatus = document.getElementById('save-status');
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== "PASTE_YOUR_URL_HERE") {
+                try {
+                    await fetch(GOOGLE_SHEET_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_name: window.studentName,
+                            exam_type: 'IELTS Reading Test 3',
+                            score: score,
+                            total: 40,
+                            band: band,
+                            answers: answersSubmitted
+                        })
+                    });
+                    saveStatus.innerText = "✅ Kết quả đã được lưu vào Google Sheet!";
+                    saveStatus.className = "text-sm text-green-700 font-bold mb-4";
+                } catch (e) {
+                    console.error("Error saving:", e);
+                    saveStatus.innerText = "⚠️ Không gửi được kết quả, nhưng bạn vẫn xem được điểm!";
+                    saveStatus.className = "text-sm text-orange-600 font-bold mb-4";
+                }
+            } else {
+                saveStatus.innerText = "ℹ️ Chế độ offline — kết quả không được lưu trữ.";
+                saveStatus.className = "text-sm text-gray-500 font-bold mb-4";
+            }
+
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('test-container').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('result-name').innerText = `Học sinh: ${window.studentName}`;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('band-display').innerText = `IELTS Band Score: ${band}`;
+            
+            const circle = document.getElementById('score-circle');
+            circle.style.strokeDashoffset = 552.92 - (552.92 * score / 40);
+
+            // Redirect to congratulations page for high scores (band >= 7.0)
+            if (band >= 7.0) {
+                setTimeout(() => {
+                    if (confirm(`🎉 Chúc mừng ${window.studentName}! Band ${band} - Bạn có muốn xem trang vinh danh không?`)) {
+                        window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=40&band=${band}&exam=IELTS+Reading+Test+3`;
+                    }
+                }, 2000);
+            }
+
+            window.scrollTo(0,0);
+        };
+    </script>
+</body>
+</html>
