@@ -699,8 +699,8 @@
         <!-- Stats -->
         <div class="stats-bar">
             <div class="stat-item">
-                <div class="stat-value" id="stat-exam-count">05</div>
-                <div class="stat-label">Bài thi có sẵn</div>
+                    <div class="stat-value" id="stat-exam-count">07</div>
+                    <div class="stat-label">Bài kiểm tra</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value">85+</div>
@@ -753,6 +753,25 @@
                     <span><span class="meta-dot"></span> 45 Phút</span>
                 </div>
                 <a href="Exam/toeic-reading-1.html" class="card-btn">
+                    Vào thi ngay
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
+
+            <!-- 2.5 TOEIC Card 2 (Cấp độ: Trung cấp) -->
+            <div class="exam-card card-ket fade-up">
+                <div class="card-icon">👔</div>
+                <div class="card-badge">
+                    <span class="meta-dot"></span> B1-B2 — Trung cấp
+                </div>
+                <h2 class="card-title">TOEIC Reading Test 2</h2>
+                <p class="card-desc">Bài thi đầy đủ năng lực TOEIC Reading (Part 5, 6, 7) với 40 câu hỏi tiêu chuẩn.</p>
+                <div class="card-meta">
+                    <span><span class="meta-dot"></span> 3 Parts</span>
+                    <span><span class="meta-dot"></span> 40 Câu</span>
+                    <span><span class="meta-dot"></span> 60 Phút</span>
+                </div>
+                <a href="Exam/toeic-reading-2.html" class="card-btn">
                     Vào thi ngay
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                 </a>
@@ -814,6 +833,25 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                 </a>
             </div>
+
+            <!-- 6. IELTS Writing 1 Card (Cấp độ: Nâng cao) -->
+            <div class="exam-card card-ielts2 fade-up">
+                <div class="card-icon">✍️</div>
+                <div class="card-badge">
+                    <span class="meta-dot"></span> B2-C1 — Nâng cao
+                </div>
+                <h2 class="card-title">IELTS Writing Test 1</h2>
+                <p class="card-desc">Hệ thống giả lập làm bài IELTS Writing trên máy tính chuẩn xác. Hỗ trợ tự động đếm từ.</p>
+                <div class="card-meta">
+                    <span><span class="meta-dot"></span> 2 Tasks</span>
+                    <span><span class="meta-dot"></span> Đếm từ tự động</span>
+                    <span><span class="meta-dot"></span> 60 Phút</span>
+                </div>
+                <a href="Exam/ielts-writing-1.html" class="card-btn">
+                    Vào thi ngay
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
         </div>
 
         <!-- ========== LEADERBOARD ========== -->
@@ -822,11 +860,13 @@
             <div class="leaderboard-container">
                 <div class="lb-tabs" id="lb-tabs">
                     <button class="lb-tab active" data-exam="all" id="tab-all">Tổng hợp</button>
-                    <button class="lb-tab" data-exam="KET A2 Exam" id="tab-ket">KET A2</button>
+                    <button class="lb-tab" data-exam="A2 Key (KET)" id="tab-ket">KET A2</button>
+                    <button class="lb-tab" data-exam="TOEIC Reading Test 1" id="tab-toeic">TOEIC Test 1</button>
+                    <button class="lb-tab" data-exam="TOEIC Reading Test 2" id="tab-toeic2">TOEIC Test 2</button>
                     <button class="lb-tab" data-exam="IELTS Reading Test 1" id="tab-ielts1">IELTS Test 1</button>
                     <button class="lb-tab" data-exam="IELTS Reading Test 2" id="tab-ielts2">IELTS Test 2</button>
                     <button class="lb-tab" data-exam="IELTS Reading Test 3" id="tab-ielts3">IELTS Test 3</button>
-                    <button class="lb-tab" data-exam="TOEIC Reading Test 1" id="tab-toeic">TOEIC Test 1</button>
+                    <button class="lb-tab" data-exam="IELTS Writing Test 1" id="tab-ielts-w1">IELTS Writing</button>
                 </div>
                 <div class="lb-panel active" id="lb-content">
                     <div class="lb-loading">

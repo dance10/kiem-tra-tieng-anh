@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC Reading Full Skill Test - Cô Thuý English Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .sticky-timer { position: sticky; top: 0; z-index: 50; }
+        .question-box { border-left: 5px solid #4f46e5; padding-left: 1.25rem; margin-bottom: 2rem; background: #ffffff; padding: 1.5rem; border-radius: 0.5rem 1rem 1rem 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.3s; border-right: 1px solid #f3f4f6; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6; }
+        .question-box:hover { transform: translateX(5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .passage-box { line-height: 1.8; text-align: justify; font-size: 1.05rem; color: #1f2937; background: #ffffff; padding: 2.5rem; border-radius: 1.5rem; border: 1px solid #e5e7eb; margin-bottom: 2rem; box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); position: relative; }
+        .passage-box::before { content: "TEXT PASSAGE"; position: absolute; top: -10px; left: 20px; background: #4f46e5; color: white; font-size: 10px; font-weight: 900; padding: 2px 10px; border-radius: 4px; }
+        .option-label { display: flex; items: center; padding: 1rem; border: 2px solid #f3f4f6; border-radius: 1rem; cursor: pointer; transition: all 0.2s; background: white; margin-bottom: 0.75rem; }
+        .option-label:hover { border-color: #c7d2fe; background: #f5f3ff; }
+        input[type="radio"]:checked + .circle-btn { background: #4f46e5; border-color: #4f46e5; color: white; }
+        .circle-btn { width: 28px; height: 28px; border: 2px solid #e5e7eb; border-radius: 50%; display: flex; items: center; justify-content: center; margin-right: 1rem; font-size: 12px; font-weight: 800; flex-shrink: 0; transition: all 0.2s; }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 100; align-items: center; justify-content: center; flex-direction: column; }
+    </style>
+</head>
+<body class="bg-[#fcfcfe] min-h-screen pb-20">
+
+    <div id="loading-spinner" class="loading-overlay">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600 mb-4"></div>
+        <p class="font-black text-indigo-900 tracking-tight">ANALYZING YOUR PERFORMANCE...</p>
+    </div>
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm border-b-4 border-indigo-600 p-8 text-center relative">
+        <a href="../index.html" class="absolute left-6 top-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-full transition-all no-underline inline-flex items-center gap-1">🏠 Trang Chủ</a>
+        <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN</h2>
+        <h1 class="text-4xl font-black text-indigo-950 my-2 tracking-tighter">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+        <p class="text-xs text-indigo-500 font-bold bg-indigo-50 inline-block px-4 py-1 rounded-full mb-4">MST: 0318842992</p>
+        <div class="mt-4 text-[11px] text-gray-500 flex flex-wrap justify-center gap-x-8 gap-y-2 max-w-4xl mx-auto">
+            <span class="flex items-center gap-2">📍 <b>CS1:</b> 202/1 Nguyễn Thị Lắng, Củ Chi</span>
+            <span class="flex items-center gap-2 border-l border-gray-200 pl-8">📍 <b>CS2:</b> 61 Lê Đình Thám, Tân Phú</span>
+            <span class="flex items-center gap-2 border-l border-gray-200 pl-8">📍 <b>CS3:</b> 325/5T Nguyễn Thị Thảnh, Hóc Môn</span>
+        </div>
+    </header>
+
+    <div id="app" class="max-w-5xl mx-auto px-4 py-12">
+        <!-- Start Screen -->
+        <div id="start-screen" class="bg-white p-16 rounded-[2.5rem] shadow-2xl text-center border border-gray-100">
+            <div class="mb-8 inline-block p-6 bg-indigo-600 text-white rounded-3xl shadow-xl shadow-indigo-200">
+                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <h3 class="text-4xl font-black text-gray-900 mb-4 tracking-tight uppercase">TOEIC READING FULL TEST</h3>
+            <p class="text-gray-500 mb-12 max-w-lg mx-auto font-medium">Chào mừng bạn đến với bài kiểm tra năng lực Reading tại Trung tâm Cô Thuý. Bài thi gồm 40 câu hỏi, thời gian 60 phút.</p>
+            
+            <div class="max-w-md mx-auto mb-12 text-left">
+                <label class="block text-gray-900 font-black text-xs uppercase tracking-widest mb-3 ml-2">Họ và tên thí sinh</label>
+                <input type="text" id="student-name" placeholder="Nhập tên đầy đủ của bạn..." 
+                    class="w-full p-5 border-2 border-gray-100 bg-gray-50 rounded-2xl focus:border-indigo-500 focus:bg-white transition-all text-xl font-bold shadow-inner outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-16 max-w-4xl mx-auto">
+                <div class="p-8 bg-white rounded-3xl border border-gray-100 shadow-sm group hover:border-indigo-200 transition-colors">
+                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    <p class="text-xs text-gray-400 uppercase font-black tracking-widest mb-1">Thời gian</p>
+                    <p class="text-2xl font-black text-indigo-950">60 Phút</p>
+                </div>
+                <div class="p-8 bg-white rounded-3xl border border-gray-100 shadow-sm group hover:border-indigo-200 transition-colors">
+                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    <p class="text-xs text-gray-400 uppercase font-black tracking-widest mb-1">Số câu hỏi</p>
+                    <p class="text-2xl font-black text-indigo-950">40 Questions</p>
+                </div>
+                <div class="p-8 bg-white rounded-3xl border border-gray-100 shadow-sm group hover:border-indigo-200 transition-colors">
+                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+                    <p class="text-xs text-gray-400 uppercase font-black tracking-widest mb-1">Trạng thái</p>
+                    <p id="cloud-status" class="text-2xl font-black text-green-600">Sẵn sàng ✅</p>
+                </div>
+            </div>
+
+            <button id="btn-start" onclick="startTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-6 px-24 rounded-[2rem] shadow-2xl shadow-indigo-200 transform transition hover:-translate-y-2 active:scale-95 text-2xl">
+                START TEST NOW
+            </button>
+        </div>
+
+        <!-- Test Content -->
+        <div id="test-container" class="hidden">
+            <div class="sticky-timer bg-white/80 backdrop-blur-xl shadow-lg p-6 rounded-3xl flex justify-between items-center mb-12 border border-white/50">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-100" id="user-initial">?</div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Candidate Name</p>
+                        <p id="display-name" class="font-black text-gray-950 text-xl tracking-tight"></p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Time Left</p>
+                    <div id="timer" class="text-4xl font-mono font-black text-indigo-600">60:00</div>
+                </div>
+            </div>
+
+            <!-- PART 5 -->
+            <section class="mb-24">
+                <div class="flex items-center gap-5 mb-10">
+                    <div class="h-12 w-2.5 bg-indigo-600 rounded-full"></div>
+                    <h2 class="text-4xl font-black text-gray-950 tracking-tighter">PART 5: Incomplete Sentences</h2>
+                </div>
+                <div id="part5-questions" class="space-y-4">
+                    <!-- Q1 - Q15 injected by JS -->
+                </div>
+            </section>
+
+            <!-- PART 6 -->
+            <section class="mb-24">
+                <div class="flex items-center gap-5 mb-10">
+                    <div class="h-12 w-2.5 bg-green-500 rounded-full"></div>
+                    <h2 class="text-4xl font-black text-gray-950 tracking-tighter">PART 6: Text Completion</h2>
+                </div>
+                <div id="part6-content">
+                    <!-- Text 1, 2, 3 injected by JS -->
+                </div>
+            </section>
+
+            <!-- PART 7 -->
+            <section class="mb-24">
+                <div class="flex items-center gap-5 mb-10">
+                    <div class="h-12 w-2.5 bg-orange-500 rounded-full"></div>
+                    <h2 class="text-4xl font-black text-gray-950 tracking-tighter">PART 7: Reading Comprehension</h2>
+                </div>
+                <div id="part7-content">
+                    <!-- Text 1, 2, 3 injected by JS -->
+                </div>
+            </section>
+
+            <div class="mt-20 text-center p-16 bg-indigo-950 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+                <h4 class="text-white text-3xl font-black mb-4 tracking-tight">Are you ready to submit?</h4>
+                <p class="text-indigo-300 mb-10 font-medium max-w-md mx-auto">Vui lòng kiểm tra lại tất cả các câu trả lời. Hệ thống sẽ không thể quay lại sau khi đã nộp bài.</p>
+                <button onclick="submitTest()" class="bg-white text-indigo-950 font-black py-6 px-24 rounded-2xl text-2xl shadow-xl hover:bg-indigo-50 transform transition active:scale-95 border-b-4 border-indigo-200">FINISH & SUBMIT</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden">
+            <div class="bg-white p-16 rounded-[3rem] shadow-2xl text-center mb-12 border border-gray-100 relative">
+                <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center shadow-2xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                <h3 class="text-5xl font-black text-gray-950 mb-4 tracking-tighter mt-4">SCORE REPORT</h3>
+                <p id="result-name" class="text-indigo-600 text-2xl font-black mb-12"></p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+                    <div class="p-10 bg-gray-50 rounded-[2rem] border border-gray-100 flex flex-col items-center">
+                        <div class="relative inline-block mb-6">
+                            <svg class="w-56 h-56 transform -rotate-90">
+                                <circle cx="112" cy="112" r="100" stroke="#f3f4f6" stroke-width="16" fill="none" />
+                                <circle cx="112" cy="112" r="100" stroke="#4f46e5" stroke-width="16" fill="none" stroke-dasharray="628.3" id="score-circle" style="stroke-dashoffset: 628.3; transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="score-display" class="text-7xl font-black text-gray-950 tracking-tighter">0</span>
+                                <span class="text-gray-400 font-black text-xs uppercase tracking-widest mt-2">Questions Correct</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-10 bg-indigo-950 rounded-[2rem] flex flex-col items-center justify-center text-white shadow-2xl shadow-indigo-200">
+                        <p class="text-indigo-400 font-black uppercase text-xs tracking-[0.2em] mb-4">Reading Final Score</p>
+                        <div id="toeic-score-display" class="text-[8rem] leading-none font-black mb-4 tracking-tighter italic">0</div>
+                        <p class="text-indigo-200 font-bold">Estimated TOEIC Points</p>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-green-50 rounded-2xl border border-green-200 mb-10 flex items-center justify-center gap-4">
+                    <span class="text-2xl">🎉</span>
+                    <p id="save-status" class="text-green-800 font-black text-lg">Great job! Your result has been saved.</p>
+                </div>
+
+                <button onclick="window.location.reload()" class="bg-gray-100 text-gray-600 font-black py-4 px-12 rounded-2xl hover:bg-gray-200 transition-colors">Retake Exam</button>
+            </div>
+
+            <div class="bg-white p-12 rounded-[2.5rem] shadow-lg border border-gray-100">
+                <h4 class="text-3xl font-black mb-12 text-gray-950 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></div>
+                    Review & Explanations
+                </h4>
+                <div id="explanation-list" class="space-y-8"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Apps Script
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
+
+        (function checkConnection() {
+            const statusEl = document.getElementById('cloud-status');
+            const btn = document.getElementById('btn-start');
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "PASTE_YOUR_URL_HERE") {
+                statusEl.innerText = "⚠️ Chưa cấu hình";
+                statusEl.className = "text-2xl font-black text-orange-500";
+                btn.innerText = "BẮT ĐẦU (Không lưu)";
+                btn.className = "bg-orange-500 hover:bg-orange-600 text-white font-black py-6 px-24 rounded-[2rem] shadow-2xl shadow-orange-200 transform transition hover:-translate-y-2 active:scale-95 text-2xl";
+            }
+        })();
+
+        const testData = {
+            part5: [
+                { id: 1, q: "The HR director was ------- impressed with the candidate's portfolio and professional background.", options: {A: "highly", B: "high", C: "height", D: "highest"}, ans: "A", expl: "Cần trạng từ 'highly' (rất) để bổ nghĩa cho tính từ 'impressed'." },
+                { id: 2, q: "Please ensure that all confidential documents are ------- locked in the cabinet before leaving.", options: {A: "security", B: "secure", C: "securely", D: "securable"}, ans: "C", expl: "Cần trạng từ bổ nghĩa cho động từ 'locked'." },
+                { id: 3, q: "Mr. Henderson is responsible for ------- the budget for the upcoming advertising campaign.", options: {A: "approval", B: "approving", C: "approved", D: "approve"}, ans: "B", expl: "Sau giới từ 'for' + V-ing." },
+                { id: 4, q: "The construction of the new office tower will be completed ------- the end of this fiscal year.", options: {A: "until", B: "between", C: "by", D: "among"}, ans: "C", expl: "'By' dùng để chỉ một thời hạn chót." },
+                { id: 5, q: "Sales representatives are expected to maintain ------- communication with their clients.", options: {A: "regular", B: "regulate", C: "regulation", D: "regularly"}, ans: "A", expl: "Cần tính từ bổ nghĩa cho danh từ 'communication'." },
+                { id: 6, q: "The application process was ------- more complicated than we had originally anticipated.", options: {A: "much", B: "very", C: "so", D: "too"}, ans: "A", expl: "Dùng 'much' để nhấn mạnh so sánh hơn 'more complicated'." },
+                { id: 7, q: "Any employee ------- wishes to attend the seminar must register by Friday noon.", options: {A: "whom", B: "whose", C: "who", D: "which"}, ans: "C", expl: "Đại từ quan hệ thay thế cho chủ ngữ chỉ người." },
+                { id: 8, q: "The technical support team is available 24 hours a day to assist you ------- any issues.", options: {A: "with", B: "of", C: "from", D: "to"}, ans: "A", expl: "Cụm từ 'assist somebody with something' (hỗ trợ ai việc gì)." },
+                { id: 9, q: "We are pleased to announce the ------- of our newest branch in Singapore.", options: {A: "opened", B: "opening", C: "openly", D: "openness"}, ans: "B", expl: "Danh từ 'opening' nghĩa là sự khai trương." },
+                { id: 10, q: "------- the heavy rain, the outdoor corporate event proceeded as scheduled.", options: {A: "Although", B: "Because", C: "Despite", D: "However"}, ans: "C", expl: "'Despite' + cụm danh từ mang nghĩa nhượng bộ (mặc dù)." },
+                { id: 11, q: "The marketing team worked ------- to finish the project before the deadline.", options: {A: "hard", B: "hardly", C: "hardiness", D: "harder"}, ans: "A", expl: "Trạng từ 'hard' nghĩa là chăm chỉ (hardly là hầu như không)." },
+                { id: 12, q: "The CEO was ------- that the company achieved its yearly goals ahead of schedule.", options: {A: "pleasure", B: "pleased", C: "pleasing", D: "pleasantly"}, ans: "B", expl: "Tính từ đuôi -ed 'pleased' chỉ cảm xúc của người." },
+                { id: 13, q: "If you have any questions, please do not ------- to contact us via email.", options: {A: "hesitate", B: "hesitation", C: "hesitant", D: "hesitatingly"}, ans: "A", expl: "Động từ 'hesitate' (do dự) sau trợ động từ 'do not'." },
+                { id: 14, q: "The legal department is currently ------- the terms of the new partnership agreement.", options: {A: "review", B: "reviews", C: "reviewing", D: "reviewed"}, ans: "C", expl: "Thì hiện tại tiếp diễn 'is reviewing'." },
+                { id: 15, q: "The manager was looking for a ------- candidate who could handle multiple tasks.", options: {A: "reliability", B: "reliable", C: "rely", D: "reliably"}, ans: "B", expl: "Cần tính từ bổ nghĩa cho danh từ 'candidate'." }
+            ],
+            part6: [
+                {
+                    passage: "<b>Notice to All Staff</b><br>Our annual company picnic will take place on Saturday, August 12th. This event is a great opportunity for everyone to ------- (16) and enjoy a day off. Food and drinks will be provided for all employees and their families. ------- (17). Please make sure to RSVP on the company intranet by the end of this week so we can accurately estimate the amount of food needed. We look forward to ------- (18) you all there. If you have any dietary restrictions, please notify the HR department ------- (19).",
+                    questions: [
+                        {id: 16, options: {A: "relax", B: "relaxed", C: "relaxation", D: "relaxing"}, ans: "A", expl: "Sau 'to' + V-inf."},
+                        {id: 17, options: {A: "The picnic was cancelled due to rain.", B: "The event will be held at Riverside Park.", C: "Lunch is not included in the event.", D: "Working on Saturday is mandatory."}, ans: "B", expl: "Câu mô tả địa điểm tổ chức hợp logic nhất."},
+                        {id: 18, options: {A: "see", B: "saw", C: "seeing", D: "seen"}, ans: "C", expl: "Cấu trúc 'look forward to + V-ing'."},
+                        {id: 19, options: {A: "immediately", B: "immediate", C: "immediacy", D: "immediateness"}, ans: "A", expl: "Trạng từ bổ nghĩa cho động từ 'notify'."}
+                    ]
+                },
+                {
+                    passage: "<b>To: IT Department<br>From: Maintenance Team</b><br>This is to inform you that the building's server room will undergo a routine maintenance check on Friday night. The power to the room will be ------- (20) from 10 PM to 4 AM. ------- (21). We suggest that all important data be backed up before the maintenance begins. This procedure is ------- (22) to prevent any unexpected system failures in the future. We apologize for the ------- (23) and thank you for your cooperation.",
+                    questions: [
+                        {id: 20, options: {A: "cut", B: "cuts", C: "cutting", D: "cutter"}, ans: "A", expl: "Cấu trúc bị động 'be cut' (bị ngắt điện)."},
+                        {id: 21, options: {A: "The servers will remain active.", B: "All online services will be temporarily unavailable.", C: "The office will be open on Friday night.", D: "We are buying new computers."}, ans: "B", expl: "Hệ quả của việc ngắt điện phòng server."},
+                        {id: 22, options: {A: "necessary", B: "necessitate", C: "necessity", D: "necessarily"}, ans: "A", expl: "Tính từ sau 'is' để mô tả chủ ngữ 'procedure'."},
+                        {id: 23, options: {A: "inconvenience", B: "convenience", C: "inconvenient", D: "conveniently"}, ans: "A", expl: "Danh từ 'inconvenience' (sự bất tiện)."}
+                    ]
+                },
+                {
+                    passage: "<b>Letter of Recommendation</b><br>Dear Hiring Manager, I am writing to highly recommend Mr. David Smith for the position of Senior Analyst. During his three years at our firm, David ------- (24) exceptional analytical skills. He is a dedicated professional who is always willing to go the extra mile. ------- (25). He will be a great ------- (26) to any team. I am confident that he will ------- (27) in your organization.",
+                    questions: [
+                        {id: 24, options: {A: "demonstrated", B: "demonstrates", C: "demonstrate", D: "demonstrating"}, ans: "A", expl: "Thì quá khứ đơn vì nói về quãng thời gian làm việc đã qua."},
+                        {id: 25, options: {A: "He was often late for work.", B: "His contributions were vital to our success.", C: "He decided to change his career.", D: "The company is closing soon."}, ans: "B", expl: "Câu khen ngợi phù hợp với thư giới thiệu."},
+                        {id: 26, options: {A: "asset", B: "assess", C: "assist", D: "aspect"}, ans: "A", expl: "'Asset' (tài sản/nhân tố quý báu)."},
+                        {id: 27, options: {A: "succeed", B: "success", C: "successful", D: "successfully"}, ans: "A", expl: "Sau trợ động từ 'will' + V-inf."}
+                    ]
+                }
+            ],
+            part7: [
+                {
+                    title: "Instant Message",
+                    content: "<b>Sarah:</b> Hi Mike, did you finish the report for the meeting at 2 PM?<br><b>Mike:</b> Not yet, I'm still waiting for the sales data from Julie.<br><b>Sarah:</b> She just sent it to everyone 10 minutes ago via email.<br><b>Mike:</b> Oh, let me check. I've been busy with phone calls all morning.<br><b>Sarah:</b> Hurry up, the boss wants to see it before the meeting starts.",
+                    questions: [
+                        {id: 28, q: "What is Mike currently doing?", options: {A: "Attending a meeting", B: "Waiting for Julie", C: "Working on a report", D: "Calling a client"}, ans: "C", expl: "Mike đang hoàn thành báo cáo."},
+                        {id: 29, q: "At what time was the sales data sent?", options: {A: "2:00 PM", B: "10 minutes before the chat", C: "In the morning", D: "Yesterday"}, ans: "B", expl: "Sarah nói Julie gửi 10 phút trước."},
+                        {id: 30, q: "Why was Mike unaware of the email?", options: {A: "His internet was down", B: "He was on the phone", C: "He was at lunch", D: "He forgot his password"}, ans: "B", expl: "Mike bận nghe điện thoại cả sáng."}
+                    ]
+                },
+                {
+                    title: "Job Advertisement",
+                    content: "<b>Creative Media Group is Hiring!</b><br>We are looking for a Social Media Manager to join our dynamic team in Seattle. <br><b>Responsibilities:</b> Manage company profiles, create engaging content, and analyze performance metrics. <br><b>Requirements:</b> At least 2 years of experience, excellent writing skills, and proficiency in design tools. <br><b>Benefits:</b> Competitive salary, flexible hours, and health insurance. <br>Interested candidates should send their resume to jobs@creativemedia.com by April 15th.",
+                    questions: [
+                        {id: 31, q: "What position is being advertised?", options: {A: "Graphic Designer", B: "Social Media Manager", C: "Content Writer", D: "Marketing Intern"}, ans: "B", expl: "Quảng cáo tuyển Social Media Manager."},
+                        {id: 32, q: "Where is the job located?", options: {A: "Singapore", B: "London", C: "Seattle", D: "New York"}, ans: "C", expl: "Địa điểm tại Seattle."},
+                        {id: 33, q: "What is NOT mentioned as a benefit?", options: {A: "Flexible hours", B: "Health insurance", C: "Free gym membership", D: "Competitive salary"}, ans: "C", expl: "Bài không nhắc tới thẻ gym."},
+                        {id: 34, q: "When is the application deadline?", options: {A: "March 1st", B: "April 15th", C: "May 20th", D: "Immediately"}, ans: "B", expl: "Hạn chót là ngày 15/4."},
+                        {id: 35, q: "What is a requirement for this job?", options: {A: "A Master's degree", B: "Fluency in 3 languages", C: "2 years of experience", D: "Ability to travel"}, ans: "C", expl: "Yêu cầu ít nhất 2 năm kinh nghiệm."}
+                    ]
+                },
+                {
+                    title: "Business Email",
+                    content: "<b>From:</b> accounts@globalelectronics.com<br><b>To:</b> p.robinson@biznet.com<br><b>Subject:</b> Overdue Invoice #99212<br>Dear Mr. Robinson, our records indicate that payment for Invoice #99212, which was due on March 1st, has not been received. The total amount outstanding is $1,250. We kindly request that you settle this balance immediately to avoid a 5% late fee. If you have already made the payment, please disregard this email. Thank you for your prompt attention.",
+                    questions: [
+                        {id: 36, q: "What is the main purpose of the email?", options: {A: "To order new equipment", B: "To request a payment", C: "To complain about a service", D: "To change a shipping address"}, ans: "B", expl: "Email yêu cầu thanh toán hóa đơn quá hạn."},
+                        {id: 37, q: "When was the invoice originally due?", options: {A: "March 1st", B: "October 5th", C: "Today", D: "April 15th"}, ans: "A", expl: "Hạn cũ là ngày 1/3."},
+                        {id: 38, q: "How much is the total balance?", options: {A: "$992", B: "$1,250", C: "$500", D: "$2,000"}, ans: "B", expl: "Số tiền là 1,250 USD."},
+                        {id: 39, q: "What will happen if the payment is late?", options: {A: "The order will be cancelled", B: "A fee will be added", C: "The account will be closed", D: "A lawyer will be contacted"}, ans: "B", expl: "Sẽ bị tính phí phạt 5% (late fee)."},
+                        {id: 40, q: "Who should disregard the email?", options: {A: "New customers", B: "People who already paid", C: "The HR department", D: "Everyone"}, ans: "B", expl: "Những người đã thanh toán thì có thể bỏ qua email này."}
+                    ]
+                }
+            ]
+        };
+
+        function renderTest() {
+            // Part 5
+            const p5Div = document.getElementById('part5-questions');
+            testData.part5.forEach(item => {
+                p5Div.innerHTML += `
+                    <div class="question-box">
+                        <p class="font-black text-gray-950 mb-6 text-lg"><span class="text-indigo-600 mr-2">#${item.id}</span> ${item.q}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                            ${Object.entries(item.options).map(([key, val]) => `
+                                <label class="option-label">
+                                    <input type="radio" name="q${item.id}" value="${key}" class="hidden">
+                                    <div class="circle-btn">${key}</div>
+                                    <span class="text-sm font-bold text-gray-700">${val}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Part 6
+            const p6Div = document.getElementById('part6-content');
+            testData.part6.forEach((p) => {
+                p6Div.innerHTML += `
+                    <div class="passage-box">${p.passage}</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+                        ${p.questions.map(q => `
+                            <div class="question-box mb-0">
+                                <p class="font-black mb-4 text-indigo-700 uppercase text-xs tracking-widest">Question ${q.id}</p>
+                                <div class="space-y-1">
+                                    ${Object.entries(q.options).map(([key, val]) => `
+                                        <label class="option-label">
+                                            <input type="radio" name="q${q.id}" value="${key}" class="hidden">
+                                            <div class="circle-btn">${key}</div>
+                                            <span class="text-[12px] font-bold text-gray-700">${val}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            });
+
+            // Part 7
+            const p7Div = document.getElementById('part7-content');
+            testData.part7.forEach(p => {
+                p7Div.innerHTML += `
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="px-4 py-1 bg-indigo-950 text-white text-[10px] font-black rounded-full uppercase tracking-widest">${p.title}</span>
+                    </div>
+                    <div class="passage-box font-medium">${p.content}</div>
+                    <div class="grid grid-cols-1 gap-6 mb-20">
+                        ${p.questions.map(q => `
+                            <div class="question-box">
+                                <p class="font-black mb-6 text-lg"><span class="text-indigo-600 mr-2">#${q.id}</span> ${q.q}</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                                    ${Object.entries(q.options).map(([key, val]) => `
+                                        <label class="option-label">
+                                            <input type="radio" name="q${q.id}" value="${key}" class="hidden">
+                                            <div class="circle-btn">${key}</div>
+                                            <span class="text-sm font-bold text-gray-700">${val}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            });
+        }
+
+        function startTest() {
+            const nameInput = document.getElementById('student-name');
+            if(!nameInput.value.trim()) { alert("Cô nhắc em nhập tên để trung tâm lưu kết quả nhé!"); return; }
+            window.studentName = nameInput.value;
+            document.getElementById('display-name').innerText = window.studentName;
+            document.getElementById('user-initial').innerText = window.studentName.charAt(0).toUpperCase();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-container').classList.remove('hidden');
+            window.scrollTo(0,0);
+            
+            let timerSeconds = 3600; // 60 mins
+            window.timerInterval = setInterval(() => {
+                timerSeconds--;
+                if (timerSeconds <= 0) { clearInterval(window.timerInterval); submitTest(); return; }
+                const mins = Math.floor(timerSeconds / 60);
+                const secs = timerSeconds % 60;
+                document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        async function submitTest() {
+            document.getElementById('loading-spinner').style.display = 'flex';
+            clearInterval(window.timerInterval);
+
+            let score = 0;
+            const explList = document.getElementById('explanation-list');
+            explList.innerHTML = '';
+            const answersSubmitted = {};
+
+            const allQs = [
+                ...testData.part5, 
+                ...testData.part6.flatMap(p => p.questions), 
+                ...testData.part7.flatMap(p => p.questions)
+            ];
+            
+            allQs.forEach(q => {
+                const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+                const userVal = selected ? selected.value : "None";
+                answersSubmitted[q.id] = userVal;
+                const isCorrect = userVal === q.ans;
+                if(isCorrect) score++;
+
+                const div = document.createElement('div');
+                div.className = `p-8 rounded-[2rem] border-l-[10px] ${isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'} shadow-sm`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <p class="font-black text-gray-950 uppercase tracking-widest text-xs">Question ${q.id}</p>
+                        <span class="px-4 py-1 rounded-full font-black text-[10px] uppercase ${isCorrect ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900'}">${isCorrect ? 'Correct' : 'Incorrect'}</span>
+                    </div>
+                    <p class="text-sm font-bold text-gray-700 mb-2">Đáp án đúng: <span class="text-indigo-600">${q.ans}</span> | Lựa chọn của bạn: <span class="${isCorrect ? 'text-green-600' : 'text-red-600'}">${userVal}</span></p>
+                    <div class="p-4 bg-white/60 rounded-xl text-xs font-medium text-gray-500 italic">💡 Phân tích: ${q.expl}</div>
+                `;
+                explList.appendChild(div);
+            });
+
+            const toeicReading = Math.round((score / 40) * 495);
+            const bandText = toeicReading + '/495';
+
+            // Google Sheets Logic
+            const saveStatus = document.getElementById('save-status');
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== "PASTE_YOUR_URL_HERE") {
+                try {
+                    await fetch(GOOGLE_SHEET_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_name: window.studentName,
+                            exam_type: 'TOEIC Reading Test 2',
+                            score: score,
+                            total: 40,
+                            band: bandText,
+                            answers: answersSubmitted
+                        })
+                    });
+                    saveStatus.innerText = "✅ Kết quả đã lưu thành công vào hồ sơ học sinh!";
+                } catch (e) {
+                    saveStatus.innerText = "⚠️ Không thể lưu kết quả do lỗi mạng.";
+                    saveStatus.className = "text-orange-600 font-black text-lg";
+                }
+            } else {
+                saveStatus.innerText = "ℹ️ Chế độ không lưu kết quả.";
+                saveStatus.className = "text-gray-500 font-black text-lg";
+            }
+
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('test-container').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('result-name').innerText = `Thí sinh: ${window.studentName}`;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('toeic-score-display').innerText = toeicReading;
+            
+            const circle = document.getElementById('score-circle');
+            circle.style.strokeDashoffset = 628.3 - (628.3 * score / 40);
+            window.scrollTo(0,0);
+
+            // Congrats Redirect
+            if (toeicReading >= 400) {
+                setTimeout(() => {
+                    if (confirm(`🎉 Chúc mừng ${window.studentName}! ${toeicReading}/495 - Bài làm xuất sắc, hãy xem bảng thành tích nhé!`)) {
+                        window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=40&band=${bandText}&exam=TOEIC+Reading+Test+2`;
+                    }
+                }, 2000);
+            }
+        }
+
+        window.onload = renderTest;
+    </script>
+</body>
+</html>
