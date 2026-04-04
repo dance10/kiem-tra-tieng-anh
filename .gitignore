@@ -1,2 +1,5 @@
 # Ignore all markdown files
 *.md
+
+# Ignore Fix reference files
+Fix/
