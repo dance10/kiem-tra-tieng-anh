@@ -998,7 +998,20 @@
                 const result = await response.json();
                 
                 if (result.status === 'success' && Array.isArray(result.data)) {
-                    leaderboardData = result.data;
+                    leaderboardData = result.data.map(row => {
+                        let parsedScore = String(row.score || '');
+                        if (parsedScore.includes('T') && parsedScore.endsWith('Z') && parsedScore.includes('-')) {
+                            try {
+                                const d = new Date(parsedScore);
+                                if (!isNaN(d.getTime())) {
+                                    const day = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Ho_Chi_Minh', day: 'numeric' }).format(d);
+                                    const month = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Ho_Chi_Minh', month: 'numeric' }).format(d);
+                                    parsedScore = day + '/' + month;
+                                }
+                            } catch (e) {}
+                        }
+                        return { ...row, score: parsedScore };
+                    });
                     renderLeaderboard();
                 } else {
                     throw new Error('Invalid data');
