@@ -699,7 +699,7 @@
         <!-- Stats -->
         <div class="stats-bar">
             <div class="stat-item">
-                    <div class="stat-value" id="stat-exam-count">07</div>
+                    <div class="stat-value" id="stat-exam-count">08</div>
                     <div class="stat-label">Bài kiểm tra</div>
             </div>
             <div class="stat-item">
@@ -720,6 +720,25 @@
         <div class="section-title">Chọn bài thi để bắt đầu</div>
 
         <div class="cards-grid" id="cards-grid">
+            <!-- 0. Starters Card (Cấp độ: Thiếu nhi) -->
+            <div class="exam-card card-ket fade-up">
+                <div class="card-icon">🌟</div>
+                <div class="card-badge">
+                    <span class="meta-dot"></span> Pre-A1 — Thiếu nhi
+                </div>
+                <h2 class="card-title">Starters Practice Test</h2>
+                <p class="card-desc">Bài thi thực hành Starters Reading & Writing với định dạng thú vị phù hợp cho các bé.</p>
+                <div class="card-meta">
+                    <span><span class="meta-dot"></span> 5 Parts</span>
+                    <span><span class="meta-dot"></span> 25 Câu</span>
+                    <span><span class="meta-dot"></span> 20 Phút</span>
+                </div>
+                <a href="Exam/starters-1.html" class="card-btn">
+                    Vào thi ngay
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
+
             <!-- 1. KET A2 Card (Cấp độ: Cơ bản) -->
             <div class="exam-card card-ket fade-up">
                 <div class="card-icon">📝</div>
@@ -860,6 +879,7 @@
             <div class="leaderboard-container">
                 <div class="lb-tabs" id="lb-tabs">
                     <button class="lb-tab active" data-exam="all" id="tab-all">Tổng hợp</button>
+                    <button class="lb-tab" data-exam="Starters Test 1" id="tab-starters">Starters 1</button>
                     <button class="lb-tab" data-exam="A2 Key (KET)" id="tab-ket">KET A2</button>
                     <button class="lb-tab" data-exam="TOEIC Reading Test 1" id="tab-toeic">TOEIC Test 1</button>
                     <button class="lb-tab" data-exam="TOEIC Reading Test 2" id="tab-toeic2">TOEIC Test 2</button>
