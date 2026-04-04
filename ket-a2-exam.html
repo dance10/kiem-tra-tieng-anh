@@ -29,7 +29,10 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
+
+        // ⚠️ QUAN TRỌNG: Dán URL Google Apps Script của bạn vào đây
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
 
         // Mocking Lucide icons for React in browser
         const Icon = ({ name, size = 24, className = "" }) => {
@@ -80,6 +83,8 @@
             const [explanations, setExplanations] = useState({});
             const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || "");
             const [showKeyInput, setShowKeyInput] = useState(false);
+            const [studentName, setStudentName] = useState('');
+            const [sheetStatus, setSheetStatus] = useState('checking'); // checking, ready, offline
 
             // Center Info
             const centerInfo = {
@@ -278,10 +283,46 @@
                 setAnswers(prev => ({ ...prev, [qId]: value }));
             };
 
-            const finishExam = () => {
+            const finishExam = async () => {
                 setIsFinished(true);
                 setCurrentStep('result');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Save to Google Sheet
+                const { score: s, total: t } = calculateScore();
+                const percentage = Math.round(s / t * 100);
+                const gradeLabel = s >= t * 0.8 ? 'Distinction' : s >= t * 0.6 ? 'Pass' : 'Practice';
+
+                if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== "PASTE_YOUR_URL_HERE") {
+                    try {
+                        await fetch(GOOGLE_SHEET_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                student_name: studentName || 'KET Student',
+                                exam_type: 'KET A2 Exam',
+                                score: s,
+                                total: t,
+                                band: gradeLabel,
+                                answers: answers
+                            })
+                        });
+                        setSheetStatus('saved');
+                    } catch (e) {
+                        console.error('Error saving to Google Sheet:', e);
+                        setSheetStatus('error');
+                    }
+                }
+
+                // Redirect to congratulations page for Distinction results
+                if (s >= t * 0.8) {
+                    setTimeout(() => {
+                        if (confirm(`\ud83c\udf89 Chúc mừng ${studentName || 'bạn'}! ${gradeLabel} (${percentage}%) - Bạn có muốn xem trang vinh danh không?`)) {
+                            window.location.href = `congratulations.html?name=${encodeURIComponent(studentName || 'KET Student')}&score=${s}&total=${t}&band=${gradeLabel}&exam=KET+A2+Exam`;
+                        }
+                    }, 2000);
+                }
             };
 
             const calculateScore = () => {
@@ -414,11 +455,16 @@
                                             </ul>
                                         </div>
                                         <div className="bg-slate-50 p-12 rounded-[2rem] border-2 border-dashed border-slate-200 flex flex-col justify-center shadow-inner">
-                                            <p className="text-slate-500 mb-10 text-center italic text-lg leading-relaxed font-medium">
+                                            <p className="text-slate-500 mb-6 text-center italic text-lg leading-relaxed font-medium">
                                                 "Sẵn sàng vượt qua kỳ thi KET với độ tự tin cao nhất cùng hệ thống luyện thi tích hợp AI đầu tiên tại khu vực."
                                             </p>
+                                            <div className="mb-6">
+                                                <label className="block text-left text-slate-700 font-bold mb-2 text-sm">Họ và tên học sinh:</label>
+                                                <input type="text" id="ket-student-name" placeholder="Nhập tên của bạn..." 
+                                                    className="w-full p-4 border-2 border-slate-100 rounded-xl focus:border-blue-500 transition-all text-lg shadow-inner" />
+                                            </div>
                                             <button 
-                                                onClick={() => setCurrentStep('exam')}
+                                                onClick={() => { setStudentName(document.getElementById('ket-student-name')?.value || ''); setCurrentStep('exam'); }}
                                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-6 rounded-2xl transition-all transform hover:-translate-y-2 shadow-2xl shadow-blue-200 flex items-center justify-center gap-4 text-xl uppercase tracking-[4px]"
                                             >
                                                 BẮT ĐẦU <ChevronRight size={28} />
@@ -557,6 +603,11 @@
                                                 </span>
                                                 <span className="bg-slate-900 text-white px-10 py-3 rounded-full text-sm font-black uppercase tracking-[3px] shadow-lg">Level A2</span>
                                             </div>
+                                            {/* Google Sheet save status */}
+                                            <p className={`text-sm font-bold mt-4 ${sheetStatus === 'saved' ? 'text-green-600' : sheetStatus === 'error' ? 'text-orange-500' : 'text-gray-400'}`}>
+                                                {sheetStatus === 'saved' && '✅ Kết quả đã được lưu vào Google Sheet!'}
+                                                {sheetStatus === 'error' && '⚠️ Không gửi được kết quả, nhưng bạn vẫn xem được điểm!'}
+                                            </p>
                                         </div>
                                         <div className="bg-slate-50/80 backdrop-blur-sm p-12 rounded-[3rem] border-4 border-white relative shadow-inner group">
                                            <h4 className="font-black text-blue-900 text-[10px] mb-6 uppercase tracking-[4px] flex items-center gap-3">

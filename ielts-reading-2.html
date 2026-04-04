@@ -350,7 +350,9 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             student_name: studentName,
+                            exam_type: 'IELTS Reading Test 2',
                             score: score,
+                            total: 40,
                             band: band,
                             answers: answersSubmitted
                         })
@@ -415,6 +417,15 @@
             });
 
             window.scrollTo(0, 0);
+
+            // Redirect to congratulations page for high scores (band >= 7.0)
+            if (band >= 7.0) {
+                setTimeout(() => {
+                    if (confirm(`🎉 Chúc mừng ${studentName}! Band ${band} - Bạn có muốn xem trang vinh danh không?`)) {
+                        window.location.href = `congratulations.html?name=${encodeURIComponent(studentName)}&score=${score}&total=40&band=${band}&exam=IELTS+Reading+Test+2`;
+                    }
+                }, 2000);
+            }
         }
     </script>
 </body>

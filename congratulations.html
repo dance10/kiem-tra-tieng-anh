@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Chúc Mừng! - Cô Thuý English Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+        /* Fireworks animation */
+        .firework {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: firework-burst 1.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 100;
+        }
+        @keyframes firework-burst {
+            0% { transform: scale(0); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 99;
+            animation: confetti-fall linear forwards;
+            pointer-events: none;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Shine effect */
+        .shine {
+            background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+            background-size: 200% 200%;
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { background-position: 200% 200%; }
+            100% { background-position: -100% -100%; }
+        }
+
+        /* Glow pulse */
+        .glow-pulse {
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3), 0 0 60px rgba(251, 191, 36, 0.1); }
+            50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.5), 0 0 100px rgba(251, 191, 36, 0.2); }
+        }
+
+        /* Float animation */
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Scale in */
+        .scale-in {
+            animation: scaleIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.3); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Slide up */
+        .slide-up {
+            animation: slideUp 1s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(60px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Star twinkle */
+        .twinkle {
+            animation: twinkle 2s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            from { opacity: 0.3; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Trophy bounce */
+        .trophy-bounce {
+            animation: trophyBounce 2s ease-in-out infinite;
+        }
+        @keyframes trophyBounce {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            25% { transform: translateY(-15px) rotate(5deg); }
+            50% { transform: translateY(0) rotate(-5deg); }
+            75% { transform: translateY(-8px) rotate(3deg); }
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706, #fbbf24);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 4s ease infinite;
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Background particles */
+        .particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: particle-float linear infinite;
+        }
+        @keyframes particle-float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white">
+
+    <!-- Background particles -->
+    <div id="particles"></div>
+
+    <!-- Confetti container -->
+    <div id="confetti-container"></div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
+
+        <!-- Top decorative stars -->
+        <div class="absolute top-8 left-8 text-4xl twinkle" style="animation-delay: 0s;">✨</div>
+        <div class="absolute top-20 right-16 text-3xl twinkle" style="animation-delay: 0.5s;">⭐</div>
+        <div class="absolute top-40 left-24 text-2xl twinkle" style="animation-delay: 1s;">💫</div>
+        <div class="absolute bottom-20 right-12 text-3xl twinkle" style="animation-delay: 0.3s;">✨</div>
+        <div class="absolute bottom-40 left-16 text-2xl twinkle" style="animation-delay: 0.7s;">⭐</div>
+
+        <!-- Trophy Icon -->
+        <div class="scale-in mb-4">
+            <div class="trophy-bounce text-[120px] md:text-[160px] leading-none select-none">🏆</div>
+        </div>
+
+        <!-- Congratulations Text -->
+        <div class="text-center mb-8 slide-up" style="animation-delay: 0.3s;">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-4">
+                <span class="gradient-text">CHÚC MỪNG!</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-blue-200 font-medium italic opacity-80">
+                🎊 Bạn đã đạt thành tích xuất sắc! 🎊
+            </p>
+        </div>
+
+        <!-- Student Card -->
+        <div class="slide-up w-full max-w-2xl" style="animation-delay: 0.6s;">
+            <div class="relative bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 rounded-[3rem] p-1 glow-pulse">
+                <div class="bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-indigo-950/95 backdrop-blur-xl rounded-[2.8rem] p-8 md:p-12">
+                    
+                    <!-- Center Logo -->
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
+                            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">AN</div>
+                            <span class="text-xs font-black text-white/60 uppercase tracking-[4px]">Hoài An Nhiên Education</span>
+                        </div>
+                    </div>
+
+                    <!-- Student Name -->
+                    <div class="text-center mb-10">
+                        <p class="text-xs font-black text-amber-400/60 uppercase tracking-[8px] mb-3">Học viên xuất sắc</p>
+                        <h2 id="student-name" class="text-4xl md:text-6xl font-black text-white tracking-tight leading-none"></h2>
+                    </div>
+
+                    <!-- Score Section -->
+                    <div class="grid grid-cols-3 gap-4 mb-10">
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/10 transition-all">
+                            <p class="text-[10px] font-black text-blue-300/50 uppercase tracking-[4px] mb-2">Bài thi</p>
+                            <p id="exam-type" class="text-lg font-black text-white leading-tight"></p>
+                        </div>
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/10 transition-all">
+                            <p class="text-[10px] font-black text-green-300/50 uppercase tracking-[4px] mb-2">Điểm số</p>
+                            <p class="text-4xl font-black text-green-400 leading-none">
+                                <span id="score-val">0</span><span class="text-lg text-white/30">/<span id="total-val">40</span></span>
+                            </p>
+                        </div>
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/10 transition-all">
+                            <p class="text-[10px] font-black text-amber-300/50 uppercase tracking-[4px] mb-2">Xếp loại</p>
+                            <p id="band-val" class="text-3xl font-black text-amber-400 leading-none"></p>
+                        </div>
+                    </div>
+
+                    <!-- Achievement Badge -->
+                    <div class="flex justify-center mb-8">
+                        <div class="shine relative bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 px-10 py-4 rounded-2xl shadow-2xl">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-2xl"></div>
+                            <p id="achievement-text" class="relative text-slate-900 font-black text-xl md:text-2xl uppercase tracking-[4px]">
+                                🏅 THÀNH TÍCH XUẤT SẮC 🏅
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Motivational Message -->
+                    <div class="text-center">
+                        <p id="motivation-text" class="text-blue-200/70 font-medium text-lg italic leading-relaxed max-w-lg mx-auto">
+                        </p>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="text-center mt-8">
+                        <p class="text-[10px] font-black text-white/20 uppercase tracking-[6px]">
+                            Ngày <span id="cert-date"></span> • Trung Tâm Tiếng Anh Cô Thuý
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="slide-up flex flex-wrap gap-4 mt-10 justify-center" style="animation-delay: 0.9s;">
+            <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-black py-4 px-10 rounded-2xl border border-white/10 transition-all hover:scale-105 active:scale-95 uppercase tracking-[3px] text-sm flex items-center gap-3">
+                🖨️ In giấy khen
+            </button>
+            <button onclick="shareResult()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-4 px-10 rounded-2xl shadow-xl shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 uppercase tracking-[3px] text-sm flex items-center gap-3">
+                📤 Chia sẻ kết quả
+            </button>
+            <a href="index.html" class="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white/70 font-black py-4 px-10 rounded-2xl border border-white/5 transition-all hover:scale-105 uppercase tracking-[3px] text-sm flex items-center gap-3 no-underline">
+                🏠 Trang chủ
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-8 border-t border-white/5">
+        <p class="text-[10px] text-white/15 uppercase tracking-[8px] font-black">
+            © 2026 Hoài An Nhiên Education • Trung Tâm Tiếng Anh Cô Thuý
+        </p>
+    </footer>
+
+    <script>
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name') || 'Học viên';
+        const score = params.get('score') || '0';
+        const total = params.get('total') || '40';
+        const band = params.get('band') || '7.0';
+        const exam = params.get('exam') || 'English Exam';
+
+        // Populate data
+        document.getElementById('student-name').textContent = name;
+        document.getElementById('score-val').textContent = score;
+        document.getElementById('total-val').textContent = total;
+        document.getElementById('band-val').textContent = band;
+        document.getElementById('exam-type').textContent = exam;
+
+        // Set date
+        const today = new Date();
+        document.getElementById('cert-date').textContent = today.toLocaleDateString('vi-VN', {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+
+        // Determine achievement level
+        const percentage = Math.round(parseInt(score) / parseInt(total) * 100);
+        const achievementEl = document.getElementById('achievement-text');
+        const motivationEl = document.getElementById('motivation-text');
+
+        if (percentage >= 95) {
+            achievementEl.textContent = '👑 HOÀN HẢO 👑';
+            motivationEl.textContent = `${name} đã đạt kết quả gần như hoàn hảo! Một tài năng thực sự đáng ngưỡng mộ. Hãy tiếp tục tỏa sáng!`;
+        } else if (percentage >= 85) {
+            achievementEl.textContent = '🏅 XUẤT SẮC 🏅';
+            motivationEl.textContent = `Tuyệt vời, ${name}! Kết quả xuất sắc thể hiện sự nỗ lực không ngừng. Bạn đang trên con đường chinh phục đỉnh cao!`;
+        } else if (percentage >= 75) {
+            achievementEl.textContent = '⭐ GIỎI ⭐';
+            motivationEl.textContent = `Chúc mừng ${name}! Thành tích rất ấn tượng. Tiếp tục luyện tập và bạn sẽ còn tiến xa hơn nữa!`;
+        } else {
+            achievementEl.textContent = '🎯 KHÁ GIỎI 🎯';
+            motivationEl.textContent = `Rất tốt, ${name}! Bạn đã thể hiện năng lực vững vàng. Cô Thuý tin rằng bạn sẽ còn xuất sắc hơn nữa!`;
+        }
+
+        // === EFFECTS ===
+
+        // Create confetti
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#fbbf24', '#f59e0b', '#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#14b8a6'];
+            const shapes = ['■', '●', '▲', '◆'];
+
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 12 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 12 + 5) + 'px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                    container.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 5500);
+                }, i * 60);
+            }
+        }
+
+        // Create background particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['rgba(251,191,36,0.3)', 'rgba(59,130,246,0.2)', 'rgba(139,92,246,0.2)'];
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.width = (Math.random() * 6 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDelay = (Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Share result
+        function shareResult() {
+            const shareText = `🏆 ${name} đã đạt ${score}/${total} (${band}) trong bài thi ${exam} tại Trung Tâm Tiếng Anh Cô Thuý! 🎉`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Kết quả thi xuất sắc!',
+                    text: shareText,
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('📋 Đã sao chép kết quả vào clipboard!\n\n' + shareText);
+                });
+            }
+        }
+
+        // Score animation
+        function animateScore() {
+            const scoreEl = document.getElementById('score-val');
+            const targetScore = parseInt(score);
+            let current = 0;
+            const step = setInterval(() => {
+                if (current >= targetScore) {
+                    scoreEl.textContent = targetScore;
+                    clearInterval(step);
+                } else {
+                    current++;
+                    scoreEl.textContent = current;
+                }
+            }, 40);
+        }
+
+        // Initialize everything
+        createParticles();
+        
+        setTimeout(() => {
+            createConfetti();
+            animateScore();
+        }, 800);
+
+        // Periodic confetti bursts
+        setInterval(() => {
+            createConfetti();
+        }, 8000);
+    </script>
+</body>
+</html>
