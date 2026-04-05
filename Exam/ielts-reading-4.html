@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Academic Reading: Interactive Practice</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brand: {
+                        50: '#f0fdfa',
+                        100: '#ccfbf1',
+                        500: '#14b8a6',
+                        700: '#0f766e',
+                        900: '#134e4a',
+                    },
+                    paper: '#fdfbf7',
+                    ink: '#334155'
+                },
+                fontFamily: {
+                    sans: ['Inter', 'system-ui', 'sans-serif'],
+                    serif: ['Merriweather', 'Georgia', 'serif'],
+                }
+            }
+        }
+    }
+</script>
+<style>
+    body { background-color: #f8fafc; color: #334155; }
+    .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 40vh; max-height: 350px; }
+    .scrollable-pane { max-height: calc(100vh - 220px); overflow-y: auto; }
+    .nav-btn.active { background-color: #0f766e; color: white; }
+    .nav-btn { background-color: white; color: #475569; transition: all 0.2s; }
+    .nav-btn:hover:not(.active) { background-color: #f1f5f9; }
+    .status-correct { color: #15803d; font-weight: bold; }
+    .status-incorrect { color: #b91c1c; font-weight: bold; }
+    input[type="text"], select { border: 1px solid #cbd5e1; border-radius: 0.25rem; padding: 0.25rem 0.5rem; width: 100%; max-width: 300px; }
+    input[type="text"]:focus, select:focus { outline: none; border-color: #0f766e; ring: 2px solid #ccfbf1; }
+</style>
+</head>
+<body class="font-sans antialiased flex flex-col h-screen overflow-hidden">
+
+<!-- Chosen Palette: Warm Neutrals with Teal Accents (Paper: #fdfbf7, Ink: #334155, Brand/Teal: #0f766e) -->
+<!-- Application Structure Plan: Thêm trường nhập tên học viên vào trang Dashboard để cá nhân hóa kết quả. Tên học viên sẽ được lưu và hiển thị lại ở trang Results (Kết quả). Cấu trúc vẫn giữ nguyên mô phỏng kỳ thi IELTS trên máy tính với 3 bài đọc. -->
+<!-- Visualization & Content Choices: Sử dụng input text để thu thập tên. Hiển thị lại bằng JavaScript khi nộp bài. Duy trì Chart.js cho dashboard. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<header class="bg-white shadow-sm z-10 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-brand-900">IELTS Interactive Simulator <span id="cloud-status" class="text-sm font-normal text-green-600">Sẵn sàng ✅</span></h1>
+            <p class="text-sm text-gray-500">TRUNG TÂM TIẾNG ANH CÔ THUÝ</p>
+        </div>
+        <div class="text-right hidden sm:block">
+            <p class="text-xs text-gray-400">Time remaining (simulation)</p>
+            <p class="text-xl font-mono font-bold text-brand-700">60:00</p>
+        </div>
+    </div>
+</header>
+
+<div class="bg-brand-50 border-b border-brand-100 z-10 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex space-x-2 overflow-x-auto">
+        <button onclick="window.location.href='../index.html'" class="nav-btn px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">&#127968; Trang Chủ</button>
+        <button onclick="navigate('dashboard')" id="btn-dashboard" class="nav-btn active px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">&#128202; Dashboard</button>
+        <button onclick="navigate('passage1')" id="btn-passage1" class="nav-btn px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">&#128214; Passage 1</button>
+        <button onclick="navigate('passage2')" id="btn-passage2" class="nav-btn px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">&#128214; Passage 2</button>
+        <button onclick="navigate('passage3')" id="btn-passage3" class="nav-btn px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">&#128214; Passage 3</button>
+        <button onclick="showResults()" id="btn-results" class="nav-btn px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap ml-auto bg-brand-900 text-white hover:bg-brand-700">&#9989; Submit Test</button>
+    </div>
+</div>
+
+<main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 h-full overflow-hidden relative">
+
+    <section id="dashboard" class="h-full overflow-y-auto pb-20">
+        <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Test Overview & Strategy</h2>
+            
+            <!-- Phần nhập tên học viên -->
+            <div class="mb-8 p-6 bg-brand-50 rounded-xl border border-brand-100 max-w-xl">
+                <label for="student-name" class="block text-sm font-bold text-brand-900 mb-2 uppercase tracking-wide">Thông tin học viên:</label>
+                <input type="text" id="student-name" placeholder="Nhập họ và tên của bạn..." class="w-full px-4 py-3 text-lg border-2 border-brand-100 rounded-lg focus:border-brand-500 focus:ring-0 transition-colors">
+                <p class="mt-2 text-xs text-gray-500 italic">* Tên này sẽ xuất hiện trên kết quả bài làm của bạn.</p>
+            </div>
+
+            <p class="text-gray-600 mb-8 max-w-3xl leading-relaxed">
+                Welcome to the interactive IELTS Academic Reading Practice. This simulator is designed to mirror the computer-delivered IELTS format. The test consists of 3 passages and 40 questions. Review the chart below to understand the distribution of question types in this specific exam before beginning.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-brand-900">Question Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-paper p-6 rounded-lg border border-brand-100">
+                    <h3 class="text-lg font-semibold mb-3">Test Breakdown</h3>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex justify-between border-b pb-1"><span>Matching Headings</span> <span class="font-bold">5 Qs</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>True/False/Not Given</span> <span class="font-bold">11 Qs</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>Sentence/Summary Completion</span> <span class="font-bold">11 Qs</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>Multiple Choice</span> <span class="font-bold">5 Qs</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>Matching Features</span> <span class="font-bold">5 Qs</span></li>
+                        <li class="flex justify-between border-b pb-1"><span>Short Answer</span> <span class="font-bold">3 Qs</span></li>
+                    </ul>
+                    <div class="mt-6">
+                        <button onclick="startTest()" class="w-full bg-brand-700 text-white py-3 rounded-lg font-medium hover:bg-brand-900 transition shadow-md">Begin Practice Test &#10140;</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 bg-gray-50 p-6 rounded-lg">
+                <h3 class="font-bold text-gray-800 mb-2">Support Information</h3>
+                <p class="text-sm text-gray-600">Provided by: CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN - TRUNG TÂM TIẾNG ANH CÔ THUÝ<br>MST: 0318842992<br>CS1: 202/1 Nguyễn Thị Lắng, Củ Chi | CS2: 61 Lê Đình Thám, Tân Phú | CS3: 325/5T Nguyễn Thị Thảnh, Hóc Môn</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Passages (Giữ nguyên cấu trúc nhưng đảm bảo ID đúng) -->
+    <section id="passage1" class="hidden h-full grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 scrollable-pane font-serif leading-relaxed text-gray-800">
+            <h2 class="text-2xl font-bold mb-6 font-sans text-brand-900">The History and Methods of Salt Production</h2>
+            <p class="mb-4"><strong>A.</strong> Salt is so common today that we rarely think about its value. However, throughout history, it has been a catalyst for civilization, trade, and even war. In ancient times, salt was known as "white gold." The word "salary" actually derives from the Latin <em>salarium</em>, which was the money given to Roman soldiers to buy salt. Because salt was essential for preserving food before the invention of refrigeration, whoever controlled salt controlled the food supply.</p>
+            <p class="mb-4"><strong>B.</strong> There are two primary methods of obtaining salt: mining it from the earth and evaporating it from seawater. Rock salt, or halite, is the mineral form of sodium chloride. It is found in massive underground deposits that were created millions of years ago when ancient seas evaporated. These deposits can be hundreds of feet thick. Mining rock salt involves drilling and blasting, much like coal mining. This salt is often used for industrial purposes, such as de-icing roads in winter.</p>
+            <p class="mb-4"><strong>C.</strong> Solar evaporation is the oldest method of salt production and is best suited for warm climates with high evaporation rates and low rainfall. Seawater is captured in a series of shallow ponds, often called "salt pans." As the sun and wind evaporate the water, the salt concentration rises until crystals begin to form. The salt is then harvested by hand or by mechanical rakes. This "sea salt" is highly prized by chefs for its trace minerals and unique texture.</p>
+            <p class="mb-4"><strong>D.</strong> In regions where the climate is too wet for solar evaporation, "vacuum evaporation" is used. In this industrial process, salt brine (water saturated with salt) is pumped into large tanks called vacuum pans. The pressure inside these tanks is reduced, which lowers the boiling point of the water. This allows the water to be boiled off quickly using less energy, leaving behind high-purity, fine-grained salt. This is the source of most common table salt.</p>
+            <p class="mb-4"><strong>E.</strong> Today, only about 6% of the salt produced worldwide is used for food. The vast majority—over 60%—is used in industrial processes, particularly in the manufacture of chlorine and caustic soda. These chemicals are essential for making plastics, paper, and glass. While we no longer fight wars over salt, it remains an indispensable pillar of the modern global economy.</p>
+        </div>
+        
+        <div class="bg-paper rounded-xl shadow-inner border border-gray-200 p-6 scrollable-pane font-sans">
+            <div class="mb-8">
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 1–5: Matching Headings</h3>
+                <p class="text-sm mb-4 text-gray-600 border p-3 rounded bg-white">
+                    <strong>List of Headings</strong><br>
+                    i. Industrial uses of salt today<br>
+                    ii. The origin of the word "salary"<br>
+                    iii. Methods for cold or wet climates<br>
+                    iv. The historical importance of salt<br>
+                    v. Extracting salt from underground<br>
+                    vi. The process of using sunlight
+                </p>
+                <div class="space-y-3">
+                    <div class="flex items-center"><label class="w-24 font-medium">1. Paragraph A</label> <select id="q1" class="flex-1"><option value="">Select heading...</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option></select><span id="res-q1" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-24 font-medium">2. Paragraph B</label> <select id="q2" class="flex-1"><option value="">Select heading...</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option></select><span id="res-q2" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-24 font-medium">3. Paragraph C</label> <select id="q3" class="flex-1"><option value="">Select heading...</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option></select><span id="res-q3" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-24 font-medium">4. Paragraph D</label> <select id="q4" class="flex-1"><option value="">Select heading...</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option></select><span id="res-q4" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-24 font-medium">5. Paragraph E</label> <select id="q5" class="flex-1"><option value="">Select heading...</option><option value="i">i</option><option value="ii">ii</option><option value="iii">iii</option><option value="iv">iv</option><option value="v">v</option><option value="vi">vi</option></select><span id="res-q5" class="ml-2"></span></div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 6–10: True, False, Not Given</h3>
+                <div class="space-y-4">
+                    <div>
+                        <p class="mb-1"><strong>6.</strong> Roman soldiers were sometimes paid directly in salt rather than money.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q6" value="TRUE"> TRUE</label> <label><input type="radio" name="q6" value="FALSE"> FALSE</label> <label><input type="radio" name="q6" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q6"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>7.</strong> Rock salt deposits are formed by the movement of tectonic plates.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q7" value="TRUE"> TRUE</label> <label><input type="radio" name="q7" value="FALSE"> FALSE</label> <label><input type="radio" name="q7" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q7"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>8.</strong> Sea salt contains more minerals than table salt.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q8" value="TRUE"> TRUE</label> <label><input type="radio" name="q8" value="FALSE"> FALSE</label> <label><input type="radio" name="q8" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q8"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>9.</strong> Vacuum evaporation requires more heat than boiling water at normal pressure.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q9" value="TRUE"> TRUE</label> <label><input type="radio" name="q9" value="FALSE"> FALSE</label> <label><input type="radio" name="q9" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q9"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>10.</strong> The majority of salt produced is consumed by humans in food.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q10" value="TRUE"> TRUE</label> <label><input type="radio" name="q10" value="FALSE"> FALSE</label> <label><input type="radio" name="q10" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q10"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 11–13: Sentence Completion</h3>
+                <div class="space-y-4">
+                    <div class="flex flex-col"><label><strong>11.</strong> Before modern cooling systems, salt was the main way to <input type="text" id="q11" class="inline-block w-32 mx-2"> meat and fish.</label><span id="res-q11"></span></div>
+                    <div class="flex flex-col"><label><strong>12.</strong> Solar evaporation works best in areas where there is very little <input type="text" id="q12" class="inline-block w-32 mx-2">.</label><span id="res-q12"></span></div>
+                    <div class="flex flex-col"><label><strong>13.</strong> Salt is a key ingredient in the production of <input type="text" id="q13" class="inline-block w-32 mx-2">, which is used to make products like plastic.</label><span id="res-q13"></span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="passage2" class="hidden h-full grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 scrollable-pane font-serif leading-relaxed text-gray-800">
+            <h2 class="text-2xl font-bold mb-6 font-sans text-brand-900">The Psychology of Innovation</h2>
+            <p class="mb-4">Why do some people come up with brilliant ideas while others struggle? Innovation is not just about intelligence; it is about a mindset. Research suggests that "divergent thinking"—the ability to generate many different solutions to a single problem—is the hallmark of a creative mind.</p>
+            <p class="mb-4">Unlike "convergent thinking," which focuses on finding the single "correct" answer (common in standardized testing), divergent thinkers explore unconventional paths. They are comfortable with ambiguity and are not afraid of making mistakes. In fact, many of the world's greatest inventions, from penicillin to the microwave oven, were the result of accidental discoveries during failed experiments.</p>
+            <p class="mb-4">Another key factor is "cross-pollination." This occurs when ideas from one field are applied to another. For example, the assembly line used in car manufacturing was inspired by the way meat-packing plants processed carcasses. By stepping outside their niche, innovators can see patterns that others miss.</p>
+        </div>
+        
+        <div class="bg-paper rounded-xl shadow-inner border border-gray-200 p-6 scrollable-pane font-sans">
+            <div class="mb-8">
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 14–18: Multiple Choice</h3>
+                <div class="space-y-6">
+                    <div>
+                        <p class="mb-2"><strong>14.</strong> What is "divergent thinking"?</p>
+                        <div class="pl-4 space-y-1">
+                            <label class="block"><input type="radio" name="q14" value="A"> A. Finding the most logical answer.</label>
+                            <label class="block"><input type="radio" name="q14" value="B"> B. Generating multiple possible solutions.</label>
+                            <label class="block"><input type="radio" name="q14" value="C"> C. Following a strict set of rules.</label>
+                        </div>
+                        <span id="res-q14"></span>
+                    </div>
+                    <div>
+                        <p class="mb-2"><strong>15.</strong> What do "convergent thinkers" usually value?</p>
+                        <div class="pl-4 space-y-1">
+                            <label class="block"><input type="radio" name="q15" value="A"> A. Ambiguity.</label>
+                            <label class="block"><input type="radio" name="q15" value="B"> B. Accidental discoveries.</label>
+                            <label class="block"><input type="radio" name="q15" value="C"> C. The single correct response.</label>
+                        </div>
+                        <span id="res-q15"></span>
+                    </div>
+                    <div>
+                        <p class="mb-2"><strong>16.</strong> The author mentions penicillin to show that:</p>
+                        <div class="pl-4 space-y-1">
+                            <label class="block"><input type="radio" name="q16" value="A"> A. Medicine is the most innovative field.</label>
+                            <label class="block"><input type="radio" name="q16" value="B"> B. Failure can lead to successful innovation.</label>
+                            <label class="block"><input type="radio" name="q16" value="C"> C. Scientists are usually divergent thinkers.</label>
+                        </div>
+                        <span id="res-q16"></span>
+                    </div>
+                    <div>
+                        <p class="mb-2"><strong>17.</strong> What is "cross-pollination" in a psychological context?</p>
+                        <div class="pl-4 space-y-1">
+                            <label class="block"><input type="radio" name="q17" value="A"> A. Working with nature.</label>
+                            <label class="block"><input type="radio" name="q17" value="B"> B. Borrowing ideas from different industries.</label>
+                            <label class="block"><input type="radio" name="q17" value="C"> C. Increasing the speed of production.</label>
+                        </div>
+                        <span id="res-q17"></span>
+                    </div>
+                    <div>
+                        <p class="mb-2"><strong>18.</strong> The assembly line example illustrates:</p>
+                        <div class="pl-4 space-y-1">
+                            <label class="block"><input type="radio" name="q18" value="A"> A. The importance of the car industry.</label>
+                            <label class="block"><input type="radio" name="q18" value="B"> B. How one field can influence another.</label>
+                            <label class="block"><input type="radio" name="q18" value="C"> C. Why meat-packing is efficient.</label>
+                        </div>
+                        <span id="res-q18"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 19–26: Summary Completion</h3>
+                <div class="bg-white p-4 border rounded mb-4 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                    <div><strong>A.</strong> creative</div><div><strong>B.</strong> mindset</div><div><strong>C.</strong> patterns</div><div><strong>D.</strong> mistakes</div>
+                    <div><strong>E.</strong> divergent</div><div><strong>F.</strong> successes</div><div><strong>G.</strong> disciplines</div><div><strong>H.</strong> cross-pollination</div>
+                </div>
+                <div class="leading-loose">
+                    Innovative people possess a specific <strong>(19)</strong> <input type="text" id="q19" class="w-12 text-center" maxlength="1"> <span id="res-q19"></span>. They rely on <strong>(20)</strong> <input type="text" id="q20" class="w-12 text-center" maxlength="1"> <span id="res-q20"></span> thinking to find varied solutions. They do not fear <strong>(21)</strong> <input type="text" id="q21" class="w-12 text-center" maxlength="1"> <span id="res-q21"></span> and often turn errors into <strong>(22)</strong> <input type="text" id="q22" class="w-12 text-center" maxlength="1"> <span id="res-q22"></span>. Innovation also thrives on <strong>(23)</strong> <input type="text" id="q23" class="w-12 text-center" maxlength="1"> <span id="res-q23"></span>, where concepts are moved between <strong>(24)</strong> <input type="text" id="q24" class="w-12 text-center" maxlength="1"> <span id="res-q24"></span>. This allows them to identify <strong>(25)</strong> <input type="text" id="q25" class="w-12 text-center" maxlength="1"> <span id="res-q25"></span> that are often invisible to others. Ultimately, being <strong>(26)</strong> <input type="text" id="q26" class="w-12 text-center" maxlength="1"> <span id="res-q26"></span> is more important than raw IQ.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="passage3" class="hidden h-full grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 scrollable-pane font-serif leading-relaxed text-gray-800">
+            <h2 class="text-2xl font-bold mb-6 font-sans text-brand-900">The Future of Urban Architecture</h2>
+            <p class="mb-4">As the global population shifts toward cities, architects are facing a crisis: how to build sustainable, high-density housing that doesn't destroy the environment. The "Vertical Forest" concept, pioneered in Milan, involves covering skyscrapers with thousands of trees and shrubs. This helps absorb CO2, produce oxygen, and regulate the building's temperature.</p>
+            <p class="mb-4">However, critics argue that these buildings are expensive to maintain. The weight of the soil and the need for complex irrigation systems mean that only luxury developments can afford them. The challenge for the next decade is "democratizing" green architecture—making it affordable for the masses.</p>
+        </div>
+        
+        <div class="bg-paper rounded-xl shadow-inner border border-gray-200 p-6 scrollable-pane font-sans">
+            <div class="mb-8">
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 27–32: Yes, No, Not Given</h3>
+                <div class="space-y-4">
+                    <div>
+                        <p class="mb-1"><strong>27.</strong> Vertical forests are primarily designed to improve the aesthetic beauty of cities.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q27" value="YES"> YES</label> <label><input type="radio" name="q27" value="NO"> NO</label> <label><input type="radio" name="q27" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q27"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>28.</strong> The Milan project was the first of its kind.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q28" value="YES"> YES</label> <label><input type="radio" name="q28" value="NO"> NO</label> <label><input type="radio" name="q28" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q28"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>29.</strong> Trees on buildings can help reduce the need for air conditioning.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q29" value="YES"> YES</label> <label><input type="radio" name="q29" value="NO"> NO</label> <label><input type="radio" name="q29" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q29"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>30.</strong> Maintaining vertical forests is cheaper than maintaining traditional parks.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q30" value="YES"> YES</label> <label><input type="radio" name="q30" value="NO"> NO</label> <label><input type="radio" name="q30" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q30"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>31.</strong> Most residents in Milan support the construction of more vertical forests.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q31" value="YES"> YES</label> <label><input type="radio" name="q31" value="NO"> NO</label> <label><input type="radio" name="q31" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q31"></span>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>32.</strong> The main barrier to mass-producing green skyscrapers is the cost.</p>
+                        <div class="flex space-x-4"><label><input type="radio" name="q32" value="YES"> YES</label> <label><input type="radio" name="q32" value="NO"> NO</label> <label><input type="radio" name="q32" value="NOT GIVEN"> NOT GIVEN</label></div><span id="res-q32"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 33–37: Matching Features</h3>
+                <p class="text-sm mb-4"><strong>A.</strong> Vertical Forests | <strong>B.</strong> Traditional Skyscrapers | <strong>C.</strong> Both | <strong>D.</strong> Neither</p>
+                <div class="space-y-3">
+                    <div class="flex items-center"><label class="w-64">33. Designed for high-density living.</label> <select id="q33" class="w-20"><option value=""></option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><span id="res-q33" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-64">34. Actively produces oxygen.</label> <select id="q34" class="w-20"><option value=""></option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><span id="res-q34" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-64">35. Relies heavily on complex irrigation.</label> <select id="q35" class="w-20"><option value=""></option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><span id="res-q35" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-64">36. Uses zero electricity.</label> <select id="q36" class="w-20"><option value=""></option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><span id="res-q36" class="ml-2"></span></div>
+                    <div class="flex items-center"><label class="w-64">37. Helps in regulating internal temperature.</label> <select id="q37" class="w-20"><option value=""></option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><span id="res-q37" class="ml-2"></span></div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-lg bg-gray-200 p-2 rounded mb-4">Questions 38–40: Short Answer</h3>
+                <div class="space-y-4">
+                    <div class="flex flex-col"><label><strong>38.</strong> What is the main gas absorbed by the trees in a Vertical Forest?</label><input type="text" id="q38" class="mt-1"><span id="res-q38"></span></div>
+                    <div class="flex flex-col"><label><strong>39.</strong> What is the specific problem for architects as people move to cities?</label><input type="text" id="q39" class="mt-1"><span id="res-q39"></span></div>
+                    <div class="flex flex-col"><label><strong>40.</strong> What is the ultimate goal for green architecture in the next decade?</label><input type="text" id="q40" class="mt-1"><span id="res-q40"></span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="results" class="hidden h-full overflow-y-auto pb-20">
+        <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-3xl mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-2 text-brand-900">Test Complete!</h2>
+            <div id="save-status" class="text-center mt-2 mb-2"></div>
+            <p id="display-student-name" class="text-xl text-brand-700 font-semibold mb-2"></p>
+            <p class="text-gray-600 mb-8">Chúc mừng bạn đã hoàn thành bài thi IELTS Reading Practice.</p>
+            
+            <div class="w-48 h-48 mx-auto bg-brand-50 rounded-full flex items-center justify-center border-4 border-brand-500 mb-8 shadow-inner">
+                <div class="text-center">
+                    <span id="final-score" class="text-5xl font-bold text-brand-700">0</span>
+                    <span class="block text-gray-500 font-medium">out of 40</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-8 text-left">
+                <div class="bg-gray-50 p-4 rounded border">
+                    <h4 class="font-bold text-sm text-gray-500">Passage 1</h4>
+                    <p id="score-p1" class="text-2xl font-bold">0/13</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded border">
+                    <h4 class="font-bold text-sm text-gray-500">Passage 2</h4>
+                    <p id="score-p2" class="text-2xl font-bold">0/13</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded border">
+                    <h4 class="font-bold text-sm text-gray-500">Passage 3</h4>
+                    <p id="score-p3" class="text-2xl font-bold">0/14</p>
+                </div>
+            </div>
+
+            <button onclick="location.reload();" class="bg-gray-200 text-gray-800 px-6 py-2 rounded font-medium hover:bg-gray-300 transition">Retake Test</button>
+            <p class="mt-6 text-sm text-gray-500">To see which specific questions you missed, navigate back to the Passage tabs. Incorrect answers are marked in red.</p>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec';
+
+    const answerKey = {
+        q1: ['iv'], q2: ['v'], q3: ['vi'], q4: ['iii'], q5: ['i'],
+        q6: ['FALSE'], q7: ['NOT GIVEN'], q8: ['TRUE'], q9: ['FALSE'], q10: ['FALSE'],
+        q11: ['preserve'], q12: ['rainfall'], q13: ['chlorine'],
+        q14: ['B'], q15: ['C'], q16: ['B'], q17: ['B'], q18: ['B'],
+        q19: ['B'], q20: ['E'], q21: ['D'], q22: ['F'], q23: ['H'], q24: ['G'], q25: ['C'], q26: ['A'],
+        q27: ['NO'], q28: ['YES'], q29: ['YES'], q30: ['NO'], q31: ['NOT GIVEN'], q32: ['YES'],
+        q33: ['C'], q34: ['A'], q35: ['A'], q36: ['D'], q37: ['A'],
+        q38: ['co2', 'carbon dioxide'], q39: ['crisis', 'a crisis'], q40: ['democratizing', 'democratizing it']
+    };
+
+    let chartInstance = null;
+
+    function initChart() {
+        const ctx = document.getElementById('overviewChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+        
+        chartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Matching Headings', 'T/F/NG & Y/N/NG', 'Completion/Short Ans', 'Multiple Choice', 'Matching Features'],
+                datasets: [{
+                    data: [5, 11, 14, 5, 5],
+                    backgroundColor: ['#0f766e', '#14b8a6', '#5eead4', '#cbd5e1', '#64748b'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { boxWidth: 12, font: { family: 'Inter' } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed !== null) { label += context.parsed + ' Questions'; }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function navigate(sectionId) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(sectionId).classList.remove('hidden');
+        if(document.getElementById('btn-' + sectionId)) {
+            document.getElementById('btn-' + sectionId).classList.add('active');
+        }
+
+        if (sectionId === 'dashboard') {
+            initChart();
+        }
+    }
+
+    function startTest() {
+        const nameInput = document.getElementById('student-name');
+        if (nameInput.value.trim() === "") {
+            alert("Vui lòng nhập tên của bạn để bắt đầu bài thi!");
+            return;
+        }
+        navigate('passage1');
+    }
+
+    function getUserAnswer(qId) {
+        const el = document.getElementById(qId);
+        if (el) return el.value.trim().toUpperCase();
+        
+        const radios = document.getElementsByName(qId);
+        if (radios.length > 0) {
+            for (let i = 0; i < radios.length; i++) {
+                if (radios[i].checked) return radios[i].value;
+            }
+        }
+        return "";
+    }
+
+    async function showResults() {
+        let totalScore = 0;
+        let p1Score = 0, p2Score = 0, p3Score = 0;
+        
+        const studentName = document.getElementById('student-name').value;
+        document.getElementById('display-student-name').innerText = "Học viên: " + studentName;
+
+        for (let i = 1; i <= 40; i++) {
+            const qId = 'q' + i;
+            const resSpan = document.getElementById('res-' + qId);
+            const userAns = getUserAnswer(qId).toLowerCase();
+            const correctAnswers = answerKey[qId].map(a => a.toLowerCase());
+            
+            let isCorrect = false;
+            
+            if (userAns !== "") {
+                if (correctAnswers.includes(userAns)) {
+                    isCorrect = true;
+                } else {
+                    for(let ans of correctAnswers) {
+                        if(userAns.includes(ans) && userAns.length <= ans.length + 4) {
+                            isCorrect = true; break;
+                        }
+                    }
+                }
+            }
+
+            if (resSpan) {
+                if (isCorrect) {
+                    resSpan.innerHTML = ' &#10004;';
+                    resSpan.className = 'ml-2 status-correct';
+                    totalScore++;
+                    if (i <= 13) p1Score++;
+                    else if (i <= 26) p2Score++;
+                    else p3Score++;
+                } else {
+                    resSpan.innerHTML = ' &#10008; (Correct: ' + answerKey[qId][0].toUpperCase() + ')';
+                    resSpan.className = 'ml-2 text-sm status-incorrect';
+                }
+            }
+        }
+
+        document.getElementById('final-score').innerText = totalScore;
+        document.getElementById('score-p1').innerText = p1Score + '/13';
+        document.getElementById('score-p2').innerText = p2Score + '/13';
+        document.getElementById('score-p3').innerText = p3Score + '/14';
+
+        const saveStatus = document.getElementById('save-status');
+        if (saveStatus) {
+            saveStatus.innerText = "⏳ Đang lưu kết quả...";
+            saveStatus.className = "text-sm text-yellow-600 font-bold mb-4";
+            try {
+                await fetch(GOOGLE_SHEET_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: studentName,
+                        exam_type: 'IELTS-004',
+                        score: totalScore,
+                        total: 40,
+                        band: (totalScore / 40 * 9).toFixed(1)
+                    })
+                });
+                saveStatus.innerText = "✅ Kết quả đã được lưu vào Google Sheet!";
+                saveStatus.className = "text-sm text-green-700 font-bold mb-4";
+                if (totalScore >= 30) {
+                     setTimeout(() => {
+                         window.location.href = "congratulations.html";
+                     }, 1500);
+                }
+            } catch (e) {
+                console.error("Error saving:", e);
+                saveStatus.innerText = "⚠️ Không gửi được kết quả!";
+                saveStatus.className = "text-sm text-orange-600 font-bold mb-4";
+            }
+        }
+
+        navigate('results');
+    }
+
+    window.onload = () => {
+        navigate('dashboard');
+    };
+</script>
+</body>
+</html>
