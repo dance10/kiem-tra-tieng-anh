@@ -696,6 +696,54 @@
             .lb-time { display: none; }
             .lb-row { gap: 0.5rem; padding: 0.7rem 0.5rem; }
         }
+
+        /* Filter & Search */
+        .filter-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        .search-box input {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 1rem;
+            padding: 1rem 1rem 1rem 3rem;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            border-color: var(--accent-cyan);
+            background: rgba(0,0,0,0.4);
+        }
+        .filter-tabs-wrapper { border-bottom: none; }
+        .filter-tabs-wrapper::after { display: none; }
+        @media (max-width: 768px) {
+            .filter-section { flex-direction: column; align-items: stretch; padding: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -738,7 +786,7 @@
 
         <div class="cards-grid" id="cards-grid">
             <!-- 0. Starters Card (Cấp độ: Thiếu nhi) -->
-            <div class="exam-card card-ket fade-up">
+            <div class="exam-card card-ket fade-up" data-level="young">
                 <div class="card-icon">🌟</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> Pre-A1 — Thiếu nhi
@@ -757,7 +805,7 @@
             </div>
 
             <!-- 0.5 Movers Card (Cấp độ: Thiếu nhi) -->
-            <div class="exam-card card-ket fade-up">
+            <div class="exam-card card-ket fade-up" data-level="young">
                 <div class="card-icon">🚀</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> A1 — Thiếu nhi
@@ -776,7 +824,7 @@
             </div>
 
             <!-- 1. KET A2 Card (Cấp độ: Cơ bản) -->
-            <div class="exam-card card-ket fade-up">
+            <div class="exam-card card-ket fade-up" data-level="ket">
                 <div class="card-icon">📝</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> A2 — Cơ bản
@@ -795,7 +843,7 @@
             </div>
 
             <!-- 1.1 KET A2 Card 2 (Cấp độ: Cơ bản) -->
-            <div class="exam-card card-ket fade-up">
+            <div class="exam-card card-ket fade-up" data-level="ket">
                 <div class="card-icon">📒</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> A2 — Cơ bản
@@ -814,7 +862,7 @@
             </div>
 
             <!-- 1.2 PET B1 Card (Cấp độ: Trung cấp/B1) -->
-            <div class="exam-card card-ielts2 fade-up">
+            <div class="exam-card card-ielts2 fade-up" data-level="pet">
                 <div class="card-icon">📚</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B1 — Trung cấp
@@ -833,7 +881,7 @@
             </div>
 
             <!-- 1.5 Tuyển sinh 10 (Cấp độ: Trung cấp/B1) -->
-            <div class="exam-card card-ielts2 fade-up">
+            <div class="exam-card card-ielts2 fade-up" data-level="pet">
                 <div class="card-icon">🎓</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B1 — Trung cấp
@@ -852,7 +900,7 @@
             </div>
 
             <!-- 2. TOEIC Card (Cấp độ: Trung cấp) -->
-            <div class="exam-card card-ket fade-up">
+            <div class="exam-card card-ket fade-up" data-level="toeic">
                 <div class="card-icon">💼</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B1-B2 — Trung cấp
@@ -871,7 +919,7 @@
             </div>
 
             <!-- 2.5 TOEIC Card 2 (Cấp độ: Trung cấp) -->
-            <div class="exam-card card-ket fade-up">
+            <div class="exam-card card-ket fade-up" data-level="toeic">
                 <div class="card-icon">👔</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B1-B2 — Trung cấp
@@ -890,7 +938,7 @@
             </div>
 
             <!-- 3. IELTS 1 Card (Cấp độ: Nâng cao) -->
-            <div class="exam-card card-ielts1 fade-up">
+            <div class="exam-card card-ielts1 fade-up" data-level="ielts">
                 <div class="card-icon">📖</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B2-C1 — Nâng cao
@@ -909,7 +957,7 @@
             </div>
 
             <!-- 4. IELTS 2 Card (Cấp độ: Nâng cao) -->
-            <div class="exam-card card-ielts2 fade-up">
+            <div class="exam-card card-ielts2 fade-up" data-level="ielts">
                 <div class="card-icon">☁️</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B2-C1 — Nâng cao
@@ -928,7 +976,7 @@
             </div>
 
             <!-- 5. IELTS 3 Card (Cấp độ: Nâng cao) -->
-            <div class="exam-card card-ielts1 fade-up">
+            <div class="exam-card card-ielts1 fade-up" data-level="ielts">
                 <div class="card-icon">📚</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B2-C1 — Nâng cao
@@ -947,7 +995,7 @@
             </div>
 
             <!-- 6. IELTS Writing 1 Card (Cấp độ: Nâng cao) -->
-            <div class="exam-card card-ielts2 fade-up">
+            <div class="exam-card card-ielts2 fade-up" data-level="ielts">
                 <div class="card-icon">✍️</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B2-C1 — Nâng cao
@@ -966,7 +1014,7 @@
             </div>
 
             <!-- 7. IELTS Reading 4 Card (Cấp độ: Nâng cao) -->
-            <div class="exam-card card-ielts1 fade-up">
+            <div class="exam-card card-ielts1 fade-up" data-level="ielts">
                 <div class="card-icon">🧠</div>
                 <div class="card-badge">
                     <span class="meta-dot"></span> B2-C1 — Nâng cao
@@ -1308,6 +1356,36 @@
                 statQuestionCount.textContent = totalQuestions + '+';
             }
         });
-    </script>
+    
+        // ==========================================
+        // FILTER & SEARCH EXAM CARDS
+        // ==========================================
+        const searchInput = document.getElementById('searchInput');
+        const searchTabs = document.getElementById('filter-tabs');
+        if (searchInput && searchTabs) {
+            const filterCards = () => {
+                const term = searchInput.value.toLowerCase().trim();
+                const activeTab = searchTabs.querySelector('.active');
+                const level = activeTab ? activeTab.dataset.filter : 'all';
+                document.querySelectorAll('#cards-grid .exam-card').forEach(card => {
+                    const title = card.querySelector('.card-title').textContent.toLowerCase();
+                    const cardLevel = card.dataset.level || '';
+                    if (title.includes(term) && (level === 'all' || cardLevel === level)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            };
+            searchInput.addEventListener('input', filterCards);
+            searchTabs.addEventListener('click', (e) => {
+                if(e.target.classList.contains('lb-tab')) {
+                    searchTabs.querySelectorAll('.lb-tab').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    filterCards();
+                }
+            });
+        }
+</script>
 </body>
 </html>
