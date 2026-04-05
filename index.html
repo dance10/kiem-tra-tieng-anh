@@ -330,10 +330,23 @@
         }
 
         /* Tabs */
+        .lb-tabs-wrapper {
+            position: relative;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .lb-tabs-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0;
+            width: 40px;
+            background: linear-gradient(to right, rgba(10, 14, 26, 0), rgba(10, 14, 26, 0.9));
+            pointer-events: none;
+            z-index: 5;
+        }
+
         .lb-tabs {
             display: flex;
             overflow-x: auto;
-            border-bottom: 1px solid var(--border-subtle);
             scrollbar-width: none;
         }
         .lb-tabs::-webkit-scrollbar { display: none; }
@@ -703,7 +716,7 @@
                     <div class="stat-label">Bài kiểm tra</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">85+</div>
+                <div class="stat-value" id="stat-question-count">85+</div>
                 <div class="stat-label">Câu hỏi tổng</div>
             </div>
             <div class="stat-item">
@@ -934,19 +947,21 @@
         <div class="leaderboard-section">
             <div class="section-title">🏆 Bảng xếp hạng</div>
             <div class="leaderboard-container">
-                <div class="lb-tabs" id="lb-tabs">
-                    <button class="lb-tab active" data-exam="all" id="tab-all">Tổng hợp</button>
-                    <button class="lb-tab" data-exam="Starters Test 1" id="tab-starters">Starters 1</button>
-                    <button class="lb-tab" data-exam="Movers Test 1" id="tab-movers">Movers 1</button>
-                    <button class="lb-tab" data-exam="A2 Key (KET)" id="tab-ket">KET A2</button>
-                    <button class="lb-tab" data-exam="B1 Preliminary (PET)" id="tab-pet">PET B1</button>
-                    <button class="lb-tab" data-exam="Tuyển Sinh 10 Test 1" id="tab-tuyensinh">TN 10</button>
-                    <button class="lb-tab" data-exam="TOEIC Reading Test 1" id="tab-toeic">TOEIC Test 1</button>
-                    <button class="lb-tab" data-exam="TOEIC Reading Test 2" id="tab-toeic2">TOEIC Test 2</button>
-                    <button class="lb-tab" data-exam="IELTS Reading Test 1" id="tab-ielts1">IELTS Test 1</button>
-                    <button class="lb-tab" data-exam="IELTS Reading Test 2" id="tab-ielts2">IELTS Test 2</button>
-                    <button class="lb-tab" data-exam="IELTS Reading Test 3" id="tab-ielts3">IELTS Test 3</button>
-                    <button class="lb-tab" data-exam="IELTS Writing Test 1" id="tab-ielts-w1">IELTS Writing</button>
+                <div class="lb-tabs-wrapper">
+                    <div class="lb-tabs" id="lb-tabs">
+                        <button class="lb-tab active" data-exam="all" id="tab-all">Tổng hợp</button>
+                        <button class="lb-tab" data-exam="Starters Test 1" id="tab-starters">Starters 1</button>
+                        <button class="lb-tab" data-exam="Movers Test 1" id="tab-movers">Movers 1</button>
+                        <button class="lb-tab" data-exam="A2 Key (KET)" id="tab-ket">KET A2</button>
+                        <button class="lb-tab" data-exam="B1 Preliminary (PET)" id="tab-pet">PET B1</button>
+                        <button class="lb-tab" data-exam="Tuyển Sinh 10 Test 1" id="tab-tuyensinh">TN 10</button>
+                        <button class="lb-tab" data-exam="TOEIC Reading Test 1" id="tab-toeic">TOEIC Test 1</button>
+                        <button class="lb-tab" data-exam="TOEIC Reading Test 2" id="tab-toeic2">TOEIC Test 2</button>
+                        <button class="lb-tab" data-exam="IELTS Reading Test 1" id="tab-ielts1">IELTS Test 1</button>
+                        <button class="lb-tab" data-exam="IELTS Reading Test 2" id="tab-ielts2">IELTS Test 2</button>
+                        <button class="lb-tab" data-exam="IELTS Reading Test 3" id="tab-ielts3">IELTS Test 3</button>
+                        <button class="lb-tab" data-exam="IELTS Writing Test 1" id="tab-ielts-w1">IELTS Writing</button>
+                    </div>
                 </div>
                 <div class="lb-panel active" id="lb-content">
                     <div class="lb-loading">
@@ -1207,6 +1222,26 @@
         // ==========================================
         document.addEventListener('DOMContentLoaded', function() {
             loadLeaderboard();
+
+            // Auto-calculate stats
+            const examCards = document.querySelectorAll('.exam-card');
+            const statExamCount = document.getElementById('stat-exam-count');
+            if (statExamCount) {
+                statExamCount.textContent = examCards.length;
+            }
+
+            let totalQuestions = 0;
+            examCards.forEach(card => {
+                const text = card.textContent;
+                const match = text.match(/(\\d+)\\s*Câu/);
+                if (match && match[1]) {
+                    totalQuestions += parseInt(match[1], 10);
+                }
+            });
+            const statQuestionCount = document.getElementById('stat-question-count');
+            if (statQuestionCount && totalQuestions > 0) {
+                statQuestionCount.textContent = totalQuestions + '+';
+            }
         });
     </script>
 </body>
