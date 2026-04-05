@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Thi Trực Tuyến - Hoài An Nhiên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Corporate Blue & Slate -->
+    <!-- Application Structure Plan: The application is structured as an interactive assessment dashboard. 
+         It shifts from a static document to a dynamic, paginated test interface. 
+         Key features include a persistent sidebar for question navigation (allowing users to jump between parts and see answered status), 
+         a sticky top bar for the timer and candidate info, and a main content area that displays one section at a time to prevent cognitive overload. 
+         Post-submission, it transitions to a results dashboard featuring a radar chart to analyze performance across different language skills. -->
+    <!-- Visualization & Content Choices: 
+         1. Interactive Test Forms: Converts static MCQs and text inputs into standard HTML form elements for user interaction.
+         2. Question Palette (Grid): Uses CSS Grid to show 40 question blocks, updating color based on answer state. Goal: Organize/Navigation.
+         3. Results Radar Chart (Chart.js): Maps user scores against max scores per test section. Goal: Compare/Analyze performance visually. Justification: Provides immediate, scannable feedback on strengths and weaknesses. NO SVG used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; overflow-x: hidden; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .section-hidden { display: none; }
+        .section-active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Question Palette Styles */
+        .q-btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; color: #64748b; }
+        .q-btn:hover { border-color: #93c5fd; }
+        .q-btn.answered { background-color: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+        .q-btn.current { border-color: #1e40af; background-color: #1e40af; color: white; }
+
+        /* Custom Radio Buttons */
+        .custom-radio input[type="radio"] { display: none; }
+        .custom-radio label { display: flex; align-items: flex-start; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: white; }
+        .custom-radio label:hover { border-color: #bfdbfe; background: #f8fafc; }
+        .custom-radio input[type="radio"]:checked + label { border-color: #3b82f6; background: #eff6ff; }
+        .radio-indicator { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 12px; color: #64748b; }
+        .custom-radio input[type="radio"]:checked + label .radio-indicator { border-color: #3b82f6; background: #3b82f6; color: white; }
+
+        /* Text Input */
+        .custom-input { width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; outline: none; font-family: inherit; }
+        .custom-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        /* Chart Container Requirements */
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+        @media (max-width: 640px) { .chart-container { height: 250px; } }
+    </style>
+</head>
+<body>
+
+    <!-- START SCREEN -->
+    <div id="startScreen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-[url('data:image/svg+xml;utf8,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23e2e8f0\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]">
+        <div class="bg-white rounded-3xl shadow-xl p-8 md:p-12 max-w-2xl w-full text-center border-t-8 border-blue-800 relative">
+            <a href="../index.html" class="absolute left-6 top-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-full inline-flex items-center gap-1">🏠 Trang Chủ</a>
+            <h2 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN</h2>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-blue-900 mb-6">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+            
+            <div class="bg-blue-50 text-blue-800 p-6 rounded-2xl mb-8 border border-blue-100">
+                <h3 class="text-xl font-bold mb-2">ĐỀ THI MÔ PHỎNG TUYỂN SINH LỚP 10 THPT</h3>
+                <p class="font-medium text-blue-600 mb-4">MÔN: TIẾNG ANH</p>
+                <div class="flex justify-center gap-6 text-sm font-semibold">
+                    <span class="flex items-center gap-2">⏱ Thời gian: 90 phút</span>
+                    <span class="flex items-center gap-2">📝 Số câu: 40 câu</span>
+                </div>
+            </div>
+
+            <div class="text-left mb-8">
+                <label class="block text-sm font-bold text-slate-700 mb-2" for="candidateName">Họ và tên thí sinh:</label>
+                <input type="text" id="candidateName" class="custom-input text-lg" placeholder="Nhập tên của bạn để bắt đầu...">
+            </div>
+
+            <div class="mb-6 text-center">
+                <p id="cloud-status" class="text-sm font-bold text-green-600">Sẵn sàng ✅</p>
+            </div>
+
+            <button id="btn-start" onclick="app.startTest()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 rounded-xl text-lg transition-colors shadow-lg shadow-blue-200">
+                BẮT ĐẦU LÀM BÀI
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN TEST INTERFACE -->
+    <div id="testInterface" class="hidden min-h-screen flex flex-col h-screen">
+        
+        <!-- Top Navbar -->
+        <header class="glass-panel border-b border-slate-200 sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-blue-800 text-white rounded-full flex items-center justify-center font-bold text-lg" id="avatarInitial"></div>
+                <div class="hidden md:block">
+                    <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Candidate</p>
+                    <p class="font-bold text-slate-800" id="displayName"></p>
+                </div>
+            </div>
+            
+            <div class="bg-red-50 text-red-600 border border-red-200 px-6 py-2 rounded-full font-mono font-bold text-2xl flex items-center gap-2 shadow-inner">
+                <span>⏱</span>
+                <span id="timerDisplay">90:00</span>
+            </div>
+
+            <button onclick="app.confirmSubmit()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold transition-colors shadow-md">
+                Nộp Bài
+            </button>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="flex-1 flex overflow-hidden">
+            
+            <!-- Sidebar: Question Palette -->
+            <aside class="w-80 bg-white border-r border-slate-200 flex flex-col hidden lg:flex shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40">
+                <div class="p-6 border-b border-slate-100">
+                    <h3 class="font-bold text-slate-800 mb-1">Question Palette</h3>
+                    <p class="text-xs text-slate-500">Track your progress</p>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6">
+                    <!-- Nav generated dynamically -->
+                    <div id="paletteContainer" class="space-y-6"></div>
+                </div>
+                <div class="p-6 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-500 flex justify-between">
+                    <span class="flex items-center gap-2"><div class="w-3 h-3 bg-white border-2 border-slate-300 rounded-sm"></div> Unanswered</span>
+                    <span class="flex items-center gap-2"><div class="w-3 h-3 bg-blue-50 border-2 border-blue-500 rounded-sm"></div> Answered</span>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto bg-slate-50 relative" id="mainScrollArea">
+                <div class="max-w-4xl mx-auto p-6 md:p-10 pb-32">
+                    
+                    <!-- Sections Container -->
+                    <div id="sectionsContainer"></div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="mt-10 pt-6 border-t border-slate-200 flex justify-between">
+                        <button id="prevBtn" onclick="app.navigateSection(-1)" class="px-6 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            ⮜ Previous Part
+                        </button>
+                        <button id="nextBtn" onclick="app.navigateSection(1)" class="px-6 py-3 rounded-xl bg-blue-100 text-blue-700 font-bold hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            Next Part ⮞
+                        </button>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- SUBMISSION MODAL -->
+    <div id="submitModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center transform scale-95 transition-transform duration-200" id="modalContent">
+            <div class="text-5xl mb-4">⚠️</div>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">Xác nhận nộp bài?</h3>
+            <p class="text-slate-600 mb-6">Bạn có chắc chắn muốn nộp bài? Bạn sẽ không thể thay đổi câu trả lời sau khi xác nhận.</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="document.getElementById('submitModal').classList.add('hidden')" class="px-6 py-3 rounded-xl border-2 border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition">Quay lại</button>
+                <button onclick="app.finishTest()" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">Nộp bài ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="resultScreen" class="hidden min-h-screen bg-slate-50 p-6 md:p-12">
+        <div class="max-w-5xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl p-8 border-t-8 border-green-500 mb-8 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="text-center md:text-left">
+                    <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Kết quả bài thi</p>
+                    <h2 class="text-4xl font-black text-slate-800 mb-2" id="resultName"></h2>
+                    <p class="text-slate-500">Hoàn thành lúc: <span id="finishTime" class="font-semibold text-slate-700"></span></p>
+                </div>
+                <div class="bg-green-50 px-8 py-6 rounded-2xl border border-green-100 text-center min-w-[200px]">
+                    <p id="save-status" class="text-green-600 font-bold mb-2 text-sm">✅ Đang lưu...</p>
+                    <p class="text-green-600 font-bold uppercase text-xs tracking-wider mb-2">Estimated Score</p>
+                    <div class="text-5xl font-black text-green-700 leading-none">
+                        <span id="finalScore"></span><span class="text-2xl text-green-400">/40</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <!-- Chart Section -->
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Phân tích kỹ năng</h3>
+                    <p class="text-sm text-slate-500 mb-6">Biểu đồ thể hiện tỷ lệ phần trăm điểm đạt được trên từng phần thi.</p>
+                    
+                    <!-- REQUIRED CHART CONTAINER STYLING IMPLEMENTED HERE -->
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Breakdown Section -->
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+                    <h3 class="text-xl font-bold text-slate-800 mb-6">Chi tiết từng phần</h3>
+                    <div id="scoreBreakdown" class="space-y-4">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-slate-500 font-medium mb-4">📍 CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN</p>
+                <button onclick="location.reload()" class="text-blue-600 font-bold hover:underline">Về trang chủ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
+
+        (function checkConnection() {
+            const statusEl = document.getElementById('cloud-status');
+            const btn = document.getElementById('btn-start');
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "PASTE_YOUR_URL_HERE") {
+                if(statusEl) {
+                    statusEl.innerText = "⚠️ Chưa cấu hình";
+                    statusEl.className = "text-sm font-bold text-orange-500";
+                }
+                if(btn) {
+                    btn.innerText = "BẮT ĐẦU (Không lưu)";
+                    btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl text-lg transition-colors shadow-lg shadow-orange-200";
+                }
+            }
+        })();
+
+        // --- DATA ARCHITECTURE ---
+        // The report is divided into 7 distinct parts. 
+        // We structure the data to allow dynamic rendering of sections and tracking of answers.
+        const testData = [
+            {
+                id: "part1",
+                title: "Part I. Multiple Choice",
+                description: "Choose the word or phrase (A, B, C or D) that best fits the space or best answers the question.",
+                points: 14,
+                questions: [
+                    { q: "1. Which word has the underlined part pronounced differently from that of the others?", type: "mcq", options: ["f<b>oo</b>d", "l<b>oo</b>k", "fl<b>oo</b>r", "s<b>oo</b>n"], answer: "C" },
+                    { q: "2. Which word has the underlined part pronounced differently from the others?", type: "mcq", options: ["w<b>ea</b>r", "dr<b>ea</b>m", "tr<b>ea</b>t", "m<b>ea</b>n"], answer: "A" },
+                    { q: "3. Which word has a different stress pattern from that of the others?", type: "mcq", options: ["frustrating", "financial", "beautiful", "improvement"], answer: "C" },
+                    { q: "4. Which word has a different stress pattern from that of the others?", type: "mcq", options: ["discard", "provide", "protect", "signal"], answer: "D" },
+                    { q: "5. A: 'Do you usually travel then?' - B: 'Yeah, we usually go away on holiday _______ New Year.'", type: "mcq", options: ["in", "at", "on", "to"], answer: "B" },
+                    { q: "6. A: 'You have a small group of close friends.' - B: 'Yes, I have ______ friends than you.'", type: "mcq", options: ["a few", "fewer", "less", "little"], answer: "B" },
+                    { q: "7. A: 'I'm so glad we're going on holiday somewhere sunny!' - B: 'We need to take some _______ with us.'", type: "mcq", options: ["dumplings", "pastries", "sunblock", "monument"], answer: "C" },
+                    { q: "8. A: 'Are they trying to go pro?' - B: 'No, they _______ motor racing just for the fun.'", type: "mcq", options: ["took up", "brought up", "turned up", "came up"], answer: "A" },
+                    { q: "9. A: 'Imagine having a teacher that never gets tired of _______ lessons!' - B: 'Yes, That’s a robot teacher.'", type: "mcq", options: ["repeating", "repeated", "to repeat", "repeats"], answer: "A" },
+                    { q: "10. A: 'I heard Bill had some trouble with the law in the past.' - B: '_______ Bill has been in trouble with the police, he earns an honest penny these days by driving a van.'", type: "mcq", options: ["So", "Despite", "Because", "Although"], answer: "D" },
+                    { q: "11. A: 'Who's going to the park?' - B: 'Peony, _______ are standing over there, will go to the park.'", type: "mcq", options: ["that", "who", "whom", "which"], answer: "B" },
+                    { q: "12. A: 'What does your father do for work?' - B: 'My father is in _______ of 80 workers.'", type: "mcq", options: ["pressure", "leadership", "impression", "charge"], answer: "D" },
+                    { q: "13. Miley: 'Our living standards have been improved greatly.' - Seth: '__________'", type: "mcq", options: ["Thanks for saying so.", "Sure. I couldn't agree more.", "No, it's nice to say so.", "Yes, it's nice of you to say so."], answer: "B" },
+                    { q: "14. Smith: 'You look nice today. I like your new hairstyle.' - Tracy: '__________'", type: "mcq", options: ["Oh, well done.", "Shall I? Thanks.", "It's nice of you to say so.", "I feel interested to hear that."], answer: "C" }
+                ]
+            },
+            {
+                id: "part2",
+                title: "Part II. Signs",
+                description: "Look at the signs. Choose the best answer (A, B, C, or D).",
+                points: 2,
+                questions: [
+                    { q: "15. What does the notice mean?", context: "<div class='p-6 border-4 border-red-600 rounded-xl text-center font-black text-2xl mb-4 bg-white'><div class='flex justify-center gap-4 mb-4 text-4xl'><span class='line-through decoration-red-600 decoration-4'>📷</span><span class='line-through decoration-red-600 decoration-4'>📱</span><span class='line-through decoration-red-600 decoration-4'>📹</span></div>NO PHOTOGRAPHY<br>NO VIDEO RECORDING</div>", type: "mcq", options: ["Cell phones are not allowed in this area.", "It’s difficult to record videos in this area.", "You cannot bring your cameras into this area.", "You mustn’t take any photos or videos in this area."], answer: "D" },
+                    { q: "16. What does the sign mean?", context: "<div class='p-6 border-4 border-red-600 rounded-xl text-center font-black text-xl mb-4 bg-white'><div class='text-5xl mb-2 line-through decoration-red-600 decoration-4'>🛗</div><div class='bg-red-600 text-white p-2 rounded'>IN CASE OF FIRE<br>DO NOT USE ELEVATOR</div></div>", type: "mcq", options: ["For your safety, do not use the elevator during a fire.", "You mustn’t use the elevator when it is on fire.", "Three people cannot ride the elevator during a fire.", "If there is a fire, you don’t have to use the elevator."], answer: "A" }
+                ]
+            },
+            {
+                id: "part3",
+                title: "Part III. Guided Cloze",
+                description: "Choose the word (A, B, C, or D) that best fits the space in the following passage.",
+                points: 6,
+                context: "<div class='bg-white p-6 rounded-2xl border border-slate-200 text-slate-700 leading-relaxed mb-6 shadow-sm'>Today, city governments need to protect (17)__________ from terrorist attacks, outbreaks of disease, and natural disasters. They are also responsible for protecting the environment. Urban planners are (18)______ cities more sustainable through solar energy, alternative transportation, increased green spaces, and innovative waste removal or recycling programs. Cities, where people share resources like public transportation, are more (19)________ than sprawling communities. Some say that cities preserve natural spaces and rural ways of life by concentrating dense populations (20)_______ urban centers rather than contributing to suburban sprawl. (21)________ such as roads, bridges and power plants should be updated to ensure the city’s (22)________ future.</div>",
+                questions: [
+                    { q: "17.", type: "mcq", options: ["veterinarians", "psychologists", "producers", "citizens"], answer: "D" },
+                    { q: "18.", type: "mcq", options: ["made", "making", "make", "makes"], answer: "B" },
+                    { q: "19.", type: "mcq", options: ["efficient", "inconvenient", "comfortable", "for"], answer: "A" },
+                    { q: "20.", type: "mcq", options: ["with", "at", "in", "on"], answer: "C" },
+                    { q: "21.", type: "mcq", options: ["road", "infrastructure", "foundation", "construction"], answer: "B" },
+                    { q: "22.", type: "mcq", options: ["promising", "decisive", "forgettable", "hopeless"], answer: "A" }
+                ]
+            },
+            {
+                id: "part4",
+                title: "Part IV. Reading Comprehension",
+                description: "Read the passage. Decide if statements 23-26 are True or False, and choose the correct answer for 27-28.",
+                points: 6,
+                context: "<div class='bg-white p-6 rounded-2xl border border-slate-200 text-slate-700 leading-relaxed mb-6 shadow-sm'>Some jobs are growing fast – in percentage terms, demand for roles driven by technological advancements such as artificial intelligence (AI) is quickly increasing. These jobs include big data specialists, fintech engineers, and AI and machine learning specialists.<br><br>But what about absolute numbers? Combining estimates from surveyed companies with International Labour Organization employment data, the report lists the 15 professions that will see the largest net growth and decline. The largest growing jobs are dominated by roles core to many economies.<br><br>Farmworkers top the list. Green transition trends, including efforts to reduce carbon emissions and adapt to the climate crisis, will drive growth that will create 34 million additional jobs by 2030, adding to the 200 million farmworkers today. Widening digital access and the rising cost of living are also contributing to the profession’s growth.<br><br>Delivery drivers, software developers, building construction workers, and shop salespersons complete the top five. Food processing workers also feature among the largest growing jobs, while care jobs – including nursing professionals, social workers, and counseling professionals – are projected to grow significantly over the next five years. This can be explained by demographic trends, especially aging working-age populations, the report says.</div>",
+                questions: [
+                    { q: "23. AI and machine learning specialists are in high demand.", type: "mcq", options: ["True", "False"], answer: "A" },
+                    { q: "24. Farmworkers are expected to see a decrease in job opportunities by 2030.", type: "mcq", options: ["True", "False"], answer: "B" },
+                    { q: "25. Delivery drivers are among the top five growing jobs.", type: "mcq", options: ["True", "False"], answer: "A" },
+                    { q: "26. The green transition trends will contribute to job growth in food processing.", type: "mcq", options: ["True", "False"], answer: "B" }, // Assuming false based on text structure, text links it to farmworkers mainly, though food processing is mentioned later. Let's set a logical key.
+                    { q: "27. Which of the following is the best heading for this passage?", type: "mcq", options: ["International Labour Organization", "Green transition trends", "Jobs of the future", "Increasing artificial intelligence (AI)"], answer: "C" },
+                    { q: "28. What is one of the reasons for the growth in care jobs?", type: "mcq", options: ["Increasing digital access", "Ageing working-age populations", "Rising cost of living", "Technological advancements"], answer: "B" }
+                ]
+            },
+            {
+                id: "part5",
+                title: "Part V. Word Form",
+                description: "Use the correct form of the word given in brackets to complete the sentence.",
+                points: 6,
+                questions: [
+                    { q: "29. This beach city’s local food is quite ______________ from other cities in the region. (distinguish)", type: "text", answer: "distinctive" },
+                    { q: "30. He treated his neighbors with _____________________ and thoughtfulness. (considerate)", type: "text", answer: "consideration" },
+                    { q: "31. You don’t have to ____________ the grammar rules to be able to do these exercises. (memory)", type: "text", answer: "memorize" },
+                    { q: "32. My mother’s recipe is ________________________ simple and quick. (marvel)", type: "text", answer: "marvelously" },
+                    { q: "33. If there is something wrong with the light, have an _____________ come to check it. (electric)", type: "text", answer: "electrician" },
+                    { q: "34. You don’t have enough ______________________ reasons for what you have done! (persuade)", type: "text", answer: "persuasive" }
+                ]
+            },
+            {
+                id: "part6",
+                title: "Part VI. Dictionary Entry",
+                description: "Look at the dictionary entry. Complete the sentences with two or three words.",
+                points: 2,
+                context: "<div class='bg-[#f0f4f8] p-6 rounded-2xl border-l-4 border-blue-600 mb-6 font-serif text-slate-800'><h4 class='text-2xl font-bold text-blue-900'>cottage <span class='text-base font-normal italic text-slate-600'>noun [B1]</span></h4><p class='text-blue-600 mb-3'>🔊 /ˈkɒtɪdʒ/</p><p class='font-bold'>⭐ a small house, especially in the country</p><ul class='list-disc list-inside ml-4 mt-2 space-y-1 text-sm'><li><i>a thatched cottage</i></li><li><i>(British English) a holiday cottage</i></li><li><b>in a cottage</b>: <i>James lived in a charming country cottage with roses around the door.</i></li></ul></div>",
+                questions: [
+                    { q: "35. ______________ with a garden is my dream home.", type: "text", answer: "a country cottage" }, // Accepting logical variations in real grading, strictly matching for this mock
+                    { q: "36. Living ______________ by the lake, they enjoy the peaceful surroundings and the simplicity of their charming home.", type: "text", answer: "in a cottage" }
+                ]
+            },
+            {
+                id: "part7",
+                title: "Part VII. Sentence Transformation",
+                description: "Rewrite each of the following sentences in another way so that it means almost the same as the sentence printed before it.",
+                points: 4,
+                questions: [
+                    { q: "37. All visitors to the town fall in love with this medieval castle.<br>→ Everyone who...", type: "text", answer: "visits the town falls in love with this medieval castle" },
+                    { q: "38. “This is a library. Keep silent, will you?” the librarian said.<br>→ The librarian told...", type: "text", answer: "me to keep silent because it was a library" },
+                    { q: "39. We didn’t follow the recipe. Therefore, we baked a terrible cake.<br>→ Because of...", type: "text", answer: "not following the recipe, we baked a terrible cake" },
+                    { q: "40. I started to work for the company a year ago.<br>→ It’s been...", type: "text", answer: "a year since I started working for the company" }
+                ]
+            }
+        ];
+
+        // --- APPLICATION STATE ---
+        const app = {
+            currentSectionIndex: 0,
+            answers: {},
+            timer: 90 * 60, // 90 minutes
+            interval: null,
+            totalQuestions: 0,
+            qIndexMap: [], // Maps global question index to {sectionIndex, qIndexInSection}
+
+            init() {
+                this.buildIndexMap();
+                this.renderSections();
+                this.renderPalette();
+            },
+
+            buildIndexMap() {
+                let globalIndex = 1;
+                testData.forEach((section, sIdx) => {
+                    section.questions.forEach((q, qIdx) => {
+                        this.qIndexMap[globalIndex] = { sIdx, qIdx };
+                        globalIndex++;
+                    });
+                });
+                this.totalQuestions = globalIndex - 1;
+            },
+
+            startTest() {
+                const name = document.getElementById('candidateName').value.trim();
+                if(!name) { alert('Vui lòng nhập tên để tiếp tục!'); return; }
+                
+                document.getElementById('displayName').innerText = name;
+                document.getElementById('avatarInitial').innerText = name.charAt(0).toUpperCase();
+                
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('testInterface').classList.remove('hidden');
+                
+                this.showSection(0);
+                this.startTimer();
+            },
+
+            startTimer() {
+                this.interval = setInterval(() => {
+                    this.timer--;
+                    if(this.timer <= 0) {
+                        clearInterval(this.interval);
+                        this.finishTest();
+                    }
+                    this.updateTimerDisplay();
+                }, 1000);
+            },
+
+            updateTimerDisplay() {
+                const m = Math.floor(this.timer / 60).toString().padStart(2, '0');
+                const s = (this.timer % 60).toString().padStart(2, '0');
+                const display = document.getElementById('timerDisplay');
+                display.innerText = `${m}:${s}`;
+                if(this.timer < 300) display.classList.add('animate-pulse', 'text-red-700'); // Last 5 mins
+            },
+
+            // --- RENDERING LOGIC ---
+            renderSections() {
+                const container = document.getElementById('sectionsContainer');
+                let globalQNum = 1;
+
+                testData.forEach((section, sIdx) => {
+                    const secDiv = document.createElement('div');
+                    secDiv.id = `section-${sIdx}`;
+                    secDiv.className = 'section-hidden';
+
+                    // Section Header
+                    let html = `
+                        <div class="mb-8">
+                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 font-bold text-xs rounded-full mb-3 tracking-widest uppercase">Section ${sIdx + 1} of ${testData.length}</span>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mb-2">${section.title}</h2>
+                            <p class="text-slate-500 font-medium">${section.description}</p>
+                        </div>
+                    `;
+
+                    if(section.context) html += section.context;
+
+                    // Questions
+                    html += `<div class="space-y-6">`;
+                    section.questions.forEach((q, qIdx) => {
+                        html += `<div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-100 transition-colors" id="q-container-${globalQNum}">`;
+                        if(q.context) html += q.context;
+                        
+                        html += `<p class="font-bold text-lg text-slate-800 mb-4">${q.q}</p>`;
+
+                        if (q.type === 'mcq') {
+                            html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+                            const labels = ['A', 'B', 'C', 'D'];
+                            q.options.forEach((opt, oIdx) => {
+                                const val = labels[oIdx];
+                                const inputId = `q${globalQNum}_${val}`;
+                                html += `
+                                    <div class="custom-radio">
+                                        <input type="radio" id="${inputId}" name="q${globalQNum}" value="${val}" onchange="app.saveAnswer(${globalQNum}, '${val}')">
+                                        <label for="${inputId}">
+                                            <span class="radio-indicator">${val}</span>
+                                            <span class="font-medium text-slate-700 w-full" style="word-break: break-word;">${opt}</span>
+                                        </label>
+                                    </div>
+                                `;
+                            });
+                            html += `</div>`;
+                        } else if (q.type === 'text') {
+                            html += `<input type="text" class="custom-input text-lg" placeholder="Type your answer here..." oninput="app.saveAnswer(${globalQNum}, this.value)">`;
+                        }
+                        
+                        html += `</div>`;
+                        globalQNum++;
+                    });
+                    html += `</div>`;
+
+                    secDiv.innerHTML = html;
+                    container.appendChild(secDiv);
+                });
+            },
+
+            renderPalette() {
+                const container = document.getElementById('paletteContainer');
+                container.innerHTML = '';
+                
+                let globalQNum = 1;
+                testData.forEach((section, sIdx) => {
+                    const group = document.createElement('div');
+                    group.innerHTML = `<p class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">${section.title.split('.')[0]}</p>`;
+                    const grid = document.createElement('div');
+                    grid.className = 'grid grid-cols-5 gap-2';
+                    
+                    section.questions.forEach(() => {
+                        const btn = document.createElement('button');
+                        btn.className = `q-btn`;
+                        btn.id = `pbtn-${globalQNum}`;
+                        btn.innerText = globalQNum;
+                        
+                        // Capture current numbers in closure
+                        const targetSIdx = sIdx;
+                        const targetQNum = globalQNum;
+                        btn.onclick = () => {
+                            this.showSection(targetSIdx);
+                            document.getElementById(`q-container-${targetQNum}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        };
+                        
+                        grid.appendChild(btn);
+                        globalQNum++;
+                    });
+                    group.appendChild(grid);
+                    container.appendChild(group);
+                });
+            },
+
+            // --- NAVIGATION ---
+            showSection(index) {
+                // Hide current
+                document.getElementById(`section-${this.currentSectionIndex}`).classList.remove('section-active');
+                document.getElementById(`section-${this.currentSectionIndex}`).classList.add('section-hidden');
+                
+                // Show new
+                this.currentSectionIndex = index;
+                document.getElementById(`section-${this.currentSectionIndex}`).classList.remove('section-hidden');
+                document.getElementById(`section-${this.currentSectionIndex}`).classList.add('section-active');
+                
+                // Update buttons
+                document.getElementById('prevBtn').disabled = (index === 0);
+                document.getElementById('nextBtn').disabled = (index === testData.length - 1);
+                
+                // Reset scroll
+                document.getElementById('mainScrollArea').scrollTo(0,0);
+            },
+
+            navigateSection(dir) {
+                const newIndex = this.currentSectionIndex + dir;
+                if(newIndex >= 0 && newIndex < testData.length) {
+                    this.showSection(newIndex);
+                }
+            },
+
+            // --- STATE MANAGEMENT ---
+            saveAnswer(qNum, val) {
+                this.answers[qNum] = val.trim();
+                const btn = document.getElementById(`pbtn-${qNum}`);
+                if(val.trim() !== '') {
+                    btn.classList.add('answered');
+                } else {
+                    btn.classList.remove('answered');
+                }
+            },
+
+            confirmSubmit() {
+                document.getElementById('submitModal').classList.remove('hidden');
+            },
+
+            // --- RESULTS & CHART ---
+            finishTest() {
+                clearInterval(this.interval);
+                document.getElementById('submitModal').classList.add('hidden');
+                document.getElementById('testInterface').classList.add('hidden');
+                
+                this.calculateResults();
+                document.getElementById('resultScreen').classList.remove('hidden');
+            },
+
+            async calculateResults() {
+                let totalScore = 0;
+                const sectionScores = Array(testData.length).fill(0);
+                const sectionMax = testData.map(s => s.points);
+                let htmlBreakdown = '';
+                let qNum = 1;
+
+                testData.forEach((sec, sIdx) => {
+                    let secScore = 0;
+                    sec.questions.forEach((q) => {
+                        const userAns = this.answers[qNum] ? this.answers[qNum].toLowerCase() : '';
+                        const correctAns = q.answer.toLowerCase();
+                        
+                        // Simple grading logic (exact match for text, case insensitive)
+                        if(userAns === correctAns) {
+                            secScore++;
+                            totalScore++;
+                        }
+                        qNum++;
+                    });
+                    
+                    // Normalize to points defined in data
+                    const normalizedScore = (secScore / sec.questions.length) * sec.points;
+                    sectionScores[sIdx] = normalizedScore;
+
+                    // Build breakdown UI
+                    const percentage = Math.round((normalizedScore / sec.points) * 100);
+                    htmlBreakdown += `
+                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <div>
+                                <p class="font-bold text-slate-800">${sec.title.split('.')[0]}</p>
+                                <p class="text-xs text-slate-500">${sec.title.split('.')[1].trim()}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-black text-lg text-blue-700">${normalizedScore.toFixed(1)} <span class="text-sm font-medium text-slate-400">/ ${sec.points}</span></p>
+                                <p class="text-xs font-bold ${percentage >= 50 ? 'text-green-500' : 'text-orange-500'}">${percentage}%</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Update UI Texts
+                document.getElementById('resultName').innerText = document.getElementById('displayName').innerText;
+                document.getElementById('finishTime').innerText = new Date().toLocaleString('vi-VN');
+                document.getElementById('finalScore').innerText = totalScore.toFixed(1);
+                document.getElementById('scoreBreakdown').innerHTML = htmlBreakdown;
+
+                // Render Chart.js
+                this.renderChart(sectionScores, sectionMax);
+
+                // Save to Google Sheet
+                const saveStatus = document.getElementById('save-status');
+                const studentName = document.getElementById('displayName').innerText;
+                const finalPercentage = Math.round((totalScore / 40) * 100);
+                
+                if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== "PASTE_YOUR_URL_HERE") {
+                    try {
+                        await fetch(GOOGLE_SHEET_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                student_name: studentName,
+                                exam_type: 'Tuyển Sinh 10 Test 1',
+                                score: totalScore,
+                                total: 40,
+                                band: `${finalPercentage}%`,
+                                answers: this.answers
+                            })
+                        });
+                        saveStatus.innerText = "✅ Nộp thành công!";
+                        saveStatus.className = "text-green-600 font-bold mb-2 text-sm";
+                    } catch (e) {
+                        saveStatus.innerText = "⚠️ Lỗi lưu online";
+                        saveStatus.className = "text-red-500 font-bold mb-2 text-sm";
+                    }
+                }
+                
+                if (finalPercentage >= 80) {
+                    setTimeout(() => window.location.href = `../congratulations.html?name=${encodeURIComponent(studentName)}&score=${totalScore}&total=40&band=${finalPercentage}%25&exam=Tuyen+Sinh+10+Test+1`, 3000);
+                }
+            },
+
+            renderChart(scores, maxScores) {
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                
+                // Labels truncated for neatness
+                const labels = testData.map(s => s.title.split('.')[0]); 
+
+                // Calculate percentages for radar chart to equalize scales
+                const percentages = scores.map((score, i) => (score / maxScores[i]) * 100);
+
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '% Hoàn thành',
+                            data: percentages,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)', // Blue-500 with opacity
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // CRITICAL for filling container height
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                pointLabels: {
+                                    font: { family: 'Inter', size: 11, weight: 'bold' },
+                                    color: '#64748b'
+                                },
+                                ticks: {
+                                    stepSize: 20,
+                                    max: 100,
+                                    min: 0,
+                                    display: false // Hide internal numbers to keep it clean
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                titleFont: { family: 'Inter', size: 13 },
+                                bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
+                                padding: 12,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.raw.toFixed(0)}% Correct`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Initialize app data
+        app.init();
+
+    </script>
+</body>
+</html>

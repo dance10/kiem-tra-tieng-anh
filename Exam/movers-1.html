@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movers Reading & Writing Test - Hoài An Nhiên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+        body { font-family: 'Quicksand', sans-serif; background-color: #fdf4ff; }
+        .test-card { background: white; border-radius: 2.5rem; border: 4px solid #f5d0fe; box-shadow: 0 15px 30px -10px rgba(168, 85, 247, 0.1); overflow: hidden; }
+        .part-header { background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); color: white; padding: 1.5rem 2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+        .shield-icon { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); transition: all 0.3s; }
+        .shield-icon:hover { transform: scale(1.1) rotate(5deg); }
+        input[type="text"]:focus { outline: none; border-color: #a855f7; box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1); }
+        .vocab-card { transition: all 0.3s; border: 2px solid #f3e8ff; }
+        .vocab-card:hover { transform: translateY(-5px); border-color: #a855f7; background: #faf5ff; }
+        .illustration-box { background: #fdfaff; border-radius: 2rem; border: 3px solid #f3e8ff; padding: 1.5rem; position: relative; overflow: hidden; }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+    <!-- Header Section -->
+    <header class="bg-white border-b-4 border-purple-400 p-8 text-center shadow-md relative">
+        <a href="../index.html" class="absolute left-6 top-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-full inline-flex items-center gap-1">🏠 Trang Chủ</a>
+        <h2 class="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN</h2>
+        <h1 class="text-4xl font-black text-purple-700 tracking-tight mb-1">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+        <p class="text-xs text-purple-400 font-bold mb-4 bg-purple-50 inline-block px-4 py-1 rounded-full italic">MST: 0318842992</p>
+        <div class="flex flex-wrap justify-center gap-x-8 gap-y-2 text-[12px] text-gray-600 max-w-5xl mx-auto border-t pt-4 font-medium">
+            <span class="flex items-center gap-2">📍 <b>CS1:</b> 202/1 Nguyễn Thị Lắng, Củ Chi</span>
+            <span class="flex items-center gap-2">📍 <b>CS2:</b> 61 Lê Đình Thám, Tân Phú</span>
+            <span class="flex items-center gap-2">📍 <b>CS3:</b> 325/5T Nguyễn Thị Thảnh, Hóc Môn</span>
+        </div>
+    </header>
+
+    <div id="app" class="max-w-5xl mx-auto px-4 py-12">
+        
+        <!-- Start Screen -->
+        <div id="start-screen" class="test-card p-16 text-center mt-6">
+            <div class="relative inline-block mb-8">
+                <div class="absolute -inset-4 bg-purple-100 rounded-full blur-xl animate-pulse"></div>
+                <div class="relative text-8xl">🚀</div>
+            </div>
+            <h3 class="text-4xl font-black text-purple-700 mb-2 uppercase tracking-tighter">A1 Movers Practice</h3>
+            <p class="text-gray-500 mb-12 font-bold text-xl">Reading & Writing Full Test</p>
+            
+            <div class="mb-12 text-left bg-purple-50 p-8 rounded-[2rem] border-2 border-purple-100 max-w-lg mx-auto">
+                <label class="block text-purple-800 font-black text-xs uppercase mb-3 ml-1 tracking-[0.2em]">Họ và tên học sinh</label>
+                <input type="text" id="student-name" placeholder="Nhập tên của con vào đây..." class="w-full p-5 rounded-2xl border-4 border-white focus:border-purple-400 outline-none transition-all font-black text-2xl text-purple-700 shadow-inner">
+            </div>
+
+            <div class="mb-10 text-center">
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Trạng thái kết nối</p>
+                <p id="cloud-status" class="text-lg font-black text-green-600">Sẵn sàng ✅</p>
+            </div>
+
+            <button id="btn-start" onclick="startTest()" class="group relative bg-purple-600 hover:bg-purple-700 text-white font-black py-6 px-24 rounded-full shadow-2xl shadow-purple-200 transition-all transform hover:-translate-y-1 active:scale-95 text-2xl uppercase tracking-widest">
+                <span>Bắt đầu làm bài</span>
+            </button>
+        </div>
+
+        <!-- Test Content -->
+        <div id="test-container" class="hidden space-y-16">
+            
+            <!-- Info Bar -->
+            <div class="bg-white/90 backdrop-blur-md p-5 rounded-3xl shadow-xl border-4 border-purple-100 flex justify-between items-center sticky top-6 z-50">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-2xl flex items-center justify-center font-black text-3xl shadow-lg shadow-purple-100" id="user-initial">?</div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Candidate</p>
+                        <p id="display-name" class="font-black text-purple-950 text-xl tracking-tight"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 px-6 py-2 bg-red-50 rounded-2xl border-2 border-red-100">
+                    <span class="text-red-400 font-black text-xs uppercase tracking-widest">Remaining:</span>
+                    <span id="timer" class="text-3xl font-mono font-black text-red-600">30:00</span>
+                </div>
+            </div>
+
+            <!-- Part 1 -->
+            <section class="test-card">
+                <div class="part-header flex justify-between items-center">
+                    <span>Part 1 - 6 Questions</span>
+                    <span class="text-xs bg-white/20 px-4 py-1 rounded-full">Vocabulary Matching</span>
+                </div>
+                <div class="p-10">
+                    <p class="italic text-gray-400 font-bold mb-8 text-lg">Look and read. Choose the correct words and write them on the lines.</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">🏠</div>
+                            <p class="font-black text-purple-700 text-sm">a basement</p>
+                        </div>
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">🚿</div>
+                            <p class="font-black text-purple-700 text-sm">a towel</p>
+                        </div>
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">📚</div>
+                            <p class="font-black text-purple-700 text-sm">a library</p>
+                        </div>
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">🧑‍🌾</div>
+                            <p class="font-black text-purple-700 text-sm">a farm</p>
+                        </div>
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">🍳</div>
+                            <p class="font-black text-purple-700 text-sm">a kitchen</p>
+                        </div>
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">🪜</div>
+                            <p class="font-black text-purple-700 text-sm">stairs</p>
+                        </div>
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">🛗</div>
+                            <p class="font-black text-purple-700 text-sm">a lift</p>
+                        </div>
+                        <div class="vocab-card p-4 rounded-2xl text-center">
+                            <div class="text-4xl mb-2">🛏️</div>
+                            <p class="font-black text-purple-700 text-sm">a blanket</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-4 bg-gray-50/50 p-4 rounded-2xl border border-transparent hover:border-purple-200 transition-colors">
+                            <span class="flex-grow font-bold text-gray-700">1. You use this to dry yourself after a shower.</span>
+                            <input type="text" class="user-ans border-4 border-white bg-white shadow-sm rounded-xl p-3 w-full lg:w-64 text-center font-black text-purple-600 uppercase" data-id="1">
+                        </div>
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-4 bg-gray-50/50 p-4 rounded-2xl">
+                            <span class="flex-grow font-bold text-gray-700">2. This is a place where you can find many books to read.</span>
+                            <input type="text" class="user-ans border-4 border-white bg-white shadow-sm rounded-xl p-3 w-full lg:w-64 text-center font-black text-purple-600 uppercase" data-id="2">
+                        </div>
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-4 bg-gray-50/50 p-4 rounded-2xl">
+                            <span class="flex-grow font-bold text-gray-700">3. This is a room under the ground in a house.</span>
+                            <input type="text" class="user-ans border-4 border-white bg-white shadow-sm rounded-xl p-3 w-full lg:w-64 text-center font-black text-purple-600 uppercase" data-id="3">
+                        </div>
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-4 bg-gray-50/50 p-4 rounded-2xl">
+                            <span class="flex-grow font-bold text-gray-700">4. You put this on your bed when it is cold.</span>
+                            <input type="text" class="user-ans border-4 border-white bg-white shadow-sm rounded-xl p-3 w-full lg:w-64 text-center font-black text-purple-600 uppercase" data-id="4">
+                        </div>
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-4 bg-gray-50/50 p-4 rounded-2xl">
+                            <span class="flex-grow font-bold text-gray-700">5. You walk up or down these to go to another floor.</span>
+                            <input type="text" class="user-ans border-4 border-white bg-white shadow-sm rounded-xl p-3 w-full lg:w-64 text-center font-black text-purple-600 uppercase" data-id="5">
+                        </div>
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-4 bg-gray-50/50 p-4 rounded-2xl">
+                            <span class="flex-grow font-bold text-gray-700">6. This is a room where people cook food.</span>
+                            <input type="text" class="user-ans border-4 border-white bg-white shadow-sm rounded-xl p-3 w-full lg:w-64 text-center font-black text-purple-600 uppercase" data-id="6">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 2 -->
+            <section class="test-card">
+                <div class="part-header flex justify-between items-center" style="background: linear-gradient(135deg, #db2777 0%, #be185d 100%);">
+                    <span>Part 2 - 6 Questions</span>
+                    <span class="text-xs bg-white/20 px-4 py-1 rounded-full">Yes or No</span>
+                </div>
+                <div class="p-10">
+                    <p class="italic text-gray-400 font-bold mb-8 text-lg">Look and read. Write 'yes' or 'no'.</p>
+                    
+                    <!-- SVG illustration for Part 2 -->
+                    <div class="illustration-box mb-12 shadow-inner bg-gradient-to-b from-blue-50 to-green-50">
+                        <svg viewBox="0 0 600 300" class="w-full h-auto rounded-xl">
+                            <!-- Background -->
+                            <rect width="600" height="300" fill="#e0f2fe" rx="20"/>
+                            <path d="M0 200 Q150 150 300 200 T600 200 V300 H0 Z" fill="#dcfce7"/>
+                            <!-- Tree -->
+                            <rect x="450" y="100" width="30" height="100" fill="#78350f"/>
+                            <circle cx="465" cy="80" r="50" fill="#16a34a"/>
+                            <circle cx="430" cy="110" r="40" fill="#15803d"/>
+                            <!-- Characters (Stylized Emojis for "Vivid" request) -->
+                            <text x="100" y="220" font-size="60">👨‍🌾</text> <!-- Dad watering -->
+                            <text x="120" y="170" font-size="30">💧</text>
+                            <text x="250" y="220" font-size="60">👩‍🌾</text> <!-- Mom weeding -->
+                            <text x="445" y="120" font-size="50">👦</text> <!-- Boy climbing -->
+                            <text x="380" y="260" font-size="60">👧</text> <!-- Girl drawing -->
+                            <text x="410" y="240" font-size="25">🎨</text>
+                            <!-- Sun -->
+                            <circle cx="50" cy="50" r="30" fill="#fbbf24" class="animate-pulse"/>
+                        </svg>
+                        <div class="mt-4 p-4 bg-white/80 backdrop-blur rounded-2xl border-2 border-pink-100 text-center text-purple-900 font-bold">
+                            "A happy family in the garden. Dad is busy, the kids are playing!"
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="flex justify-between items-center p-4 bg-pink-50 rounded-2xl border-2 border-white shadow-sm">
+                            <p class="font-bold text-gray-700">7. The father is watering the plants.</p>
+                            <input type="text" class="user-ans border-4 border-white rounded-xl p-3 w-28 uppercase font-black text-pink-600 text-center" data-id="7">
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-pink-50 rounded-2xl border-2 border-white shadow-sm">
+                            <p class="font-bold text-gray-700">8. The mother is wearing a red hat.</p>
+                            <input type="text" class="user-ans border-4 border-white rounded-xl p-3 w-28 uppercase font-black text-pink-600 text-center" data-id="8">
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-pink-50 rounded-2xl border-2 border-white shadow-sm">
+                            <p class="font-bold text-gray-700">9. The boy is climbing a tree.</p>
+                            <input type="text" class="user-ans border-4 border-white rounded-xl p-3 w-28 uppercase font-black text-pink-600 text-center" data-id="9">
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-pink-50 rounded-2xl border-2 border-white shadow-sm">
+                            <p class="font-bold text-gray-700">10. The girl is playing with a dog.</p>
+                            <input type="text" class="user-ans border-4 border-white rounded-xl p-3 w-28 uppercase font-black text-pink-600 text-center" data-id="10">
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-pink-50 rounded-2xl border-2 border-white shadow-sm">
+                            <p class="font-bold text-gray-700">11. There are some birds on the grass.</p>
+                            <input type="text" class="user-ans border-4 border-white rounded-xl p-3 w-28 uppercase font-black text-pink-600 text-center" data-id="11">
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-pink-50 rounded-2xl border-2 border-white shadow-sm">
+                            <p class="font-bold text-gray-700">12. The family is in the kitchen.</p>
+                            <input type="text" class="user-ans border-4 border-white rounded-xl p-3 w-28 uppercase font-black text-pink-600 text-center" data-id="12">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 3 (Conversation) -->
+            <section class="test-card">
+                <div class="part-header" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+                    <span>Part 3 - 6 Questions</span>
+                    <span class="text-xs bg-white/20 px-4 py-1 rounded-full">Conversation Choice</span>
+                </div>
+                <div class="p-10">
+                    <div class="flex items-center gap-6 mb-8 bg-green-50 p-6 rounded-3xl border-2 border-green-100">
+                        <div class="text-5xl">💬</div>
+                        <p class="font-bold text-green-800 italic leading-relaxed">Fred is talking to his friend Peter about his trip to the zoo. Choose the best response for Peter.</p>
+                    </div>
+                    
+                    <div class="space-y-8">
+                        <div class="question-box bg-white border-2 border-green-100 p-6 rounded-[2rem] shadow-sm">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-8 h-8 bg-green-600 text-white rounded-lg flex items-center justify-center font-black">13</span>
+                                <p class="font-black text-gray-800">Fred: Hi Peter! Where did you go yesterday?</p>
+                            </div>
+                            <select class="user-ans block w-full p-4 rounded-2xl border-4 border-gray-100 focus:border-green-400 bg-gray-50 transition-all font-bold" data-id="13">
+                                <option value="">-- Click to choose --</option>
+                                <option value="A">A. I go to the cinema.</option>
+                                <option value="B">B. I went to the zoo with my brother.</option>
+                                <option value="C">C. Yes, I am.</option>
+                            </select>
+                        </div>
+                        <div class="question-box bg-white border-2 border-green-100 p-6 rounded-[2rem] shadow-sm">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-8 h-8 bg-green-600 text-white rounded-lg flex items-center justify-center font-black">14</span>
+                                <p class="font-black text-gray-800">Fred: Was the zoo exciting?</p>
+                            </div>
+                            <select class="user-ans block w-full p-4 rounded-2xl border-4 border-gray-100 focus:border-green-400 bg-gray-50 transition-all font-bold" data-id="14">
+                                <option value="">-- Click to choose --</option>
+                                <option value="A">A. Yes, it was great!</option>
+                                <option value="B">B. It is a big lion.</option>
+                                <option value="C">C. No, I don't.</option>
+                            </select>
+                        </div>
+                        <div class="question-box bg-white border-2 border-green-100 p-6 rounded-[2rem] shadow-sm">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-8 h-8 bg-green-600 text-white rounded-lg flex items-center justify-center font-black">15</span>
+                                <p class="font-black text-gray-800">Fred: What was your favorite animal?</p>
+                            </div>
+                            <select class="user-ans block w-full p-4 rounded-2xl border-4 border-gray-100 focus:border-green-400 bg-gray-50 transition-all font-bold" data-id="15">
+                                <option value="">-- Click to choose --</option>
+                                <option value="A">A. I like bananas.</option>
+                                <option value="B">B. The tigers were amazing.</option>
+                                <option value="C">C. I have a cat.</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 5 (Story Completion) -->
+            <section class="test-card">
+                <div class="part-header" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+                    <span>Part 5 - 7 Questions</span>
+                    <span class="text-xs bg-white/20 px-4 py-1 rounded-full">Story & Fill</span>
+                </div>
+                <div class="p-10">
+                    <p class="italic text-gray-400 font-bold mb-8 text-lg">Read the story. Write 1, 2 or 3 words to complete the sentences.</p>
+                    
+                    <div class="illustration-box mb-8 bg-blue-50 border-blue-100">
+                        <div class="grid grid-cols-2 gap-8 items-center">
+                            <div class="text-center">
+                                <div class="relative inline-block">
+                                    <span class="text-[120px]">🦜</span>
+                                    <span class="absolute top-1/2 left-1/2 -translate-x-1/2 text-4xl">👓</span>
+                                </div>
+                                <p class="font-black text-blue-600 mt-2 uppercase tracking-widest">Polly the Parrot</p>
+                            </div>
+                            <div class="passage-content font-bold text-gray-700 leading-relaxed bg-white/80 p-6 rounded-3xl shadow-sm border-2 border-white">
+                                <p class="text-xl text-blue-800 mb-2 underline">A Naughty Parrot</p>
+                                Mary has a green parrot called Polly. Polly is very clever. Yesterday, Mary's grandmother came to visit. She left her glasses on the table. Polly took them and flew to the top of the cupboard!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6 bg-blue-50/30 p-8 rounded-[2rem] border-2 border-dashed border-blue-200">
+                        <div class="flex flex-wrap items-center gap-2 text-lg">
+                            <span class="font-bold text-gray-700">25. Mary has a green parrot and its name is</span>
+                            <input type="text" class="user-ans border-b-4 border-blue-400 bg-transparent w-48 text-center font-black text-blue-600 uppercase outline-none" data-id="25">
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-lg">
+                            <span class="font-bold text-gray-700">26. Mary's</span>
+                            <input type="text" class="user-ans border-b-4 border-blue-400 bg-transparent w-48 text-center font-black text-blue-600 uppercase outline-none" data-id="26">
+                            <span class="font-bold text-gray-700">came to visit yesterday.</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-lg">
+                            <span class="font-bold text-gray-700">27. The grandmother put her</span>
+                            <input type="text" class="user-ans border-b-4 border-blue-400 bg-transparent w-48 text-center font-black text-blue-600 uppercase outline-none" data-id="27">
+                            <span class="font-bold text-gray-700">on the table.</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-lg">
+                            <span class="font-bold text-gray-700">28. Polly took the glasses and flew to the</span>
+                            <input type="text" class="user-ans border-b-4 border-blue-400 bg-transparent w-48 text-center font-black text-blue-600 uppercase outline-none" data-id="28">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="text-center pb-20">
+                <button onclick="submitTest()" class="group relative inline-flex items-center justify-center px-24 py-8 overflow-hidden font-black text-white transition duration-300 ease-out bg-purple-600 rounded-full shadow-2xl active:scale-95">
+                    <span class="absolute inset-0 w-full h-full bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700"></span>
+                    <span class="relative text-3xl tracking-widest uppercase">Nộp bài ngay! 🏆</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden">
+            <div class="test-card p-20 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-2 bg-gradient-to-r from-transparent via-purple-400 to-transparent"></div>
+                <h3 class="text-5xl font-black text-purple-700 mb-4 tracking-tighter">FANTASTIC WORK!</h3>
+                <p id="result-name" class="text-2xl font-bold text-gray-500 mb-12"></p>
+                
+                <div class="flex justify-center gap-6 mb-12" id="shields-container">
+                    <!-- Shields will be injected here -->
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-16">
+                    <div class="bg-purple-50 p-10 rounded-[2.5rem] border-4 border-white shadow-xl">
+                        <p class="text-purple-400 font-black uppercase tracking-[0.2em] text-xs mb-4">Total Score</p>
+                        <p class="text-8xl font-black text-purple-700 tracking-tighter"><span id="correct-count">0</span><span class="text-2xl text-purple-300">/ 35</span></p>
+                    </div>
+                    <div class="bg-indigo-950 p-10 rounded-[2.5rem] text-white flex flex-col justify-center text-center">
+                        <p id="save-status" class="text-xl font-bold text-green-400 mb-2">✅ Đang lưu...</p>
+                        <p class="text-indigo-300 font-bold text-lg mb-2 italic">Teacher's Note:</p>
+                        <p class="text-xl font-medium">Cô Thuý rất tự hào về nỗ lực của con! Tiếp tục phát huy nhé! 🌟</p>
+                    </div>
+                </div>
+
+                <div class="text-left space-y-6">
+                    <h4 class="font-black text-2xl mb-8 flex items-center gap-3 text-gray-800">
+                        <span class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center italic font-serif">i</span>
+                        Review & Feedback
+                    </h4>
+                    <div id="explanation-list" class="grid md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <div class="mt-16 pt-10 border-t border-gray-100 flex flex-col items-center">
+                    <p class="text-gray-400 font-bold mb-6 italic">📍 Hoai An Nhien Training and Education</p>
+                    <button onclick="window.location.reload()" class="bg-gray-100 text-gray-500 font-black py-4 px-12 rounded-2xl hover:bg-gray-200 transition-colors uppercase tracking-widest text-sm">Làm lại bài thi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
+
+        (function checkConnection() {
+            const statusEl = document.getElementById('cloud-status');
+            const btn = document.getElementById('btn-start');
+            if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "PASTE_YOUR_URL_HERE") {
+                if(statusEl) {
+                    statusEl.innerText = "⚠️ Chưa cấu hình";
+                    statusEl.className = "text-lg font-black text-orange-500";
+                }
+                if(btn) {
+                    btn.innerText = "BẮT ĐẦU (Không lưu)";
+                    btn.className = "group relative bg-orange-500 hover:bg-orange-600 text-white font-black py-6 px-24 rounded-full shadow-2xl shadow-orange-200 transition-all transform hover:-translate-y-1 active:scale-95 text-2xl uppercase tracking-widest";
+                }
+            }
+        })();
+
+        const answerKey = {
+            1: { ans: "A TOWEL", expl: "Bạn dùng khăn tắm (towel) để lau khô người." },
+            2: { ans: "A LIBRARY", expl: "Thư viện (library) là nơi có nhiều sách." },
+            3: { ans: "A BASEMENT", expl: "Tầng hầm (basement) nằm dưới mặt đất." },
+            4: { ans: "A BLANKET", expl: "Bạn đắp chăn (blanket) khi trời lạnh." },
+            5: { ans: "STAIRS", expl: "Bạn đi cầu thang (stairs) để lên hoặc xuống tầng." },
+            6: { ans: "A KITCHEN", expl: "Mọi người nấu ăn trong bếp (kitchen)." },
+            7: { ans: "YES", expl: "Trong hình ba đang tưới cây." },
+            8: { ans: "NO", expl: "Mẹ không đội mũ đỏ trong hình." },
+            9: { ans: "YES", expl: "Cậu bé đang ở trên cây." },
+            10: { ans: "NO", expl: "Cô bé đang vẽ tranh (painting/drawing)." },
+            11: { ans: "NO", expl: "Bãi cỏ không có chim đậu." },
+            12: { ans: "NO", expl: "Gia đình đang ở trong vườn (garden)." },
+            13: { ans: "B", expl: "Câu trả lời đúng thì cho câu hỏi về địa điểm đã đi." },
+            14: { ans: "A", expl: "Cấu trúc trả lời Yes/No cho Was it...?" },
+            15: { ans: "B", expl: "Trả lời đúng về loài động vật yêu thích." },
+            25: { ans: "POLLY", expl: "Tên chú vẹt là Polly." },
+            26: { ans: "GRANDMOTHER", expl: "Bà (grandmother) đã đến thăm." },
+            27: { ans: "GLASSES", expl: "Bà để quên kính (glasses)." },
+            28: { ans: "CUPBOARD", expl: "Chú vẹt bay lên nóc tủ chén." }
+        };
+
+        function startTest() {
+            const name = document.getElementById('student-name').value.trim();
+            if(!name) { alert("Con ơi, nhập tên của mình vào nhé!"); return; }
+            window.studentName = name;
+            document.getElementById('display-name').innerText = name;
+            document.getElementById('user-initial').innerText = name.charAt(0).toUpperCase();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-container').classList.remove('hidden');
+            
+            let timer = 1800; 
+            window.timerInterval = setInterval(() => {
+                timer--;
+                if(timer <= 0) { clearInterval(window.timerInterval); submitTest(); }
+                const mins = Math.floor(timer / 60);
+                const secs = timer % 60;
+                document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        async function submitTest() {
+            clearInterval(window.timerInterval);
+            let score = 0;
+            const explList = document.getElementById('explanation-list');
+            explList.innerHTML = '';
+            const answersSubmitted = {};
+
+            document.querySelectorAll('.user-ans').forEach(input => {
+                const id = input.getAttribute('data-id');
+                const val = input.value.trim().toUpperCase();
+                answersSubmitted[id] = val;
+                const correctInfo = answerKey[id];
+                if (!correctInfo) return;
+
+                const isCorrect = val === correctInfo.ans;
+                if(isCorrect) score++;
+
+                const div = document.createElement('div');
+                div.className = `p-6 rounded-3xl border-l-[12px] shadow-sm flex flex-col gap-2 ${isCorrect ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <p class="font-black text-gray-800 text-lg">Question ${id}</p>
+                        <span>${isCorrect ? '✅' : '❌'}</span>
+                    </div>
+                    <p class="text-sm font-bold">Đáp án đúng: <span class="text-purple-600">${correctInfo.ans}</span></p>
+                    <p class="text-xs italic text-gray-500">💡 ${correctInfo.expl}</p>
+                `;
+                explList.appendChild(div);
+            });
+
+            // Calculate Shields
+            const shields = Math.max(1, Math.min(5, Math.floor(score / 7) + 1));
+            const container = document.getElementById('shields-container');
+            container.innerHTML = '';
+            for(let i=0; i<5; i++) {
+                const s = document.createElement('span');
+                s.className = `text-6xl shield-icon ${i < shields ? 'opacity-100' : 'opacity-20 grayscale'}`;
+                s.innerText = '🛡️';
+                container.appendChild(s);
+            }
+
+            document.getElementById('correct-count').innerText = score;
+            document.getElementById('result-name').innerText = `Candidate: ${window.studentName}`;
+            document.getElementById('test-container').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            window.scrollTo(0,0);
+
+            // Google Sheets Save Logic
+            const saveStatus = document.getElementById('save-status');
+            if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== "PASTE_YOUR_URL_HERE") {
+                try {
+                    await fetch(GOOGLE_SHEET_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_name: window.studentName,
+                            exam_type: 'Movers Test 1',
+                            score: score,
+                            total: 35,
+                            band: `${shields} Shields`,
+                            answers: answersSubmitted
+                        })
+                    });
+                    saveStatus.innerText = "✅ Nộp thành công!";
+                    saveStatus.className = "text-green-400 font-bold mb-2 text-xl";
+                } catch (e) {
+                    saveStatus.innerText = "⚠️ Lỗi lưu online";
+                    saveStatus.className = "text-red-400 font-bold mb-2 text-xl";
+                }
+            }
+            
+            // Redirect to congrats if shields >= 4
+            if (shields >= 4) {
+                setTimeout(() => window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=35&band=${shields}+Shields&exam=Movers+Test+1`, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
