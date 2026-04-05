@@ -782,7 +782,23 @@
         </div>
 
         <!-- Exam Cards -->
-        <div class="section-title">Chọn bài thi để bắt đầu</div>
+        <!-- Filter & Search Section -->
+        <div class="filter-section">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm đề thi (Vd: KET, IELTS, Starters...)">
+            </div>
+            <div class="lb-tabs-wrapper filter-tabs-wrapper">
+                <div class="lb-tabs" id="filter-tabs">
+                    <button class="lb-tab active" data-filter="all">Tất cả</button>
+                    <button class="lb-tab" data-filter="young">Thiếu nhi</button>
+                    <button class="lb-tab" data-filter="ket">KET (A2)</button>
+                    <button class="lb-tab" data-filter="pet">PET/TS10</button>
+                    <button class="lb-tab" data-filter="toeic">TOEIC</button>
+                    <button class="lb-tab" data-filter="ielts">IELTS</button>
+                </div>
+            </div>
+        </div>
 
         <div class="cards-grid" id="cards-grid">
             <!-- 0. Starters Card (Cấp độ: Thiếu nhi) -->
