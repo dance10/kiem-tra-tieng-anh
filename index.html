@@ -176,6 +176,8 @@
             position: relative;
             overflow: hidden;
             cursor: default;
+            display: flex;
+            flex-direction: column;
         }
         .exam-card::before {
             content: '';
@@ -300,6 +302,8 @@
             z-index: 1;
             border: none;
             cursor: pointer;
+            margin-top: auto;
+            align-self: flex-start;
         }
         .card-btn:hover {
             transform: translateY(-2px);
