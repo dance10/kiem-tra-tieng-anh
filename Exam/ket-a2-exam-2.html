@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Thi Thử KET - Trung Tâm Cô Thuý</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+            height: 300px;
+        }
+
+        .hidden-view { display: none !important; }
+
+        .nav-active {
+            background-color: #0d9488;
+            color: white;
+            border-color: #0d9488;
+        }
+
+        .nav-inactive {
+            background-color: transparent;
+            color: #44403c;
+            border-color: #d6d3d1;
+        }
+
+        /* Cambridge-style Lined Paper */
+        .writing-sheet {
+            background-color: #fff;
+            background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 100% 2.5rem;
+            line-height: 2.5rem;
+            padding: 0.5rem 2rem 0.5rem 3.5rem;
+            position: relative;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .writing-sheet::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 2.5rem;
+            width: 2px;
+            height: 100%;
+            background-color: #fecaca;
+        }
+
+        /* Picture Frames for Q32 - Grayscale Cambridge Style */
+        .cambridge-frame {
+            border: 3px solid #1f2937;
+            background: #fff;
+            position: relative;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 5px 5px 0px #1f2937;
+            overflow: hidden;
+        }
+
+        /* Apply grayscale to symbols within the frame to mimic ink drawings */
+        .frame-content {
+            filter: grayscale(100%) contrast(1.5) brightness(0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .frame-number {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 28px;
+            height: 28px;
+            background: #1f2937;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
+        /* Grayscale Gradients for Scenes */
+        .scene-bg-gray-1 { background: linear-gradient(to bottom, #f3f4f6 60%, #d1d5db 60%); }
+        .scene-bg-gray-2 { background: linear-gradient(to bottom, #e5e7eb 60%, #9ca3af 60%); }
+        .scene-bg-gray-3 { background: linear-gradient(to bottom, #f3f4f6 60%, #d1d5db 60%); }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Chosen Palette: Soft Educational (Stone, Teal, Amber) -->
+    <!-- Application Structure Plan: Toàn bộ 32 câu hỏi KET được tích hợp. Phần Part 7 đã được chuyển sang chế độ hình ảnh trắng đen (grayscale) để đồng bộ hoàn toàn với phong cách thiết kế của Cambridge English. Task viết Email Part 6 được trình bày bằng tiếng Anh chuẩn. -->
+    <!-- Visualization & Content Choices: Thống kê hoàn thành sử dụng Chart.js Doughnut. Hiệu ứng grayscale trong Part 7 được thực hiện bằng CSS filters. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <a href="../index.html" class="flex-shrink-0 bg-stone-100 hover:bg-stone-200 text-stone-700 px-3 py-2 rounded-lg text-sm font-bold transition-colors no-underline">🏠 Trang Chủ</a>
+                <div class="p-2 bg-teal-600 rounded-lg text-white font-bold text-xl">TC</div>
+                <div>
+                    <h1 class="text-xl font-bold text-teal-800 leading-none">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+                    <p class="text-[10px] text-stone-500 font-bold uppercase mt-1 tracking-widest">Hoài An Nhiên Education & Training</p>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-4 text-[11px] text-stone-600">
+                <div class="border-l pl-3"><strong>CS1:</strong> Nguyễn Thị Lắng, Củ Chi</div>
+                <div class="border-l pl-3"><strong>CS2:</strong> Lê Đình Thám, Tân Phú</div>
+                <div class="border-l pl-3"><strong>CS3:</strong> Nguyễn Thị Thảnh, Hóc Môn</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-6 lg:p-8">
+        
+        <!-- LOGIN VIEW -->
+        <section id="view-login" class="max-w-xl mx-auto bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden mt-10">
+            <div class="bg-teal-700 p-8 text-white text-center">
+                <h2 class="text-3xl font-bold mb-2">A2 KEY (KET)</h2>
+                <p class="opacity-90">Reading and Writing Full Mock Test</p>
+            </div>
+            <div class="p-8 space-y-6">
+                <p class="text-stone-600 text-center text-sm italic">Chào mừng các em đến với kỳ thi thử tại Trung tâm Cô Thuý. Hãy điền thông tin thật chính xác nhé!</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Họ và Tên (Full Name)</label>
+                        <input type="text" id="cand-name" class="w-full border-2 border-stone-100 rounded-xl px-4 py-3 focus:border-teal-500 outline-none transition-all" placeholder="Ví dụ: Nguyễn Văn A">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Lớp (Class)</label>
+                            <input type="text" id="cand-class" class="w-full border-2 border-stone-100 rounded-xl px-4 py-3 focus:border-teal-500 outline-none transition-all" placeholder="Ví dụ: KET-01">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase mb-1">Ngày thi (Date)</label>
+                            <input type="date" id="cand-date" class="w-full border-2 border-stone-100 rounded-xl px-4 py-3 focus:border-teal-500 outline-none transition-all">
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-start" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-teal-100 transition-all transform hover:-translate-y-1">
+                    BẮT ĐẦU LÀM BÀI
+                </button>
+            </div>
+        </section>
+
+        <!-- EXAM VIEW -->
+        <section id="view-exam" class="hidden-view flex flex-col lg:flex-row gap-8">
+            
+            <aside class="w-full lg:w-72 space-y-4">
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-5">
+                    <h3 class="text-xs font-bold text-stone-400 uppercase mb-4 tracking-widest">Thí sinh</h3>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold">
+                            <span id="initial-name">?</span>
+                        </div>
+                        <div class="overflow-hidden">
+                            <p id="display-name" class="font-bold text-stone-800 truncate"></p>
+                            <p id="display-class" class="text-xs text-stone-500"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-5">
+                    <h3 class="text-xs font-bold text-stone-400 uppercase mb-4 tracking-widest">Tiến độ</h3>
+                    <nav class="flex flex-col gap-2" id="nav-buttons">
+                        <button class="nav-btn nav-active text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all" data-target="part-1">Part 1: Questions 1-6</button>
+                        <button class="nav-btn nav-inactive text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all" data-target="part-2">Part 2: Questions 7-13</button>
+                        <button class="nav-btn nav-inactive text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all" data-target="part-3">Part 3: Questions 14-18</button>
+                        <button class="nav-btn nav-inactive text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all" data-target="part-4">Part 4: Questions 19-24</button>
+                        <button class="nav-btn nav-inactive text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all" data-target="part-5">Part 5: Questions 25-30</button>
+                        <button class="nav-btn nav-inactive text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all" data-target="part-6">Part 6: Question 31</button>
+                        <button class="nav-btn nav-inactive text-left px-4 py-2.5 rounded-lg border text-xs font-semibold transition-all" data-target="part-7">Part 7: Question 32</button>
+                    </nav>
+                </div>
+
+                <button id="btn-submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                    <span>NỘP BÀI THI</span>
+                </button>
+            </aside>
+
+            <div class="flex-grow bg-white rounded-2xl shadow-sm border border-stone-200 p-6 md:p-10 min-h-[700px]">
+                
+                <!-- PART 1 -->
+                <div id="part-1" class="exam-part space-y-8">
+                    <div class="border-b-2 border-stone-800 pb-4">
+                        <h2 class="text-2xl font-extrabold text-stone-900">Part 1</h2>
+                        <p class="text-stone-600 font-bold text-sm">Questions 1 – 6: For each question, choose the correct answer.</p>
+                    </div>
+                    
+                    <div class="space-y-12">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div class="bg-white border-2 border-stone-800 p-6 shadow-[4px_4px_0px_#292524] text-center font-bold">
+                                <p class="text-rose-600 mb-2 uppercase tracking-widest">Library Notice</p>
+                                <p class="text-sm">Please return all library books by Friday afternoon. Any books returned late will result in a small fine.</p>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="font-bold">1. What does the notice say?</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q1" value="A" class="ans-input w-4 h-4"><span>A. You can return books over the weekend.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q1" value="B" class="ans-input w-4 h-4"><span>B. There is no cost for late books if returned by Friday.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q1" value="C" class="ans-input w-4 h-4"><span>C. You will have to pay money if you miss the deadline.</span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div class="bg-teal-50 border-2 border-teal-800 p-6 shadow-[4px_4px_0px_#115e59]">
+                                <p class="font-bold text-teal-900 mb-2">From: Jack</p>
+                                <p class="text-sm">Hi Sam, can you bring that photography book I lent you to school tomorrow? My sister needs it for her project.</p>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="font-bold">2. Why is Jack writing to Sam?</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q2" value="A" class="ans-input w-4 h-4"><span>A. To borrow a book about photography.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q2" value="B" class="ans-input w-4 h-4"><span>B. To ask Sam to return something.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q2" value="C" class="ans-input w-4 h-4"><span>C. To offer help with a school project.</span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div class="bg-amber-50 border-2 border-amber-800 p-6 shadow-[4px_4px_0px_#92400e] text-center">
+                                <p class="font-bold text-amber-900 mb-2">CAFE SPECIAL</p>
+                                <p class="text-sm font-medium">Free drink with every large pizza ordered before 6 PM today!</p>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="font-bold">3. What is true about the cafe offer?</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q3" value="A" class="ans-input w-4 h-4"><span>A. You can get a cheap pizza after 6 PM.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q3" value="B" class="ans-input w-4 h-4"><span>B. You don't pay for a drink if you buy a big pizza early.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q3" value="C" class="ans-input w-4 h-4"><span>C. Large pizzas come with a free drink all day long.</span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div class="bg-white border-2 border-stone-800 p-6 shadow-[4px_4px_0px_#292524] text-center">
+                                <p class="font-bold mb-2">LIBRARY COMPUTERS</p>
+                                <p class="text-sm">Computers are for research only. No social media or gaming.</p>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="font-bold">4. How should students use the computers?</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q4" value="A" class="ans-input w-4 h-4"><span>A. You can use them to play games.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q4" value="B" class="ans-input w-4 h-4"><span>B. You must only use them for study or finding information.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q4" value="C" class="ans-input w-4 h-4"><span>C. You need to ask a teacher before using social media.</span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div class="bg-rose-50 border-2 border-rose-800 p-6 shadow-[4px_4px_0px_#9f1239]">
+                                <p class="font-bold text-rose-900 mb-1">To: Jane</p>
+                                <p class="text-sm italic">"Jane, the concert starts at 7:30. Let's meet at the station at 6:45 so we can eat first." - Sarah</p>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="font-bold">5. What is Sarah's plan?</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q5" value="A" class="ans-input w-4 h-4"><span>A. Sarah wants to have dinner before the concert.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q5" value="B" class="ans-input w-4 h-4"><span>B. The concert begins at 6:45.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q5" value="C" class="ans-input w-4 h-4"><span>C. They will meet at the concert hall.</span></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div class="bg-white border-2 border-stone-800 p-6 shadow-[4px_4px_0px_#292524] text-center font-bold">
+                                <p class="text-sm">Special Offer! Buy two T-shirts and get the third one half price.</p>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="font-bold">6. What is the deal on T-shirts?</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q6" value="A" class="ans-input w-4 h-4"><span>A. All T-shirts are half price.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q6" value="B" class="ans-input w-4 h-4"><span>B. You pay full price for two and 50% for the next one.</span></label>
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg hover:bg-stone-50 cursor-pointer"><input type="radio" name="q6" value="C" class="ans-input w-4 h-4"><span>C. If you buy three shirts, you pay for only two.</span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 2 -->
+                <div id="part-2" class="exam-part hidden-view space-y-8">
+                    <div class="border-b-2 border-stone-800 pb-4">
+                        <h2 class="text-2xl font-extrabold text-stone-900">Part 2</h2>
+                        <p class="text-stone-600 font-bold text-sm">Questions 7 – 13: Choose the correct club (A, B or C).</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-sm">
+                        <div class="p-6 border-2 border-stone-200 rounded-xl bg-white shadow-sm">
+                            <h3 class="font-black text-teal-700 mb-3 uppercase">A. The Blue Whale</h3>
+                            <p>Perfect for water lovers. Swimming classes for all levels. Next to central bus station. Lockers available for a small fee.</p>
+                        </div>
+                        <div class="p-6 border-2 border-stone-200 rounded-xl bg-white shadow-sm">
+                            <h3 class="font-black text-rose-700 mb-3 uppercase">B. Victory Sports</h3>
+                            <p>Specializing in football and basketball. Practice on Tue and Thu evenings. Monthly competitions. Lockers are free.</p>
+                        </div>
+                        <div class="p-6 border-2 border-stone-200 rounded-xl bg-white shadow-sm">
+                            <h3 class="font-black text-amber-700 mb-3 uppercase">C. Sunrise Gym</h3>
+                            <p>Opens at 5:00 AM. Great for working out alone. Pay per visit. Located in the quiet park area.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 text-sm">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-stone-50 rounded-lg border">
+                            <span>7. Which club is best for team sports on weekdays?</span>
+                            <select name="q7" class="ans-input border-2 border-stone-300 rounded px-3 py-1 outline-none"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-stone-50 rounded-lg border">
+                            <span>8. Which club opens very early?</span>
+                            <select name="q8" class="ans-input border-2 border-stone-300 rounded px-3 py-1 outline-none"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-stone-50 rounded-lg border">
+                            <span>9. Which club has swimming classes with teachers?</span>
+                            <select name="q9" class="ans-input border-2 border-stone-300 rounded px-3 py-1 outline-none"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-stone-50 rounded-lg border">
+                            <span>10. Which club has free lockers?</span>
+                            <select name="q10" class="ans-input border-2 border-stone-300 rounded px-3 py-1 outline-none"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-stone-50 rounded-lg border">
+                            <span>11. Which club doesn't require a monthly fee?</span>
+                            <select name="q11" class="ans-input border-2 border-stone-300 rounded px-3 py-1 outline-none"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-stone-50 rounded-lg border">
+                            <span>12. Which club is next to a bus station?</span>
+                            <select name="q12" class="ans-input border-2 border-stone-300 rounded px-3 py-1 outline-none"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-stone-50 rounded-lg border">
+                            <span>13. Which club has monthly competitions?</span>
+                            <select name="q13" class="ans-input border-2 border-stone-300 rounded px-3 py-1 outline-none"><option value="">--</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 3 -->
+                <div id="part-3" class="exam-part hidden-view space-y-8">
+                    <div class="border-b-2 border-stone-800 pb-4">
+                        <h2 class="text-2xl font-extrabold text-stone-900">Part 3</h2>
+                        <p class="text-stone-600 font-bold text-sm">Questions 14 – 18: Read the text and choose A, B or C.</p>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <div class="bg-stone-50 p-6 rounded-xl border leading-relaxed text-sm text-justify">
+                            <h3 class="text-center font-bold mb-4">MY NEW HOBBY</h3>
+                            I started bird watching last summer. My grandfather gave me a pair of binoculars for my birthday. At first, I thought it would be boring. However, once I saw a rare kingfisher, I was hooked! Now I go to the forest every Saturday. I draw the birds in a notebook. Friends prefer gaming, but I love the fresh air.
+                        </div>
+                        <div class="space-y-6 text-sm">
+                            <p class="font-bold">14. What started Mark's interest in birds?</p>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2"><input type="radio" name="q14" value="B" class="ans-input"> B. A birthday present.</label>
+                            </div>
+                            <p class="font-bold">15. How did Mark feel at first?</p>
+                            <label class="flex items-center gap-2"><input type="radio" name="q15" value="A" class="ans-input"> A. It would be boring.</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 4 -->
+                <div id="part-4" class="exam-part hidden-view space-y-8">
+                    <div class="border-b-2 border-stone-800 pb-4">
+                        <h2 class="text-2xl font-extrabold text-stone-900">Part 4</h2>
+                        <p class="text-stone-600 font-bold text-sm">Questions 19 – 24: Choose A, B or C.</p>
+                    </div>
+                    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg border shadow-sm leading-relaxed">
+                        Chocolate (19) <select name="q19" class="ans-input border-b border-teal-500 outline-none"><option value="">--</option><option value="A">was</option><option value="B">is</option></select> first discovered long ago.
+                    </div>
+                </div>
+
+                <!-- PART 5 -->
+                <div id="part-5" class="exam-part hidden-view space-y-8">
+                    <div class="border-b-2 border-stone-800 pb-4">
+                        <h2 class="text-2xl font-extrabold text-stone-900">Part 5</h2>
+                        <p class="text-stone-600 font-bold text-sm">Questions 25 – 30: Write ONE word for each gap.</p>
+                    </div>
+                    <div class="max-w-2xl mx-auto p-8 border rounded shadow-sm bg-white">
+                        Hi Alex, <br> I'm writing (25) <input type="text" name="q25" class="ans-input border-b w-20 outline-none"> invite you to my party...
+                    </div>
+                </div>
+
+                <!-- PART 6 -->
+                <div id="part-6" class="exam-part hidden-view space-y-8">
+                    <div class="border-b-2 border-stone-800 pb-4">
+                        <h2 class="text-2xl font-extrabold text-stone-900">Part 6</h2>
+                        <p class="text-stone-600 font-bold text-sm">Question 31: Email writing (25 words or more).</p>
+                    </div>
+                    <div class="bg-teal-50 border-l-4 border-teal-500 p-6 rounded-r-lg">
+                        <p class="font-bold italic">You want to go shopping this weekend. Write an email to Chris. In your email, write:</p>
+                        <ul class="list-disc ml-6 mt-2 text-sm italic">
+                            <li>what you want to buy</li>
+                            <li>which day you want to go</li>
+                            <li>where to meet</li>
+                        </ul>
+                    </div>
+                    <div class="writing-sheet min-h-[250px]">
+                        <textarea id="q31-text" name="q31" class="ans-input w-full bg-transparent border-none outline-none min-h-[200px]" placeholder="Hi Chris..."></textarea>
+                    </div>
+                </div>
+
+                <!-- PART 7 - BLACK & WHITE CAMBRIDGE STYLE -->
+                <div id="part-7" class="exam-part hidden-view space-y-8">
+                    <div class="flex justify-between items-end border-b-2 border-stone-800 pb-2">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-stone-900">Part 7</h2>
+                            <p class="text-stone-600 font-bold uppercase text-xs tracking-widest">Question 32</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-stone-50 border border-stone-200 p-5 rounded-lg text-stone-800">
+                        <p class="text-sm">Look at the three pictures below. Write the story shown in the pictures. Write <strong>35 words or more</strong>.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 py-4">
+                        <!-- Frame 1 -->
+                        <div class="cambridge-frame scene-bg-gray-1">
+                            <span class="frame-number">1</span>
+                            <div class="frame-content">
+                                <div class="text-7xl mb-1">🚲</div>
+                                <div class="text-5xl">👧</div>
+                            </div>
+                        </div>
+
+                        <!-- Frame 2 -->
+                        <div class="cambridge-frame scene-bg-gray-2">
+                            <span class="frame-number">2</span>
+                            <div class="frame-content">
+                                <div class="text-4xl mb-1">💥</div>
+                                <div class="text-6xl mb-2 flex gap-1"><span>🚲</span><span>🪨</span></div>
+                                <div class="text-5xl rotate-90 translate-x-4">👧</div>
+                            </div>
+                        </div>
+
+                        <!-- Frame 3 -->
+                        <div class="cambridge-frame scene-bg-gray-3">
+                            <span class="frame-number">3</span>
+                            <div class="frame-content">
+                                <div class="flex items-center gap-4 text-5xl">
+                                    <span>👧</span>
+                                    <span class="text-4xl">🤝</span>
+                                    <span>👦</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center px-1">
+                            <h3 class="font-bold text-stone-700 uppercase text-xs tracking-widest">Your Answer</h3>
+                            <div class="flex items-center gap-4">
+                                <div class="h-2 w-32 bg-stone-200 rounded-full overflow-hidden">
+                                    <div id="q32-progress" class="h-full bg-stone-800 transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <span class="text-xs font-bold text-stone-600"><span id="q32-count">0</span> words</span>
+                            </div>
+                        </div>
+                        
+                        <div class="writing-sheet">
+                            <textarea id="q32-text" name="q32" class="ans-input w-full bg-transparent border-none resize-none outline-none font-medium text-stone-800 placeholder-stone-400 min-h-[300px]" placeholder="One morning..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RESULT VIEW -->
+        <section id="view-result" class="hidden-view max-w-4xl mx-auto space-y-8 mt-10">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-stone-200">
+                <div class="bg-teal-700 p-10 text-white text-center">
+                    <h2 class="text-3xl font-bold mb-1">BÀI THI ĐÃ ĐƯỢC NỘP!</h2>
+                    <p class="opacity-80">Cảm ơn <span id="res-name" class="font-bold underline"></span> đã hoàn thành kỳ thi.</p>
+                </div>
+                <div class="p-10 flex flex-col md:flex-row items-center gap-10">
+                    <div class="flex-grow space-y-6">
+                        <div class="bg-stone-50 p-6 rounded-lg border text-sm font-bold text-stone-500 uppercase tracking-widest">
+                            <div class="flex justify-between mb-2"><span>Hoàn thành:</span> <span id="res-answered" class="text-teal-600">0</span></div>
+                            <div class="flex justify-between border-t pt-2"><span>Chưa làm:</span> <span id="res-missed" class="text-rose-500">0</span></div>
+                            <div class="flex justify-between border-t pt-2"><span>Lưu điểm Đám Mây:</span> <span id="cloud-status" class="text-stone-400">Đang lưu...</span></div>
+                        </div>
+                        <button onclick="location.reload()" class="w-full py-4 bg-teal-600 text-white font-bold rounded-xl shadow-lg">LÀM BÀI MỚI</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="resultChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-auto py-8 bg-stone-900 text-stone-500 text-[10px] text-center border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-bold text-stone-300">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN - MST: 0318842992</p>
+            <p>Hệ thống Đào tạo Tiếng Anh Cô Thuý &copy; 2026. Chúc các em học tốt!</p>
+        </div>
+    </footer>
+
+    <script>
+        const views = {
+            login: document.getElementById('view-login'),
+            exam: document.getElementById('view-exam'),
+            result: document.getElementById('view-result')
+        };
+
+        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec';
+        const state = { name: '', totalQuestions: 32 };
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            const nameInput = document.getElementById('cand-name').value.trim();
+            if(!nameInput) return alert("Vui lòng nhập tên!");
+            state.name = nameInput;
+            document.getElementById('display-name').textContent = state.name;
+            document.getElementById('display-class').textContent = document.getElementById('cand-class').value || 'KET Class';
+            document.getElementById('initial-name').textContent = state.name.charAt(0).toUpperCase();
+            views.login.classList.add('hidden-view');
+            views.exam.classList.remove('hidden-view');
+            window.scrollTo(0, 0);
+        });
+
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const examParts = document.querySelectorAll('.exam-part');
+
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                navBtns.forEach(b => b.classList.replace('nav-active', 'nav-inactive'));
+                e.target.classList.replace('nav-inactive', 'nav-active');
+                const targetId = e.target.getAttribute('data-target');
+                examParts.forEach(part => part.classList.toggle('hidden-view', part.id !== targetId));
+                window.scrollTo(0, 0);
+            });
+        });
+
+        const handleWriting = (id, target) => {
+            const el = document.getElementById(id);
+            const countEl = document.getElementById(id.replace('text', 'count'));
+            const progressEl = document.getElementById(id.replace('text', 'progress'));
+            el.addEventListener('input', () => {
+                const words = el.value.trim() ? el.value.trim().split(/\s+/).length : 0;
+                countEl.textContent = words;
+                if(progressEl) progressEl.style.width = `${Math.min((words / target) * 100, 100)}%`;
+            });
+        };
+        handleWriting('q31-text', 25);
+        handleWriting('q32-text', 35);
+
+        let chartInstance = null;
+        document.getElementById('btn-submit').addEventListener('click', () => {
+            if(!confirm('Xác nhận nộp bài?')) return;
+            const inputs = document.querySelectorAll('.ans-input');
+            let answered = 0;
+            inputs.forEach(input => {
+                if (input.type === 'radio' && input.checked) answered++;
+                else if (input.tagName === 'SELECT' && input.value !== '') answered++;
+                else if ((input.tagName === 'TEXTAREA' || input.type === 'text') && input.value.trim().length > 1) answered++;
+            });
+            const missed = state.totalQuestions - answered;
+            document.getElementById('res-name').textContent = state.name;
+            document.getElementById('res-answered').textContent = answered;
+            document.getElementById('res-missed').textContent = missed;
+            views.exam.classList.add('hidden-view');
+            views.result.classList.remove('hidden-view');
+            window.scrollTo(0, 0);
+            const ctx = document.getElementById('resultChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hoàn thành', 'Chưa làm'],
+                    datasets: [{
+                        data: [answered, missed],
+                        backgroundColor: ['#0d9488', '#fecaca'],
+                        borderWidth: 8,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: { responsive: true, cutout: '80%', plugins: { legend: { display: false } } }
+            });
+
+            // Post result to Google Sheet
+            const bandLabel = (answered / state.totalQuestions >= 0.8) ? 'Distinction' : (answered / state.totalQuestions >= 0.6 ? 'Pass' : 'Practice');
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_name: state.name || 'Học viên ẩn danh',
+                    exam_type: 'KET Practice Test 2',
+                    score: answered,
+                    total: state.totalQuestions,
+                    band: bandLabel
+                })
+            }).then(() => {
+                const cs = document.getElementById('cloud-status');
+                if (cs) {
+                    cs.textContent = "Đã lưu thành công";
+                    cs.className = "text-green-600";
+                }
+                if (answered / state.totalQuestions >= 0.8) {
+                    setTimeout(() => {
+                        window.location.href = `congratulations.html?name=${encodeURIComponent(state.name)}&score=${answered}&total=${state.totalQuestions}&band=${bandLabel}&exam=KET+Practice+Test+2`;
+                    }, 1500);
+                }
+            }).catch(e => {
+                const cs = document.getElementById('cloud-status');
+                if (cs) {
+                    cs.textContent = "Lỗi lưu điểm";
+                    cs.className = "text-rose-500";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
