@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B1 Preliminary Reading Test - Hoài An Nhiên</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+        .tab-active { background-color: #e2e8f0; color: #0f172a; font-weight: 600; border-left: 4px solid #3b82f6; }
+        .tab-inactive { color: #475569; border-left: 4px solid transparent; hover:bg-slate-100; }
+        .hidden-content { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+<!-- Chosen Palette: Warm Neutrals with Sky Blue (#3b82f6) for primary actions, Emerald (#10b981) for correct states, and Rose (#ef4444) for error states. -->
+<!-- Application Structure Plan: The SPA uses a dashboard-style layout to transform a static test paper into an interactive learning environment. A left sidebar provides persistent navigation between the 6 parts of the reading test, allowing non-linear progression. The main content area acts as a dynamic viewport, presenting one part at a time to reduce cognitive load. A 'Submit' action transitions the app into a 'Review Mode', revealing a performance dashboard (using Chart.js) and unlocking detailed, localized explanations for every question to support self-study. -->
+<!-- Visualization & Content Choices: Report Info -> Test Questions & Explanations | Goal -> Interactive Assessment & Feedback | Viz/Presentation Method -> Dynamic Forms & Performance Dashboard (Doughnut Chart) | Interaction -> Tabbed navigation, selectable answers, automated grading, toggleable explanations | Justification -> Emulates computer-based testing while providing immediate, context-aware feedback crucial for language learning. Doughnut chart provides quick visual summary of score | Library/Method -> Vanilla JS for DOM manipulation and state management, Chart.js for the score visualization. Confirming NO SVG/Mermaid. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+                <p class="text-xs text-slate-500">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN | MST: 0318842992</p>
+            </div>
+            <div class="text-right flex flex-col items-end gap-2">
+                <div class="flex items-center gap-2">
+                    <a href="../index.html" class="inline-block bg-slate-100 text-slate-800 text-xs px-2 py-1 rounded font-semibold uppercase tracking-wide hover:bg-slate-200 transition-colors no-underline">
+                        🏠 Trang Chủ
+                    </a>
+                    <span class="inline-block bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded font-semibold uppercase tracking-wide">B1 Preliminary (PET)</span>
+                </div>
+                <p class="text-sm font-medium mt-1" id="header-status">Chế độ: Làm bài thi</p>
+                <div id="save-status" class="text-xs font-semibold text-green-600 hidden"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-6 p-4 sm:px-6 lg:px-8">
+        
+        <aside class="w-full md:w-64 shrink-0 bg-white rounded-lg shadow-sm p-4 h-fit sticky top-24">
+            <h2 class="font-bold text-lg mb-4 border-b pb-2">Điều hướng</h2>
+            <nav id="sidebar-nav" class="flex flex-col space-y-1">
+                <button onclick="switchTab('intro')" id="tab-intro" class="tab-active text-left px-4 py-2 rounded-r transition-colors">Giới thiệu</button>
+                <button onclick="switchTab('part1')" id="tab-part1" class="tab-inactive text-left px-4 py-2 rounded-r transition-colors">Part 1: Thông báo (1-5)</button>
+                <button onclick="switchTab('part2')" id="tab-part2" class="tab-inactive text-left px-4 py-2 rounded-r transition-colors">Part 2: Nối thông tin (6-10)</button>
+                <button onclick="switchTab('part3')" id="tab-part3" class="tab-inactive text-left px-4 py-2 rounded-r transition-colors">Part 3: Đọc hiểu (11-15)</button>
+                <button onclick="switchTab('part4')" id="tab-part4" class="tab-inactive text-left px-4 py-2 rounded-r transition-colors">Part 4: Điền câu (16-20)</button>
+                <button onclick="switchTab('part5')" id="tab-part5" class="tab-inactive text-left px-4 py-2 rounded-r transition-colors">Part 5: Điền từ (21-26)</button>
+                <button onclick="switchTab('part6')" id="tab-part6" class="tab-inactive text-left px-4 py-2 rounded-r transition-colors">Part 6: Viết từ (27-32)</button>
+            </nav>
+            <div class="mt-8 pt-4 border-t">
+                <button id="submit-btn" onclick="submitTest()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded transition-colors">Nộp bài & Xem kết quả</button>
+                <button id="results-nav-btn" onclick="switchTab('results')" class="hidden-content w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded transition-colors mt-2">Xem Bảng Điểm</button>
+            </div>
+            <div class="mt-6 text-xs text-slate-500">
+                <p class="font-semibold text-slate-700 mb-1">Hệ thống cơ sở:</p>
+                <ul class="space-y-1">
+                    <li>CS1: 202/1 Nguyễn Thị Lắng, Củ Chi</li>
+                    <li>CS2: 61 Lê Đình Thám, Tân Phú</li>
+                    <li>CS3: 325/5T Nguyễn Thị Thảnh, Hóc Môn</li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="flex-1 bg-white rounded-lg shadow-sm p-6 lg:p-10 relative" id="main-content">
+            
+            <section id="content-intro" class="block">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Chào mừng đến với hệ thống thi thử PET B1</h2>
+                <div class="bg-sky-50 p-4 rounded-lg border border-sky-100 mb-6">
+                    <p class="text-slate-700">Ứng dụng này cung cấp trải nghiệm làm bài thi mô phỏng trực tiếp từ đề thi thử của Trung tâm tiếng Anh Cô Thuý. Mục tiêu của phần này là giúp bạn làm quen với cấu trúc 6 phần của bài thi Reading và tự đánh giá năng lực hiện tại.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border rounded-lg p-5">
+                        <h3 class="font-bold text-lg mb-2">&#9202; Thông tin chung</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600">
+                            <li><strong>Thời gian khuyến nghị:</strong> 45 phút</li>
+                            <li><strong>Tổng số phần:</strong> 6 phần</li>
+                            <li><strong>Tổng số câu hỏi:</strong> 32 câu</li>
+                            <li><strong>Hình thức:</strong> Chọn đáp án, Nối, Điền từ</li>
+                        </ul>
+                    </div>
+                    <div class="border rounded-lg p-5">
+                        <h3 class="font-bold text-lg mb-2">&#128221; Hướng dẫn</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600">
+                            <li>Sử dụng thanh điều hướng bên trái để di chuyển giữa các phần.</li>
+                            <li>Bạn có thể làm bài theo bất kỳ thứ tự nào.</li>
+                            <li>Sau khi hoàn thành, nhấn <strong>"Nộp bài & Xem kết quả"</strong>.</li>
+                            <li>Hệ thống sẽ chấm điểm và cung cấp giải thích chi tiết cho từng câu.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button onclick="switchTab('part1')" class="bg-sky-600 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-sky-700 transition-colors shadow-md">Bắt đầu làm bài</button>
+                </div>
+            </section>
+
+            <section id="content-part1" class="hidden-content">
+                <h2 class="text-2xl font-bold mb-2">Part 1: Đọc hiểu biển báo (Questions 1-5)</h2>
+                <p class="text-slate-600 mb-6 pb-4 border-b">Trong phần này, bạn sẽ đọc 5 thông báo, tin nhắn ngắn hoặc biển báo. Nhiệm vụ của bạn là chọn đáp án (A, B hoặc C) phản ánh đúng nhất ý nghĩa của văn bản gốc. Phần này kiểm tra khả năng đọc hiểu ý chính trong các tình huống thực tế.</p>
+                <div id="part1-container" class="space-y-8"></div>
+            </section>
+
+            <section id="content-part2" class="hidden-content">
+                <h2 class="text-2xl font-bold mb-2">Part 2: Nối thông tin (Questions 6-10)</h2>
+                <p class="text-slate-600 mb-6 pb-4 border-b">Bạn sẽ đọc mô tả nhu cầu của 5 người và thông tin về 8 địa điểm kỳ nghỉ. Nhiệm vụ là chọn ra địa điểm phù hợp nhất cho từng người. Phần này đòi hỏi khả năng đọc quét (scanning) để tìm thông tin chi tiết cụ thể.</p>
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <div class="w-full lg:w-1/2" id="part2-people"></div>
+                    <div class="w-full lg:w-1/2 bg-slate-50 p-4 rounded-lg border h-fit" id="part2-places"></div>
+                </div>
+            </section>
+
+            <section id="content-part3" class="hidden-content">
+                <h2 class="text-2xl font-bold mb-2">Part 3: Đọc hiểu văn bản dài (Questions 11-15)</h2>
+                <p class="text-slate-600 mb-6 pb-4 border-b">Đọc một bài báo hoặc câu chuyện dài và trả lời 5 câu hỏi trắc nghiệm (A, B, C, D). Phần này kiểm tra khả năng hiểu ý chính, chi tiết, thái độ và ý đồ của tác giả.</p>
+                <div class="bg-amber-50 p-6 rounded-lg mb-8 border border-amber-100 text-slate-800 leading-relaxed">
+                    <h3 class="text-xl font-bold mb-4 text-center">My First Marathon (by Jane Miller)</h3>
+                    <p class="mb-4">Last year, I decided to run my first marathon. I wasn't an athlete; in fact, I hated running at school. But after turning 30, I wanted a challenge. I started training six months before the race. At first, I could only run for ten minutes, but gradually, I improved.</p>
+                    <p class="mb-4">The day of the race was freezing. I arrived at the starting line with thousands of others. I felt nervous but excited. The first 20 kilometers were fine. People were cheering, and I felt strong. However, at 30 kilometers, my legs started to hurt terribly. I wanted to stop. Then, I saw a young boy holding a sign that said "Keep going, hero!". It made me smile and gave me the energy to continue.</p>
+                    <p>When I finally crossed the finish line, I cried. Not because of the pain, but because I was so proud. I didn't win, and I wasn't fast, but I finished. Now, I run every morning, and I’m already planning my next marathon in Paris.</p>
+                </div>
+                <div id="part3-container" class="space-y-6"></div>
+            </section>
+
+            <section id="content-part4" class="hidden-content">
+                <h2 class="text-2xl font-bold mb-2">Part 4: Điền câu vào đoạn văn (Questions 16-20)</h2>
+                <p class="text-slate-600 mb-6 pb-4 border-b">Năm câu đã bị xóa khỏi văn bản. Bạn cần chọn câu đúng (A-G) để điền vào mỗi chỗ trống. Sẽ có các câu thừa. Phần này kiểm tra hiểu biết về cấu trúc văn bản và sự liên kết ý tưởng.</p>
+                
+                <div class="mb-6 bg-slate-100 p-4 rounded border">
+                    <p class="font-bold mb-2">Các câu để chọn:</p>
+                    <ul class="space-y-2 text-sm" id="part4-options-list">
+                        <li><strong>A.</strong> They were often decorated with gold and jewels.</li>
+                        <li><strong>B.</strong> They also break very easily in strong winds.</li>
+                        <li><strong>C.</strong> This is why we call them "parasols" in some languages.</li>
+                        <li><strong>D.</strong> They are now an essential item for people all over the world.</li>
+                        <li><strong>E.</strong> Men, in particular, refused to use them for many years.</li>
+                        <li><strong>F.</strong> It was also very expensive to buy one at that time.</li>
+                        <li><strong>G.</strong> They were so heavy that you needed two hands to hold them.</li>
+                    </ul>
+                </div>
+
+                <div class="text-lg leading-loose text-slate-800" id="part4-text-container">
+                </div>
+            </section>
+
+            <section id="content-part5" class="hidden-content">
+                <h2 class="text-2xl font-bold mb-2">Part 5: Trắc nghiệm từ vựng (Questions 21-26)</h2>
+                <p class="text-slate-600 mb-6 pb-4 border-b">Đọc một đoạn văn ngắn có 6 chỗ trống. Chọn từ đúng nhất (A, B, C hoặc D) cho mỗi chỗ trống. Phần này chủ yếu kiểm tra từ vựng và một số cấu trúc ngữ pháp cơ bản.</p>
+                
+                <div class="bg-amber-50 p-6 rounded-lg mb-8 border border-amber-100 text-slate-800 leading-loose text-lg text-justify" id="part5-text-container">
+                </div>
+            </section>
+
+            <section id="content-part6" class="hidden-content">
+                <h2 class="text-2xl font-bold mb-2">Part 6: Viết từ điền khuyết (Questions 27-32)</h2>
+                <p class="text-slate-600 mb-6 pb-4 border-b">Đọc một văn bản ngắn (thường là email) và tự tìm MỘT từ duy nhất để điền vào mỗi chỗ trống. Không có đáp án cho sẵn. Phần này kiểm tra kiến thức ngữ pháp (giới từ, đại từ, liên từ...).</p>
+                
+                <div class="max-w-xl mx-auto border-2 border-slate-200 rounded-lg overflow-hidden">
+                    <div class="bg-slate-100 p-3 border-b border-slate-200 text-sm">
+                        <p><strong>From:</strong> Amy</p>
+                        <p><strong>To:</strong> Chloe</p>
+                    </div>
+                    <div class="p-6 text-lg leading-loose" id="part6-text-container">
+                    </div>
+                </div>
+            </section>
+
+            <section id="content-results" class="hidden-content">
+                <h2 class="text-3xl font-bold text-slate-800 mb-2">Báo Cáo Kết Quả</h2>
+                <p class="text-slate-600 mb-8 pb-4 border-b">Dưới đây là phân tích chi tiết về điểm số của bạn dựa trên thang điểm chuẩn của Cambridge B1 Preliminary. Bạn có thể quay lại các phần trước thông qua thanh điều hướng bên trái để xem giải thích chi tiết cho từng câu hỏi.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="scoreChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-white border rounded-xl p-6 shadow-sm text-center">
+                            <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Tổng điểm</p>
+                            <div class="text-5xl font-black text-slate-800 mb-2"><span id="result-score">0</span><span class="text-2xl text-slate-400">/32</span></div>
+                            <div id="result-grade" class="text-xl font-bold inline-block px-4 py-1 rounded-full"></div>
+                        </div>
+
+                        <div class="bg-slate-50 border rounded-lg p-5">
+                            <h3 class="font-bold text-slate-700 mb-3 border-b pb-2">Thang điểm chuẩn Cambridge</h3>
+                            <ul class="space-y-2 text-sm text-slate-600">
+                                <li class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span>28 - 32 điểm</span> <strong>Grade A (Tương đương B2)</strong></li>
+                                <li class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span>24 - 27 điểm</span> <strong>Grade B (Đạt B1 cao)</strong></li>
+                                <li class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span>20 - 23 điểm</span> <strong>Grade C (Đạt B1)</strong></li>
+                                <li class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-400"></span>13 - 19 điểm</span> <strong>Level A2 (Chưa đạt B1)</strong></li>
+                                <li class="flex justify-between items-center"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span>Dưới 13 điểm</span> <strong>Không đạt chứng chỉ</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center bg-sky-50 p-6 rounded-lg border border-sky-100">
+                    <p class="text-lg text-slate-800 mb-4">Để hiểu rõ tại sao mình chọn sai, hãy nhấp vào các phần (Part 1-6) ở menu bên trái. Chế độ giải thích đã được mở khóa.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const testData = {
+            part1: [
+                { id: 1, title: "Library Notice", text: "Please return all borrowed books by Friday. Books returned late will incur a fine of £1 per day.", options: { A: "You must pay £1 to borrow a book on Friday.", B: "There is no charge for books returned after Friday.", C: "You will have to pay if you keep books longer than allowed." }, correct: "C", exp: "\"Incur a fine\" = pay if keep longer (Chịu phạt = trả tiền nếu giữ lâu hơn)." },
+                { id: 2, title: "Message from Sarah to Jack", text: "Hi Jack, I’ve left my umbrella at your house. Could you bring it to the cinema tonight? If not, I'll come by tomorrow.", options: { A: "Sarah wants Jack to meet her at his house.", B: "Sarah hopes Jack can return her umbrella tonight.", C: "Jack should go to Sarah's house to get the umbrella." }, correct: "B", exp: "\"Could you bring it to the cinema tonight?\" = hy vọng Jack trả lại chiếc ô tối nay." },
+                { id: 3, title: "Gym Sign", text: "Lockers are for daily use only. Items left overnight will be removed by staff.", options: { A: "You can keep your things in a locker for as long as you want.", B: "The staff will take away anything found in lockers after the gym closes.", C: "You must use a locker if you have heavy items." }, correct: "B", exp: "\"Items left overnight will be removed\" = nhân viên sẽ dọn đồ để lại qua đêm (sau khi đóng cửa)." },
+                { id: 4, title: "Email to Students", text: "The school trip to the museum is cancelled due to the bus strike. Classes will run as normal instead.", options: { A: "Students should go to the museum by themselves.", B: "There will be no school tomorrow because of the strike.", C: "Students must attend their usual lessons tomorrow." }, correct: "C", exp: "\"Classes will run as normal\" = lớp học diễn ra bình thường = phải đi học bình thường." },
+                { id: 5, title: "Cafe Notice", text: "Order your food at the counter. Drinks will be served at your table.", options: { A: "You need to wait for a waiter to take your food order.", B: "You pay for everything at the table.", C: "You must go to the counter to choose what you want to eat." }, correct: "C", exp: "\"Order food at the counter\" = đến quầy để chọn món và gọi món ăn." }
+            ],
+            part2: {
+                people: [
+                    { id: 6, name: "Marco", desc: "loves history and wants to visit ancient ruins. He prefers quiet places without many tourists and likes walking in nature.", correct: "E", exp: "Marco thích lịch sử (ancient ruins), yên tĩnh (rarely visited), đi bộ (long walk) -> Khớp với Hidden Temple." },
+                    { id: 7, name: "Elena", desc: "is looking for a beach holiday. She wants to try water sports like surfing and enjoys lively nightlife with clubs and music.", correct: "A", exp: "Elena thích biển, thể thao nước (windsurf), sôi động (nightlife, discos) -> Khớp với Sun City." },
+                    { id: 8, name: "The Smith family", desc: "have two young children. They want a safe place with activities for kids, like a zoo or a theme park, and a family-friendly hotel.", correct: "G", exp: "Gia đình Smith cần nơi an toàn cho trẻ (theme park, water park, childcare) -> Khớp với Fun World." },
+                    { id: 9, name: "Hiroko", desc: "is interested in art and architecture. She wants to stay in a city where she can visit famous museums and galleries during the day.", correct: "C", exp: "Hiroko thích nghệ thuật (museums, art galleries, architecture) -> Khớp với Old Port." },
+                    { id: 10, name: "David", desc: "wants to go to the mountains. He is an experienced climber and wants a challenge. He prefers staying in small, traditional villages.", correct: "D", exp: "David muốn leo núi thách thức (steepest climbs) và ở làng truyền thống (stone houses) -> Khớp với Rocky Peak." }
+                ],
+                places: [
+                    { id: "A", name: "Sun City", desc: "A popular resort known for its white sand beaches. During the day, you can learn to windsurf, and at night, the town comes alive with discos." },
+                    { id: "B", name: "Green Valley", desc: "A peaceful village located at the foot of the mountains. Perfect for families who want to enjoy gentle walks and visit the local wildlife park." },
+                    { id: "C", name: "Old Port", desc: "A historic town full of museums and art galleries. It’s famous for its beautiful 18th-century buildings and modern art exhibitions." },
+                    { id: "D", name: "Rocky Peak", desc: "For serious adventurers only. This remote area offers the steepest climbs in the region. Stay in local stone houses and enjoy the silence." },
+                    { id: "E", name: "Hidden Temple", desc: "Deep in the forest, these 1000-year-old ruins are rarely visited. It’s a long walk to get there, but you’ll likely have the place to yourself." },
+                    { id: "F", name: "Blue Bay", desc: "A quiet beach perfect for swimming. There are no loud clubs here, making it ideal for those who want to relax and read a book." },
+                    { id: "G", name: "Fun World", desc: "The ultimate destination for kids! This resort features a massive theme park, a water park, and daily shows. All hotels have childcare services." },
+                    { id: "H", name: "Forest Trails", desc: "Great for mountain bikers. The paths are difficult, but the views of the city below are worth the effort." }
+                ]
+            },
+            part3: [
+                { id: 11, text: "Why did Jane decide to run a marathon?", options: { A: "She had always loved running.", B: "She wanted to prove she was an athlete.", C: "She was looking for a personal challenge.", D: "Her friends encouraged her to do it." }, correct: "C", exp: "Đoạn 1: \"after turning 30, I wanted a challenge\" (muốn một thử thách cá nhân)." },
+                { id: 12, text: "How did Jane feel about her training?", options: { A: "It was easy from the very beginning.", B: "She saw a slow but steady improvement.", C: "She found it impossible to run for long.", D: "She trained for a year before the race." }, correct: "B", exp: "Đoạn 1: \"At first... only run for ten minutes, but gradually, I improved\" (dần dần tiến bộ - bền vững)." },
+                { id: 13, text: "What happened at the 30-kilometer mark?", options: { A: "She decided to quit the race.", B: "She met a young boy who was running.", C: "She felt physical pain but found motivation.", D: "The weather became too cold to continue." }, correct: "C", exp: "Đoạn 2: \"legs started to hurt... saw a young boy holding a sign... gave me the energy\" (đau nhưng tìm thấy động lực)." },
+                { id: 14, text: "How did Jane feel when she finished?", options: { A: "Disappointed because she was slow.", B: "Happy to have beaten the other runners.", C: "Emotional because of her achievement.", D: "Relieved that the pain had finally stopped." }, correct: "C", exp: "Đoạn 3: \"cried... because I was so proud\" (xúc động vì tự hào về thành tựu)." },
+                { id: 15, text: "What would be a good title for Jane's blog?", options: { A: "How to win your first big race.", B: "From running hater to marathon finisher.", C: "The best training tips for young athletes.", D: "My painful experience in the cold weather." }, correct: "B", exp: "Phù hợp nhất vì bao quát toàn bộ câu chuyện: từng ghét chạy (hated running) đến khi hoàn thành marathon." }
+            ],
+            part4: {
+                textBlocks: [
+                    "Umbrellas have been around for a long time. The first ones were probably made to protect people from the sun, not the rain. ",
+                    " Ancient Egyptians used umbrellas made of feathers and palm leaves.<br><br>In ancient Greece and Rome, umbrellas were seen as a symbol of wealth and power. ",
+                    " However, it wasn't until the 18th century that they became common in Europe for rain protection. Before that, people thought using an umbrella was a sign of weakness. ",
+                    "<br><br>Early European umbrellas were made of wood and heavy cloth, which made them very difficult to carry. ",
+                    " Modern umbrellas are much lighter because they use materials like plastic and aluminum. ",
+                    " Today, you can find them in every color and size imaginable."
+                ],
+                questions: [
+                    { id: 16, correct: "C", exp: "Parasol (para=chống, sol=mặt trời) giải thích trực tiếp cho câu trước đó nói về việc dùng ô để chống nắng, không phải che mưa." },
+                    { id: 17, correct: "A", exp: "\"Gold and jewels\" (vàng và trang sức) giải thích chi tiết cho sự giàu có và quyền lực (wealth and power) ở câu trước." },
+                    { id: 18, correct: "E", exp: "\"Men refused...\" (đàn ông từ chối dùng) tiếp nối ý tưởng trước đó cho rằng dùng ô là \"yếu đuối\" (sign of weakness)." },
+                    { id: 19, correct: "G", exp: "\"Heavy... needed two hands\" (quá nặng cần 2 tay) bổ sung ý nghĩa cho câu trước chê ô thời xưa rất khó mang theo (difficult to carry)." },
+                    { id: 20, correct: "D", exp: "\"Essential item...\" (vật dụng thiết yếu) làm cầu nối hoàn hảo để câu kết luận nói rằng bây giờ có thể tìm thấy chúng ở mọi màu sắc, kích cỡ." }
+                ]
+            },
+            part5: {
+                textBlocks: [
+                    "The Great Barrier Reef is the ",
+                    " coral reef system in the world. It is located in the Coral Sea, off the coast of Australia. This amazing place is ",
+                    " up of thousands of individual reefs and hundreds of islands. It is so large that it can be ",
+                    " from outer space. Many types of fish and sea creatures live there. ",
+                    ", the reef is in danger because of climate change. The water is getting warmer, which ",
+                    " the coral. We must ",
+                    " our best to protect this natural wonder."
+                ],
+                questions: [
+                    { id: 21, options: ["A. largest", "B. longest", "C. highest", "D. deepest"], correct: "A", exp: "Largest (lớn nhất). Cụm từ phổ biến: the largest coral reef system." },
+                    { id: 22, options: ["A. put", "B. made", "C. kept", "D. set"], correct: "B", exp: "Cấu trúc bị động \"be made up of\" = được cấu tạo từ." },
+                    { id: 23, options: ["A. looked", "B. watched", "C. seen", "D. noticed"], correct: "C", exp: "\"Seen\" (được nhìn thấy) từ vũ trụ. Look/Watch cần giới từ hoặc mang tính chủ động." },
+                    { id: 24, options: ["A. Although", "B. Because", "C. However", "D. Instead"], correct: "C", exp: "\"However\" (Tuy nhiên) đứng đầu câu, có dấu phẩy theo sau, dùng để chuyển ý từ khen ngợi sang cảnh báo nguy hiểm." },
+                    { id: 25, options: ["A. hurts", "B. pains", "C. breaks", "D. destroys"], correct: "A", exp: "Nước ấm lên \"hurts/damages\" (làm hại) san hô dần dần. B1 thường dùng hurt cho môi trường." },
+                    { id: 26, options: ["A. make", "B. do", "C. give", "D. take"], correct: "B", exp: "Cụm động từ cố định: \"do one's best\" = cố gắng hết sức." }
+                ]
+            },
+            part6: {
+                textBlocks: [
+                    "Hi Chloe,<br>How ",
+                    " you? I’m writing to tell you ",
+                    " my new house. We moved in last week and I love it! My room is much bigger ",
+                    " my old one. I have a great view ",
+                    " the park from my window.<br>Would you like to come and visit me ",
+                    " Saturday? My mum says she will cook a special dinner ",
+                    " us.<br>Let me know!<br>Amy"
+                ],
+                questions: [
+                    { id: 27, correct: "are", exp: "Câu hỏi thăm sức khỏe cơ bản: How are you?" },
+                    { id: 28, correct: "about", exp: "Giới từ: tell someone about something (kể cho ai về cái gì)." },
+                    { id: 29, correct: "than", exp: "Cấu trúc so sánh hơn: bigger than (lớn hơn)." },
+                    { id: 30, correct: "of", exp: "Cụm danh từ: a view of something (tầm nhìn ra cái gì)." },
+                    { id: 31, correct: "on", alt: "this", exp: "Giới từ chỉ ngày trong tuần dùng 'on' (on Saturday) hoặc 'this' (this Saturday)." },
+                    { id: 32, correct: "for", exp: "Giới từ: cook for somebody (nấu ăn cho ai đó)." }
+                ]
+            }
+        };
+
+        let currentAnswers = {};
+        let isSubmitted = false;
+        let scoreChartInstance = null;
+        
+        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec';
+
+        // Helper function to extract answers for logging
+        function prepareAnswersForSheet() {
+            return currentAnswers;
+        }
+
+        function initApp() {
+            renderPart1();
+            renderPart2();
+            renderPart3();
+            renderPart4();
+            renderPart5();
+            renderPart6();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden-content'));
+            document.querySelectorAll('#sidebar-nav button').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('tab-inactive');
+            });
+            
+            document.getElementById(`content-${tabId}`).classList.remove('hidden-content');
+            
+            if(tabId !== 'intro' && tabId !== 'results') {
+                document.getElementById(`tab-${tabId}`).classList.remove('tab-inactive');
+                document.getElementById(`tab-${tabId}`).classList.add('tab-active');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function handleRadioChange(qId, val) {
+            if(isSubmitted) return;
+            currentAnswers[qId] = val;
+        }
+
+        function handleSelectChange(qId, val) {
+            if(isSubmitted) return;
+            currentAnswers[qId] = val;
+        }
+        
+        function handleTextChange(qId, val) {
+            if(isSubmitted) return;
+            currentAnswers[qId] = val.trim().toLowerCase();
+        }
+
+        function createExpBox(qId, exp) {
+            return `
+                <div id="exp-${qId}" class="hidden-content mt-3 p-3 bg-slate-100 border-l-4 border-slate-400 rounded text-sm text-slate-700">
+                    <strong>Giải thích:</strong> ${exp}
+                </div>
+            `;
+        }
+
+        function renderPart1() {
+            const container = document.getElementById('part1-container');
+            let html = '';
+            testData.part1.forEach(q => {
+                html += `<div class="bg-white border rounded-lg p-5 shadow-sm relative" id="q-container-${q.id}">
+                    <div class="absolute top-0 right-0 p-3" id="icon-${q.id}"></div>
+                    <h3 class="font-bold text-lg mb-2">Câu ${q.id}. ${q.title}</h3>
+                    <blockquote class="bg-slate-50 border-l-4 border-slate-300 p-3 mb-4 italic text-slate-700">"${q.text}"</blockquote>
+                    <div class="space-y-2">`;
+                
+                for (const [key, val] of Object.entries(q.options)) {
+                    html += `<label class="flex items-start space-x-3 p-2 rounded hover:bg-slate-50 cursor-pointer">
+                        <input type="radio" name="q${q.id}" value="${key}" onchange="handleRadioChange(${q.id}, '${key}')" class="mt-1 disabled:opacity-50">
+                        <span><strong>${key}.</strong> ${val}</span>
+                    </label>`;
+                }
+                html += `</div>${createExpBox(q.id, q.exp)}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderPart2() {
+            const peopleContainer = document.getElementById('part2-people');
+            const placesContainer = document.getElementById('part2-places');
+            
+            let phtml = '<h3 class="font-bold text-lg mb-4">Người tìm kiếm kỳ nghỉ</h3><div class="space-y-4">';
+            testData.part2.people.forEach(p => {
+                phtml += `<div class="border rounded p-4 relative" id="q-container-${p.id}">
+                    <div class="absolute top-2 right-2" id="icon-${p.id}"></div>
+                    <p class="mb-3"><strong>${p.id}. ${p.name}</strong> ${p.desc}</p>
+                    <div class="flex items-center gap-3">
+                        <label class="font-semibold text-sm">Chọn nơi đến:</label>
+                        <select onchange="handleSelectChange(${p.id}, this.value)" id="select-${p.id}" class="border rounded p-1 w-32 disabled:bg-slate-100">
+                            <option value="">-- Chọn --</option>
+                            ${testData.part2.places.map(pl => `<option value="${pl.id}">${pl.id}</option>`).join('')}
+                        </select>
+                    </div>
+                    ${createExpBox(p.id, p.exp)}
+                </div>`;
+            });
+            phtml += '</div>';
+            peopleContainer.innerHTML = phtml;
+
+            let plhtml = '<h3 class="font-bold text-lg mb-4">Các địa điểm (A-H)</h3><ul class="space-y-3">';
+            testData.part2.places.forEach(pl => {
+                plhtml += `<li class="text-sm border-b border-slate-200 pb-2 last:border-0"><strong class="text-sky-700">${pl.id}. ${pl.name}:</strong> ${pl.desc}</li>`;
+            });
+            plhtml += '</ul>';
+            placesContainer.innerHTML = plhtml;
+        }
+
+        function renderPart3() {
+            const container = document.getElementById('part3-container');
+            let html = '';
+            testData.part3.forEach(q => {
+                html += `<div class="border rounded-lg p-5 relative" id="q-container-${q.id}">
+                    <div class="absolute top-2 right-2" id="icon-${q.id}"></div>
+                    <p class="font-bold mb-3">${q.id}. ${q.text}</p>
+                    <div class="space-y-2">`;
+                for (const [key, val] of Object.entries(q.options)) {
+                    html += `<label class="flex items-start space-x-3 p-2 rounded hover:bg-slate-50 cursor-pointer">
+                        <input type="radio" name="q${q.id}" value="${key}" onchange="handleRadioChange(${q.id}, '${key}')" class="mt-1 disabled:opacity-50">
+                        <span><strong>${key}.</strong> ${val}</span>
+                    </label>`;
+                }
+                html += `</div>${createExpBox(q.id, q.exp)}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderPart4() {
+            const container = document.getElementById('part4-text-container');
+            let html = '';
+            const d = testData.part4;
+            for(let i=0; i<d.textBlocks.length; i++) {
+                html += d.textBlocks[i];
+                if (i < d.questions.length) {
+                    let q = d.questions[i];
+                    html += `<span class="inline-block mx-1 relative" id="q-container-${q.id}">
+                        <select onchange="handleSelectChange(${q.id}, this.value)" id="select-${q.id}" class="border-2 border-slate-300 rounded p-1 text-base font-bold text-sky-700 bg-white disabled:bg-slate-100">
+                            <option value="">(${q.id})</option>
+                            ${['A','B','C','D','E','F','G'].map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                        <span id="icon-${q.id}" class="absolute -top-3 -right-3 bg-white rounded-full"></span>
+                    </span>`;
+                }
+            }
+            let exps = '<div class="mt-8 space-y-2">';
+            d.questions.forEach(q => exps += createExpBox(q.id, q.exp));
+            exps += '</div>';
+            container.innerHTML = html + exps;
+        }
+
+        function renderPart5() {
+            const container = document.getElementById('part5-text-container');
+            let html = '';
+            const d = testData.part5;
+            for(let i=0; i<d.textBlocks.length; i++) {
+                html += d.textBlocks[i];
+                if (i < d.questions.length) {
+                    let q = d.questions[i];
+                    html += `<span class="inline-block mx-1 relative" id="q-container-${q.id}">
+                        <select onchange="handleSelectChange(${q.id}, this.value)" id="select-${q.id}" class="border-2 border-slate-300 rounded p-1 text-base font-bold text-sky-700 bg-white disabled:bg-slate-100">
+                            <option value="">(${q.id})</option>
+                            ${q.options.map(opt => {
+                                let val = opt.charAt(0);
+                                return `<option value="${val}">${opt}</option>`;
+                            }).join('')}
+                        </select>
+                        <span id="icon-${q.id}" class="absolute -top-3 -right-3 bg-white rounded-full"></span>
+                    </span>`;
+                }
+            }
+            let exps = '<div class="mt-8 space-y-2">';
+            d.questions.forEach(q => exps += createExpBox(q.id, q.exp));
+            exps += '</div>';
+            container.innerHTML = html + exps;
+        }
+
+        function renderPart6() {
+            const container = document.getElementById('part6-text-container');
+            let html = '';
+            const d = testData.part6;
+            for(let i=0; i<d.textBlocks.length; i++) {
+                html += d.textBlocks[i];
+                if (i < d.questions.length) {
+                    let q = d.questions[i];
+                    html += `<span class="inline-block mx-1 relative" id="q-container-${q.id}">
+                        <strong>(${q.id})</strong> <input type="text" oninput="handleTextChange(${q.id}, this.value)" id="input-${q.id}" class="border-b-2 border-slate-400 bg-transparent w-24 px-1 text-center font-bold text-sky-700 focus:outline-none focus:border-sky-600 disabled:opacity-70" autocomplete="off">
+                        <span id="icon-${q.id}" class="absolute -top-2 -right-4 bg-white rounded-full"></span>
+                    </span>`;
+                }
+            }
+            let exps = '<div class="mt-8 space-y-2">';
+            d.questions.forEach(q => exps += createExpBox(q.id, q.exp));
+            exps += '</div>';
+            container.innerHTML = html + exps;
+        }
+
+        function submitTest() {
+            if(isSubmitted) return;
+            
+            let totalScore = 0;
+            const checkAnswer = (qId, correctAns, altAns = null) => {
+                let uAns = currentAnswers[qId];
+                let isCorrect = false;
+                if(uAns && typeof uAns === 'string') {
+                    if (uAns.toUpperCase() === correctAns.toUpperCase() || (altAns && uAns.toUpperCase() === altAns.toUpperCase())) {
+                        isCorrect = true;
+                    }
+                }
+
+                let container = document.getElementById(`q-container-${qId}`);
+                let icon = document.getElementById(`icon-${qId}`);
+                let expBox = document.getElementById(`exp-${qId}`);
+                
+                if(isCorrect) {
+                    totalScore++;
+                    if(container) container.classList.add('bg-emerald-50', 'border-emerald-200');
+                    if(icon) icon.innerHTML = '<span class="text-emerald-500 font-bold text-xl">&#10003;</span>';
+                    if(expBox) {
+                        expBox.classList.remove('hidden-content');
+                        expBox.classList.replace('border-slate-400', 'border-emerald-500');
+                    }
+                } else {
+                    if(container) container.classList.add('bg-rose-50', 'border-rose-200');
+                    if(icon) icon.innerHTML = `<span class="text-rose-500 font-bold text-xl">&#10007;</span> <span class="bg-rose-100 text-rose-800 text-xs px-2 py-1 rounded ml-1">Đ.án: ${correctAns}</span>`;
+                    if(expBox) {
+                        expBox.classList.remove('hidden-content');
+                        expBox.classList.replace('border-slate-400', 'border-rose-500');
+                    }
+                }
+                
+                let elRadio = document.getElementsByName(`q${qId}`);
+                elRadio.forEach(r => r.disabled = true);
+                let elSelect = document.getElementById(`select-${qId}`);
+                if(elSelect) elSelect.disabled = true;
+                let elInput = document.getElementById(`input-${qId}`);
+                if(elInput) elInput.disabled = true;
+            };
+
+            testData.part1.forEach(q => checkAnswer(q.id, q.correct));
+            testData.part2.people.forEach(q => checkAnswer(q.id, q.correct));
+            testData.part3.forEach(q => checkAnswer(q.id, q.correct));
+            testData.part4.questions.forEach(q => checkAnswer(q.id, q.correct));
+            testData.part5.questions.forEach(q => checkAnswer(q.id, q.correct));
+            testData.part6.questions.forEach(q => checkAnswer(q.id, q.correct, q.alt));
+
+            isSubmitted = true;
+            document.getElementById('submit-btn').classList.add('hidden-content');
+            document.getElementById('results-nav-btn').classList.remove('hidden-content');
+            document.getElementById('header-status').innerText = 'Chế độ: Đã nộp bài (Xem lại)';
+            document.getElementById('header-status').classList.replace('text-slate-800', 'text-sky-800');
+            
+            showResults(totalScore);
+            switchTab('results');
+
+            // Save to Google Sheet
+            let _studentName = prompt("Nhập họ và tên của bạn để lưu bảng điểm:", "") || "PET Student";
+            let _band = totalScore >= 28 ? "Grade A" : totalScore >= 24 ? "Grade B" : totalScore >= 20 ? "Grade C" : "Level A2/Fail";
+            let _percentage = Math.round((totalScore / 32) * 100);
+
+            const statusEl = document.getElementById('save-status');
+            statusEl.classList.remove('hidden');
+            statusEl.innerText = "⏳ Đang lưu kết quả...";
+            statusEl.className = "text-xs font-semibold text-amber-600";
+
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_name: _studentName,
+                    exam_type: 'B1 Preliminary (PET)',
+                    score: totalScore,
+                    total: 32,
+                    band: _band,
+                    answers: prepareAnswersForSheet()
+                })
+            }).then(() => {
+                statusEl.innerText = "✅ Đã lưu kết quả Cloud!";
+                statusEl.className = "text-xs font-semibold text-green-600";
+                
+                // Redirect for high score
+                if (totalScore >= 24) {
+                    setTimeout(() => {
+                        if (confirm(`🎉 Chúc mừng ${_studentName}! ${totalScore}/32 (${_percentage}%) - Bạn có muốn xem trang vinh danh không?`)) {
+                            window.location.href = `../congratulations.html?name=${encodeURIComponent(_studentName)}&score=${totalScore}&total=32&band=${encodeURIComponent(_band)}&exam=B1+Preliminary`;
+                        }
+                    }, 1000);
+                }
+            }).catch(e => {
+                console.error(e);
+                statusEl.innerText = "❌ Lỗi lưu kết quả!";
+                statusEl.className = "text-xs font-semibold text-red-600";
+            });
+        }
+
+        function showResults(score) {
+            document.getElementById('result-score').innerText = score;
+            
+            let grade = '';
+            let gradeClass = '';
+            if (score >= 28) { grade = 'Grade A (B2)'; gradeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300'; }
+            else if (score >= 24) { grade = 'Grade B (B1 Cao)'; gradeClass = 'bg-blue-100 text-blue-800 border-blue-300'; }
+            else if (score >= 20) { grade = 'Grade C (B1)'; gradeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300'; }
+            else if (score >= 13) { grade = 'Level A2'; gradeClass = 'bg-orange-100 text-orange-800 border-orange-300'; }
+            else { grade = 'Fail (Dưới A2)'; gradeClass = 'bg-red-100 text-red-800 border-red-300'; }
+
+            const gradeEl = document.getElementById('result-grade');
+            gradeEl.innerText = grade;
+            gradeEl.className = `text-xl font-bold inline-block px-4 py-1 rounded-full border ${gradeClass}`;
+
+            renderChart(score, 32 - score);
+        }
+
+        function renderChart(correct, incorrect) {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            if (scoreChartInstance) scoreChartInstance.destroy();
+
+            scoreChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Câu đúng', 'Câu sai / Bỏ qua'],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' câu';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
