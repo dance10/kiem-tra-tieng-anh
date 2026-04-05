@@ -1118,6 +1118,31 @@
             return { correct, total, percent: (correct / total) * 100 };
         }
 
+        function formatBand(rawBand, examName) {
+            if (!rawBand || rawBand === 'undefined' || rawBand === '0.0') return '';
+            let band = String(rawBand).trim();
+            examName = examName || '';
+
+            if (examName.includes('IELTS')) {
+                let num = parseFloat(band.replace(',', '.'));
+                return !isNaN(num) ? `BAND ${num.toFixed(1)}` : band;
+            }
+            if (examName.includes('TOEIC')) {
+                let pts = band.split('/')[0];
+                return `${pts} PTS`;
+            }
+            if (examName.includes('Starters') || examName.includes('Movers')) {
+                let num = parseInt(band);
+                return !isNaN(num) ? '⭐'.repeat(num) : band.replace('Shields', '⭐');
+            }
+            if (examName.includes('KET') || examName.includes('PET')) {
+                let grade = band.split(' ').pop();
+                if (grade.toLowerCase() === 'practice') return 'PRACTICE';
+                return `GRADE: ${grade.toUpperCase()}`;
+            }
+            return band;
+        }
+
         function renderLeaderboard() {
             const content = document.getElementById('lb-content');
             
@@ -1179,7 +1204,7 @@
                             <div class="podium-medal">${medals[i]}</div>
                             <div class="podium-name" title="${escapeHtml(row.name || 'Ẩn danh')}">${escapeHtml(row.name || 'Ẩn danh')}</div>
                             <div class="podium-score">${row.score || '—'}</div>
-                            <div class="podium-band">${escapeHtml(row.band || '')}</div>
+                            <div class="podium-band">${escapeHtml(formatBand(row.band, row.exam))}</div>
                         </div>
                     `;
                 });
@@ -1195,7 +1220,7 @@
                             <div class="lb-rank">${i + 4}</div>
                             <div class="lb-name">${escapeHtml(row.name || 'Ẩn danh')}</div>
                             <div class="lb-score">${row.score || '—'}</div>
-                            <div class="lb-band">${escapeHtml(row.band || '')}</div>
+                            <div class="lb-band">${escapeHtml(formatBand(row.band, row.exam))}</div>
                             <div class="lb-time">${escapeHtml(row.time || '')}</div>
                         </div>
                     `;
