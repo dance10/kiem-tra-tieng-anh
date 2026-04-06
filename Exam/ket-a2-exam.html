@@ -318,7 +318,7 @@
                                                     className="w-full p-4 border-2 border-slate-100 rounded-xl focus:border-blue-500 transition-all text-lg shadow-inner" />
                                             </div>
                                             <button 
-                                                onClick={() => { setStudentName(document.getElementById('ket-student-name')?.value || ''); setCurrentStep('exam'); }}
+                                                onClick={() => { const _n = (document.getElementById('ket-student-name')?.value || '').trim(); if(!_n) { alert('Vui lòng nhập họ và tên để bắt đầu làm bài!'); return; } setStudentName(_n); setCurrentStep('exam'); }}
                                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-6 rounded-2xl transition-all transform hover:-translate-y-2 shadow-2xl shadow-blue-200 flex items-center justify-center gap-4 text-xl uppercase tracking-[4px]"
                                             >
                                                 BẮT ĐẦU <ChevronRight size={28} />

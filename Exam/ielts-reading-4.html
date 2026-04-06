@@ -513,9 +513,12 @@
                 saveStatus.innerText = "✅ Kết quả đã được lưu vào Google Sheet!";
                 saveStatus.className = "text-sm text-green-700 font-bold mb-4";
                 if (totalScore >= 30) {
-                     setTimeout(() => {
-                         window.location.href = "congratulations.html";
-                     }, 1500);
+                    const band = (totalScore / 40 * 9).toFixed(1);
+                    setTimeout(() => {
+                        if (confirm(`🎉 Chúc mừng ${studentName}! Band ${band} - Bạn có muốn xem trang vinh danh không?`)) {
+                            window.location.href = `../congratulations.html?name=${encodeURIComponent(studentName)}&score=${totalScore}&total=40&band=${band}&exam=IELTS+Reading+Test+4`;
+                        }
+                    }, 3000);
                 }
             } catch (e) {
                 console.error("Error saving:", e);

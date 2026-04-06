@@ -93,8 +93,14 @@
                         </ul>
                     </div>
                 </div>
-                <div class="mt-8 text-center">
-                    <button onclick="switchTab('part1')" class="bg-sky-600 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-sky-700 transition-colors shadow-md">Bắt đầu làm bài</button>
+                <div class="mt-8">
+                    <div class="max-w-md mx-auto mb-6">
+                        <label class="block text-sm font-bold text-slate-700 mb-2" for="pet-student-name">Họ và tên học sinh: <span class="text-red-500">*</span></label>
+                        <input type="text" id="pet-student-name" placeholder="Nhập tên của bạn để bắt đầu..." class="w-full p-4 border-2 border-slate-200 rounded-xl focus:border-sky-500 outline-none transition-all text-lg">
+                    </div>
+                    <div class="text-center">
+                        <button onclick="startPetExam()" class="bg-sky-600 text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-sky-700 transition-colors shadow-md">Bắt đầu làm bài</button>
+                    </div>
                 </div>
             </section>
 
@@ -301,12 +307,23 @@
         let currentAnswers = {};
         let isSubmitted = false;
         let scoreChartInstance = null;
+        let petStudentName = '';
         
         const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec';
 
         // Helper function to extract answers for logging
         function prepareAnswersForSheet() {
             return currentAnswers;
+        }
+
+        function startPetExam() {
+            const nameVal = document.getElementById('pet-student-name').value.trim();
+            if (!nameVal) {
+                alert('Vui lòng nhập họ và tên để bắt đầu làm bài!');
+                return;
+            }
+            petStudentName = nameVal;
+            switchTab('part1');
         }
 
         function initApp() {
@@ -319,6 +336,12 @@
         }
 
         function switchTab(tabId) {
+            // Block navigation to exam parts if name not entered yet
+            if (tabId !== 'intro' && tabId !== 'results' && !petStudentName) {
+                alert('Vui lòng nhập họ và tên ở trang Giới thiệu trước khi làm bài!');
+                switchTab('intro');
+                return;
+            }
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden-content'));
             document.querySelectorAll('#sidebar-nav button').forEach(btn => {
                 btn.classList.remove('tab-active');
@@ -555,7 +578,7 @@
             switchTab('results');
 
             // Save to Google Sheet
-            let _studentName = prompt("Nhập họ và tên của bạn để lưu bảng điểm:", "") || "PET Student";
+            let _studentName = petStudentName || "PET Student";
             let _band = totalScore >= 28 ? "Grade A" : totalScore >= 24 ? "Grade B" : totalScore >= 20 ? "Grade C" : "Level A2/Fail";
             let _percentage = Math.round((totalScore / 32) * 100);
 

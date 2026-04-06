@@ -386,6 +386,42 @@
             border-radius: 2px;
         }
 
+        /* Sub-tabs (Level 2) */
+        .lb-subtabs-wrapper {
+            position: relative;
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(0,0,0,0.15);
+            display: none;
+        }
+        .lb-subtabs-wrapper.visible { display: block; }
+        .lb-subtabs {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+        }
+        .lb-subtabs::-webkit-scrollbar { display: none; }
+        .lb-subtab {
+            padding: 0.5rem 1rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid transparent;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+        .lb-subtab:hover { color: var(--text-primary); background: rgba(255,255,255,0.08); }
+        .lb-subtab.active {
+            color: var(--accent-cyan);
+            background: rgba(6,182,212,0.1);
+            border-color: rgba(6,182,212,0.3);
+        }
+
         /* Leaderboard content */
         .lb-panel {
             display: none;
@@ -1053,24 +1089,22 @@
         <div class="leaderboard-section">
             <div class="section-title">🏆 Bảng xếp hạng</div>
             <div class="leaderboard-container">
+                <!-- Level 1: Category tabs -->
                 <div class="lb-tabs-wrapper">
                     <div class="lb-tabs" id="lb-tabs">
-                        <button class="lb-tab active" data-exam="all" id="tab-all">Tổng hợp</button>
-                        <button class="lb-tab" data-exam="Starters Test 1" id="tab-starters">Starters 1</button>
-                        <button class="lb-tab" data-exam="Movers Test 1" id="tab-movers">Movers 1</button>
-                        <button class="lb-tab" data-exam="KET A2 Exam" id="tab-ket">KET A2</button>
-                        <button class="lb-tab" data-exam="KET Practice Test 2" id="tab-ket2">KET A2 (Test 2)</button>
-                        <button class="lb-tab" data-exam="B1 Preliminary (PET)" id="tab-pet">PET B1</button>
-                        <button class="lb-tab" data-exam="Tuyển Sinh 10 Test 1" id="tab-tuyensinh">TN 10</button>
-                        <button class="lb-tab" data-exam="TOEIC Reading Test 1" id="tab-toeic">TOEIC Test 1</button>
-                        <button class="lb-tab" data-exam="TOEIC Reading Test 2" id="tab-toeic2">TOEIC Test 2</button>
-                        <button class="lb-tab" data-exam="IELTS Reading Test 1" id="tab-ielts1">IELTS Test 1</button>
-                        <button class="lb-tab" data-exam="IELTS Reading Test 2" id="tab-ielts2">IELTS Test 2</button>
-                        <button class="lb-tab" data-exam="IELTS Reading Test 3" id="tab-ielts3">IELTS Test 3</button>
-                        <button class="lb-tab" data-exam="IELTS-004" id="tab-ielts4">IELTS Test 4</button>
-                        <button class="lb-tab" data-exam="IELTS Writing Test 1" id="tab-ielts-w1">IELTS Writing</button>
+                        <button class="lb-tab active" data-category="all">Tổng hợp</button>
+                        <button class="lb-tab" data-category="young">🌟 Thiếu nhi</button>
+                        <button class="lb-tab" data-category="ket">📝 KET (A2)</button>
+                        <button class="lb-tab" data-category="pet">📚 PET / TS10</button>
+                        <button class="lb-tab" data-category="toeic">💼 TOEIC</button>
+                        <button class="lb-tab" data-category="ielts">🎓 IELTS</button>
                     </div>
                 </div>
+                <!-- Level 2: Sub-tabs (generated dynamically) -->
+                <div class="lb-subtabs-wrapper" id="lb-subtabs-wrapper">
+                    <div class="lb-subtabs" id="lb-subtabs"></div>
+                </div>
+                <!-- Content -->
                 <div class="lb-panel active" id="lb-content">
                     <div class="lb-loading">
                         <div class="spinner"></div>
@@ -1167,7 +1201,26 @@
         // LEADERBOARD
         // ==========================================
         let leaderboardData = [];
-        let currentFilter = 'all';
+        let currentCategory = 'all';
+        let currentSubFilter = 'all';
+
+        // Category → keyword mapping for filtering exam names
+        const CATEGORIES = {
+            all:   { label: 'Tổng hợp', keywords: [] },
+            young: { label: 'Thiếu nhi', keywords: ['Starters', 'Movers'] },
+            ket:   { label: 'KET', keywords: ['KET'] },
+            pet:   { label: 'PET / TS10', keywords: ['PET', 'Preliminary', 'Tuyển Sinh'] },
+            toeic: { label: 'TOEIC', keywords: ['TOEIC'] },
+            ielts: { label: 'IELTS', keywords: ['IELTS'] }
+        };
+
+        function matchCategory(examName, category) {
+            if (category === 'all') return true;
+            const cat = CATEGORIES[category];
+            if (!cat) return false;
+            const upper = (examName || '').toUpperCase();
+            return cat.keywords.some(k => upper.includes(k.toUpperCase()));
+        }
 
         async function loadLeaderboard() {
             const content = document.getElementById('lb-content');
@@ -1191,30 +1244,70 @@
                         }
                         return { ...row, score: parsedScore };
                     });
+                    buildSubTabs();
                     renderLeaderboard();
                 } else {
                     throw new Error('Invalid data');
                 }
             } catch (error) {
                 console.warn('Leaderboard fetch failed:', error);
-                // Show empty state instead of error 
                 content.innerHTML = `
                     <div class="lb-empty">
                         <div class="empty-icon">📋</div>
                         <strong>Chưa có dữ liệu xếp hạng</strong><br>
                         <span style="font-size:0.75rem; margin-top:0.5rem; display:block;">
-                            Dữ liệu sẽ hiển thị khi có học viên nộp bài.<br>
-                            <span style="color:rgba(148,163,184,0.4); font-size:0.65rem;">
-                                (Cần cập nhật Apps Script — xem hướng dẫn bên dưới)
-                            </span>
+                            Dữ liệu sẽ hiển thị khi có học viên nộp bài.
                         </span>
                     </div>
                 `;
             }
         }
 
+        // Build sub-tabs dynamically from actual data
+        function buildSubTabs() {
+            const wrapper = document.getElementById('lb-subtabs-wrapper');
+            const container = document.getElementById('lb-subtabs');
+
+            if (currentCategory === 'all') {
+                wrapper.classList.remove('visible');
+                return;
+            }
+
+            // Find unique exam names in this category
+            const examsInCategory = [...new Set(
+                leaderboardData
+                    .filter(r => matchCategory(r.exam, currentCategory))
+                    .map(r => r.exam)
+                    .filter(Boolean)
+            )].sort();
+
+            if (examsInCategory.length <= 1) {
+                // Only 1 exam type → no need for sub-tabs
+                wrapper.classList.remove('visible');
+                return;
+            }
+
+            let html = `<button class="lb-subtab active" data-sub="all">Tất cả</button>`;
+            examsInCategory.forEach(name => {
+                // Create short label from exam name
+                let label = name
+                    .replace('Reading ', 'R')
+                    .replace('Writing ', 'W')
+                    .replace('Listening ', 'L')
+                    .replace('Practice ', '')
+                    .replace('Test ', 'T')
+                    .replace('Exam', '')
+                    .replace('A2', '')
+                    .replace('B1 Preliminary (PET)', 'PET')
+                    .trim();
+                html += `<button class="lb-subtab" data-sub="${escapeHtml(name)}">${escapeHtml(label || name)}</button>`;
+            });
+
+            container.innerHTML = html;
+            wrapper.classList.add('visible');
+        }
+
         function parseScore(scoreStr) {
-            // Handle formats like "35/40", "120/160", etc.
             if (!scoreStr) return { correct: 0, total: 1, percent: 0 };
             const parts = String(scoreStr).split('/');
             const correct = parseFloat(parts[0]) || 0;
@@ -1250,13 +1343,18 @@
         function renderLeaderboard() {
             const content = document.getElementById('lb-content');
             
-            // Filter data
+            // Step 1: Filter by category
             let filteredData = leaderboardData;
-            if (currentFilter !== 'all') {
-                filteredData = leaderboardData.filter(r => r.exam === currentFilter);
+            if (currentCategory !== 'all') {
+                filteredData = leaderboardData.filter(r => matchCategory(r.exam, currentCategory));
             }
 
-            // Sort by percentage score (descending), then by time (latest first)
+            // Step 2: Filter by sub-tab (specific exam)
+            if (currentSubFilter !== 'all') {
+                filteredData = filteredData.filter(r => r.exam === currentSubFilter);
+            }
+
+            // Sort by percentage score (descending)
             filteredData.sort((a, b) => {
                 const sa = parseScore(a.score);
                 const sb = parseScore(b.score);
@@ -1264,10 +1362,10 @@
                 return 0;
             });
 
-            // Deduplicate: keep each student's best score per exam type
+            // Deduplicate: keep each student's best score
             const bestScores = new Map();
             filteredData.forEach(row => {
-                const key = (row.name || '').trim().toLowerCase() + '|' + (currentFilter === 'all' ? '' : row.exam);
+                const key = (row.name || '').trim().toLowerCase() + '|' + (currentSubFilter !== 'all' ? row.exam : (currentCategory === 'all' ? '' : row.exam));
                 if (!bestScores.has(key)) {
                     bestScores.set(key, row);
                 } else {
@@ -1302,7 +1400,6 @@
                 const classes = ['gold', 'silver', 'bronze'];
                 html += '<div class="lb-podium">';
                 top3.forEach((row, i) => {
-                    const score = parseScore(row.score);
                     html += `
                         <div class="podium-item ${classes[i]}">
                             <div class="podium-medal">${medals[i]}</div>
@@ -1334,7 +1431,7 @@
             content.innerHTML = html;
         }
 
-        // Tab switching
+        // Level 1: Category tab switching
         document.getElementById('lb-tabs').addEventListener('click', function(e) {
             const tab = e.target.closest('.lb-tab');
             if (!tab) return;
@@ -1342,7 +1439,21 @@
             this.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             
-            currentFilter = tab.dataset.exam;
+            currentCategory = tab.dataset.category;
+            currentSubFilter = 'all';
+            buildSubTabs();
+            renderLeaderboard();
+        });
+
+        // Level 2: Sub-tab switching
+        document.getElementById('lb-subtabs').addEventListener('click', function(e) {
+            const tab = e.target.closest('.lb-subtab');
+            if (!tab) return;
+            
+            this.querySelectorAll('.lb-subtab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            currentSubFilter = tab.dataset.sub;
             renderLeaderboard();
         });
 
