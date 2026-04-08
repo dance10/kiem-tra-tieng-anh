@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Reading Practice Test - Cô Thuý</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .reading-content p { margin-bottom: 1.25rem; line-height: 1.8; color: #374151; text-align: justify; position: relative; }
+        .sticky-header { position: sticky; top: 0; z-index: 50; }
+        .passage-section { display: none; }
+        .passage-section.active { display: block; }
+        
+        .correct { color: #059669; font-weight: 700; }
+        .incorrect { color: #dc2626 !important; font-weight: 700; text-decoration: underline; }
+        
+        /* Highlight Tool */
+        ::selection { background-color: #fef08a; }
+        .highlight-yellow { background-color: #fef08a; border-radius: 2px; }
+        #highlightMenu {
+            display: none;
+            position: absolute;
+            background: #1e3a8a;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; padding: 0; color: black; }
+            .modal-content { 
+                position: absolute !important; 
+                top: 0 !important; 
+                left: 0 !important; 
+                width: 100% !important; 
+                box-shadow: none !important; 
+                border: none !important; 
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .passage-section, .reading-content, main, header, .sticky-header { display: none !important; }
+            #modal { display: block !important; background: white !important; position: static !important; width: 100% !important; }
+            table { border: 1px solid #000 !important; width: 100%; border-collapse: collapse; margin-top: 1rem; }
+            th, td { border: 1px solid #000 !important; padding: 6px !important; font-size: 11px; }
+            .incorrect { color: #dc2626 !important; border: 1px solid #dc2626; padding: 1px; display: inline-block; }
+            .report-header { display: block !important; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+
+    <div id="highlightMenu">HIGHLIGHT</div>
+
+    <!-- Screen Header -->
+    <header class="bg-white border-b border-gray-200 py-6 px-4 no-print">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-xl md:text-2xl font-bold text-blue-900 uppercase tracking-tight">Công Ty TNHH Giáo Dục Và Đào Tạo Hoài An Nhiên</h1>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-red-600 mt-1 uppercase">Trung Tâm Tiếng Anh Cô Thuý</h2>
+            <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-gray-600 font-medium">
+                <span><strong>MST:</strong> 0318842992</span>
+                <span>| CS1: 202/1 Nguyễn Thị Lắng, Củ Chi</span>
+                <span>| CS2: 61 Lê Đình Thám, Tân Phú</span>
+                <span>| CS3: 325/5T Nguyễn Thị Thảnh, Hóc Môn</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Control Bar -->
+    <div class="sticky-header bg-blue-900 text-white py-3 px-4 shadow-lg no-print">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-semibold uppercase opacity-70">Học viên:</label>
+                    <input type="text" id="studentName" class="bg-blue-800 text-white px-3 py-1 rounded border border-blue-700 text-sm w-44 outline-none" placeholder="Nhập họ tên...">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-semibold uppercase opacity-70">Ngày thi:</label>
+                    <input type="date" id="testDate" class="bg-blue-800 text-white px-3 py-1 rounded border border-blue-700 text-sm outline-none">
+                </div>
+                <div id="timer" class="font-mono text-lg font-bold bg-blue-800 px-3 py-1 rounded border border-blue-700">60:00</div>
+            </div>
+            <a href="../index.html" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-1.5 rounded-lg font-bold text-sm shadow-md transition-colors uppercase mr-2">🏠 Trang Chủ</a>
+                <button onclick="submitTest()" class="bg-green-600 hover:bg-green-500 px-10 py-2 rounded-lg font-black text-sm uppercase transition-all shadow-md">Nộp bài & Chấm điểm</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-4 md:p-8 no-print">
+        <div class="flex border-b border-gray-300 mb-8 overflow-x-auto">
+            <button onclick="showPassage(1)" id="tab1" class="tab-btn py-4 px-6 font-bold border-b-2 border-blue-600 text-blue-600 whitespace-nowrap transition-all">Passage 1: Urban Engineers & Dance</button>
+            <button onclick="showPassage(2)" id="tab2" class="tab-btn py-4 px-6 font-bold border-b-2 border-transparent text-gray-500 hover:text-blue-600 whitespace-nowrap transition-all">Passage 2: De-extinction</button>
+            <button onclick="showPassage(3)" id="tab3" class="tab-btn py-4 px-6 font-bold border-b-2 border-transparent text-gray-500 hover:text-blue-600 whitespace-nowrap transition-all">Passage 3: Humour & Laughter</button>
+        </div>
+
+        <!-- PASSAGE 1: Could urban engineers learn from dance? -->
+        <section id="passage1" class="passage-section active">
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <div class="reading-content bg-white p-8 rounded-xl shadow-sm border border-gray-200 sticky top-24 max-h-[75vh] overflow-y-auto" id="text1">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-600 pl-4 uppercase">Could urban engineers learn from dance?</h3>
+                    <p><strong>A</strong> The way we travel around cities has a major impact on whether they are sustainable. Transportation is estimated to account for 30% of energy consumption in most of the world's most developed nations... We need radical changes, to make it healthier, more enjoyable, and less environmentally damaging to travel around cities.</p>
+                    <p><strong>B</strong> Dance might hold some of the answers. That is not to suggest everyone should dance their way to work, however healthy and happy it might make us, but rather that the techniques used by choreographers to experiment with and design movement in dance could provide engineers with tools to stimulate new ideas in city-making.</p>
+                    <p><strong>C</strong> Whereas medieval builders improvised and adapted construction through their intimate knowledge of materials and personal experience, building designs are now conceived and stored in media technologies that detach the designer from physical and social realities.</p>
+                    <p><strong>D</strong> Sennett discusses the Peachtree Center in Atlanta, USA. Peachtree created a grid of streets and towers intended as a new pedestrian-friendly downtown for Atlanta. According to Sennett, this failed because its designers had invested too much faith in computer-aided design. They failed to take into account that street cafés could not operate in the hot sun without protective awnings.</p>
+                    <p><strong>E</strong> The same is true in transport engineering... The guard rails familiar to anyone who has attempted to cross a British road, for example, were an engineering solution based on models that prioritise the smooth flow of traffic. On wide major roads, they make crossings feel longer, introducing psychological barriers greatly impacting those that are the least mobile.</p>
+                    <p><strong>F</strong> Choreography may not seem an obvious choice for tackling this problem. Yet it shares with engineering the aim of designing patterns of movement within limitations of space. It is an art form developed almost entirely by trying out ideas with the body.</p>
+                    <p><strong>G</strong> Kirsh argues that by using the body to simulate outcomes, McGregor is able to imagine solutions that would not be possible using purely abstract thought. Above all, perhaps, they might learn to design for emotional as well as functional effects.</p>
+                </div>
+                <div class="questions-content space-y-8">
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                        <h4 class="font-bold text-blue-900 mb-4">Questions 1-6: Paragraph Matching (A-G)</h4>
+                        <div class="space-y-3">
+                            <p>1. Appeal of dance writer is NOT proposing: <input type="text" id="q1" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>2. Contrast between past and present approaches: <input type="text" id="q2" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>3. Objective of both dance and engineering: <input type="text" id="q3" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>4. Unforeseen problem ignoring climate: <input type="text" id="q4" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>5. Why some measures are being reversed: <input type="text" id="q5" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>6. Transport impact on human lives: <input type="text" id="q6" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-gray-800 mb-4">Questions 7-13: Summary Completion</h4>
+                        <div class="space-y-4 text-sm">
+                            <p>Guard rails improved 7. <input type="text" id="q7" class="border-b border-gray-400 bg-transparent w-28 outline-none"> of pedestrians, while ensuring 8. <input type="text" id="q8" class="border-b border-gray-400 bg-transparent w-28 outline-none"> is not disrupted. Cross one 9. <input type="text" id="q9" class="border-b border-gray-400 bg-transparent w-28 outline-none"> at a time. Difficult for less 10. <input type="text" id="q10" class="border-b border-gray-400 bg-transparent w-28 outline-none"> people. Some cross in a 11. <input type="text" id="q11" class="border-b border-gray-400 bg-transparent w-28 outline-none"> way. Guard rails separate 12. <input type="text" id="q12" class="border-b border-gray-400 bg-transparent w-28 outline-none"> and make it harder to introduce 13. <input type="text" id="q13" class="border-b border-gray-400 bg-transparent w-28 outline-none"> transport.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PASSAGE 2: De-extinction -->
+        <section id="passage2" class="passage-section">
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <div class="reading-content bg-white p-8 rounded-xl shadow-sm border border-gray-200 sticky top-24 max-h-[75vh] overflow-y-auto">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-600 pl-4 uppercase">Should we try to bring extinct species back to life?</h3>
+                    <p><strong>A</strong> The passenger pigeon was a legendary species... Sadly, the passenger pigeon's existence came to an end on 1 September 1914, when the last living specimen died at Cincinnati Zoo. Ben Novak aims to bring the bird back through 'de-extinction'.</p>
+                    <p><strong>B</strong> In Australia, the thylacine return could help prevent facial tumour syndrome in Tasmanian devils by killing significant numbers of them. 'There is no carnivore now in Tasmania that fills the niche which thylacines once occupied,' explains Michael Archer.</p>
+                    <p><strong>C</strong> Beth Shapiro says there is no way to bring back something 100% identical. A hybrid based on the living species, ready for insertion of extinct animal DNA, is more practical.</p>
+                    <p><strong>D</strong> Since the disappearance of passenger pigeons, forest ecosystems have suffered. A hybridised pigeon could re-establish forest disturbance needed for native species.</p>
+                    <p><strong>E</strong> George Church focuses on genetic traits like cold resistance found in the woolly mammoth to expand Asian elephant range to the tundra... Adaptations include smaller ears, thicker hair, and extra insulating fat to reduce heat loss.</p>
+                    <p><strong>F</strong> Shapiro prefers focus on 'genetic rescue' for existing threatened species. We know that what we are doing today is not enough.</p>
+                </div>
+                <div class="questions-content space-y-8">
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                        <h4 class="font-bold text-blue-900 mb-4">Questions 14-17 (A-F)</h4>
+                        <div class="space-y-3">
+                            <p>14. Avoid further disappearance: <input type="text" id="q14" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>15. Reproduce animal using DNA of only that species: <input type="text" id="q15" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>16. Habitat suffered following extinction: <input type="text" id="q16" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                            <p>17. Exact point species became extinct: <input type="text" id="q17" class="w-12 border rounded text-center uppercase" maxlength="1"></p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-gray-800 mb-4">Questions 18-22: Woolly Mammoth Summary</h4>
+                        <div class="space-y-4">
+                            <p>18. <input type="text" id="q18" class="border-b border-gray-400 bg-transparent w-40 outline-none"> traits for survival.</p>
+                            <p>19. Minimise <input type="text" id="q19" class="border-b border-gray-400 bg-transparent w-40 outline-none"> in tundra.</p>
+                            <p>20. Mammoth features: thicker hair, <input type="text" id="q20" class="border-b border-gray-400 bg-transparent w-32 outline-none"> of reduced size,</p>
+                            <p>21. and more <input type="text" id="q21" class="border-b border-gray-400 bg-transparent w-32 outline-none">.</p>
+                            <p>22. decrease <input type="text" id="q22" class="border-b border-gray-400 bg-transparent w-40 outline-none"> from melting permafrost.</p>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-xl border border-green-200">
+                        <h4 class="font-bold text-green-900 mb-4">Questions 23-26 (People A-C)</h4>
+                        <div class="space-y-3">
+                            <p>23. Improve health of particular species: <select id="q23" class="border p-1 rounded"><option value="">Select</option><option>A</option><option>B</option><option>C</option></select></p>
+                            <p>24. Concentrate on causes of extinction: <select id="q24" class="border p-1 rounded"><option value="">Select</option><option>A</option><option>B</option><option>C</option></select></p>
+                            <p>25. Beneficial impact on vegetation: <select id="q25" class="border p-1 rounded"><option value="">Select</option><option>A</option><option>B</option><option>C</option></select></p>
+                            <p>26. Biodiversity efforts insufficient: <select id="q26" class="border p-1 rounded"><option value="">Select</option><option>A</option><option>B</option><option>C</option></select></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PASSAGE 3: Having a laugh -->
+        <section id="passage3" class="passage-section">
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <div class="reading-content bg-white p-8 rounded-xl shadow-sm border border-gray-200 sticky top-24 max-h-[75vh] overflow-y-auto">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-600 pl-4 uppercase">Having a laugh</h3>
+                    <p>Humans start developing a sense of humour as early as six weeks old, when babies begin to laugh and smile in response to stimuli. Laughter is universal across all human cultures and even exists in some form in rats, chimps, and bonobos. Like other human emotions and expressions, laughter and humour provide psychological scientists with rich resources for studying human psychology, ranging from the development of language to the neuroscience of social perception.</p>
+                    <p>Theories focusing on the evolution of laughter point to it as an important adaptation for social communication. Take, for example, the recorded laughter in TV comedy shows. Back in 1950, US sound engineer Charley Douglass hated dealing with the unpredictable laughter of live audiences, so started recording his own 'laugh tracks'. These were intended to help people at home feel like they were in a social situation, such as a crowded theatre.</p>
+                    <p>In one study conducted in 2016, samples of laughter from pairs of English-speaking students were recorded at the University of California, Santa Cruz. A team then played these recordings to listeners from 24 diverse societies, from indigenous tribes in New Guinea to city-dwellers in India and Europe. Participants were asked whether they thought the people laughing were friends or strangers. Worldwide, people's guesses were correct approximately 60% of the time.</p>
+                    <p>Researchers have also found that different types of laughter serve as codes to complex human social hierarchies. A team led by Christopher Oveis from the University of California, San Diego, found that high-status individuals had different laughs from low-status individuals. Stranger's judgements of an individual's social status were influenced by the dominant or submissive quality of their laughter.</p>
+                    <p>Analysis revealed that high-status individuals produced more dominant laughs and fewer submissive laughs. Dominant laughter was higher in pitch, louder, and more variable in tone. In line with predictions, laughers producing dominant laughs were perceived to be significantly higher in status. This was particularly true for low-status individuals, who were rated as significantly higher in status when displaying a dominant versus submissive laugh.</p>
+                    <p>Another study, conducted by David Cheng and Lu Wang of Australian National University, was based on the hypothesis that humour might provide a respite from tedious situations in the workplace. This 'mental break' might facilitate the replenishment of mental resources. To test this theory, they recruited students to perform a tedious task. Some then watched a video clip of the BBC comedy Mr. Bean, others a relaxing scene with dolphins, others a factual video about management.</p>
+                    <p>Students who had watched the Mr. Bean video ended up spending significantly more time working on the task, making twice as many predictions as the other two groups. Humour is not only enjoyable but more importantly, energising.</p>
+                </div>
+                <div class="questions-content space-y-8">
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                        <h4 class="font-bold text-blue-900 mb-4">Questions 27-31</h4>
+                        <div class="space-y-4">
+                            <div>27. Writer emphasises laughter's: <select id="q27" class="border p-2 rounded w-full"><option value="">Select</option><option value="A">A. impact on language.</option><option value="B">B. function in human culture.</option><option value="C">C. value to scientific research.</option><option value="D">D. universality in animal societies.</option></select></div>
+                            <div>28. Writer suggests about Charley Douglass: <select id="q28" class="border p-2 rounded w-full"><option value="">Select</option><option value="A">A. He understood importance of groups.</option><option value="B">B. TV viewers needed to be told when to laugh.</option><option value="C">C. Appeal to audiences across social spectrum.</option><option value="D">D. Preferred live recording studio audiences.</option></select></div>
+                            <div>29. Santa Cruz study significance: <select id="q29" class="border p-2 rounded w-full"><option value="">Select</option><option value="A">A. various different types studied.</option><option value="B">B. similar results produced by wide range of cultures.</option><option value="C">C. number of academic disciplines involved.</option><option value="D">D. many kinds of people recorded.</option></select></div>
+                            <div>30. Happened in San Diego study? <select id="q30" class="border p-2 rounded w-full"><option value="">Select</option><option value="A">A. Some became upset.</option><option value="B">B. Participants exchanged roles.</option><option value="C">C. Became friends.</option><option value="D">D. Unable to laugh.</option></select></div>
+                            <div>31. Results suggest: <select id="q31" class="border p-2 rounded w-full"><option value="">Select</option><option value="A">A. dominant laugh produced by high or low status.</option><option value="B">B. Low-status still produce submissive laughs.</option><option value="C">C. submissive laughs surprisingly similar.</option><option value="D">D. High-status always identified by laughter.</option></select></div>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-50 p-6 rounded-xl border border-yellow-200">
+                        <h4 class="font-bold text-yellow-900 mb-4">Questions 32-36 (A-H)</h4>
+                        <div class="bg-white p-2 border mb-3 text-[10px] font-bold grid grid-cols-4 gap-1 uppercase">
+                            <span>A Laughter</span> <span>B Relaxing</span> <span>C Boring</span> <span>D Anxiety</span>
+                            <span>E Stimulating</span> <span>F Emotion</span> <span>G Enjoyment</span> <span>H Amusing</span>
+                        </div>
+                        <p class="text-sm">Generate different kind of 32. <input type="text" id="q32" class="w-10 border text-center uppercase" maxlength="1">. Watch 33. <input type="text" id="q33" class="w-10 border text-center uppercase" maxlength="1"> video. Perform particularly 34. <input type="text" id="q34" class="w-10 border text-center uppercase" maxlength="1"> task. reduce 35. <input type="text" id="q35" class="w-10 border text-center uppercase" maxlength="1">. Have 36. <input type="text" id="q36" class="w-10 border text-center uppercase" maxlength="1"> effect.</p>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-gray-800 mb-4">Questions 37-40 (YES/NO/NG)</h4>
+                        <div class="space-y-2 text-sm">
+                            <p>37. Accurate at identifying friends? <select id="q37" class="border p-1 rounded"><option value="">Select</option><option>YES</option><option>NO</option><option>NOT GIVEN</option></select></p>
+                            <p>38. Researchers correct in predictions? <select id="q38" class="border p-1 rounded"><option value="">Select</option><option>YES</option><option>NO</option><option>NOT GIVEN</option></select></p>
+                            <p>39. Given a fixed amount of time? <select id="q39" class="border p-1 rounded"><option value="">Select</option><option>YES</option><option>NO</option><option>NOT GIVEN</option></select></p>
+                            <p>40. Line with established notions? <select id="q40" class="border p-1 rounded"><option value="">Select</option><option>YES</option><option>NO</option><option>NOT GIVEN</option></select></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Detailed Report -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex items-center justify-center z-[100] p-4 no-print">
+        <div class="bg-white rounded-2xl p-8 max-w-5xl w-full shadow-2xl overflow-y-auto max-h-[90vh] modal-content relative">
+            
+            <!-- Report Header for Printing -->
+            <div class="report-header text-center pb-4 mb-6">
+                <h1 class="text-2xl font-black text-blue-900 uppercase">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN</h1>
+                <h2 class="text-xl font-bold text-red-600 mt-1 uppercase">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h2>
+                <div class="mt-6 p-4 bg-gray-50 border rounded-lg text-left text-xs font-bold text-gray-800 grid md:grid-cols-2 gap-2">
+                    <p id="resName"></p>
+                    <p id="resDate"></p>
+                    <p id="resTime"></p>
+                    <p id="resAssessment" class="text-blue-800"></p>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-blue-900 uppercase">IELTS Detailed Score Report</h3>
+                <div class="text-5xl font-black text-red-600 border-4 border-red-600 px-6 py-2 rounded-xl" id="finalScore">0/40</div>
+            </div>
+
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-blue-900 text-white">
+                    <tr>
+                        <th class="p-3">Câu</th>
+                        <th class="p-3">Bài làm của học viên</th>
+                        <th class="p-3">Đáp án đúng</th>
+                        <th class="p-3">Giải thích & Vị trí bài đọc</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackBody"></tbody>
+            </table>
+
+            <div id="save-status" class="mb-4 text-center font-bold text-blue-600"></div>
+            <div class="mt-8 flex gap-4 no-print">
+                <button onclick="window.print()" class="flex-1 bg-blue-900 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-800 transition-all shadow-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print Report
+                </button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-200 font-bold py-4 rounded-xl">Back to Review</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Start overlay -->
+    <div id="start-overlay" class="fixed inset-0 bg-blue-900 bg-opacity-95 z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full text-center shadow-2xl">
+            <h2 class="text-2xl font-black text-blue-900 mb-4">${examName.toUpperCase()}</h2>
+            <p class="text-gray-600 mb-6 font-medium">Vui lòng nhập họ và tên của bạn để bắt đầu làm bài.</p>
+            <input type="text" id="overlay-name" class="w-full border-2 border-blue-200 rounded-lg px-4 py-3 mb-6 outline-none focus:border-blue-600 font-semibold text-center" placeholder="Họ và tên học viên...">
+            <button onclick="startTest()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-lg shadow-lg uppercase tracking-wide transition-all">Bắt đầu làm bài</button>
+        </div>
+    </div>
+    <script>
+        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec';
+        let isStarted = false;
+        function startTest() {
+            const name = document.getElementById('overlay-name').value.trim();
+            if (!name) {
+                alert('Vui lòng nhập họ và tên để bắt đầu làm bài!');
+                return;
+            }
+            document.getElementById('studentName').value = name;
+            document.getElementById('start-overlay').style.display = 'none';
+            isStarted = true;
+        }
+
+        const highlightMenu = document.getElementById('highlightMenu');
+        document.addEventListener('mouseup', (e) => {
+            const sel = window.getSelection();
+            if (sel.toString().trim().length > 0) {
+                highlightMenu.style.display = 'block';
+                highlightMenu.style.left = e.pageX + 'px';
+                highlightMenu.style.top = (e.pageY - 40) + 'px';
+            } else { highlightMenu.style.display = 'none'; }
+        });
+        highlightMenu.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const span = document.createElement('span');
+            span.className = 'highlight-yellow';
+            sel.getRangeAt(0).surroundContents(span);
+            highlightMenu.style.display = 'none';
+        });
+
+        function showPassage(num) {
+            document.querySelectorAll('.passage-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('border-blue-600', 'text-blue-600', 'border-transparent', 'text-gray-500'));
+            document.getElementById('passage' + num).classList.add('active');
+            document.getElementById('tab' + num).classList.add('border-blue-600', 'text-blue-600');
+            document.querySelectorAll('.tab-btn').forEach(b => { if(!b.classList.contains('border-blue-600')) b.classList.add('border-transparent', 'text-gray-500'); });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const ANSWERS = {
+            q1: "B", q2: "C", q3: "F", q4: "D", q5: "E", q6: "A",
+            q7: "safety", q8: "traffic", q9: "carriageway", q10: "mobile", q11: "dangerous", q12: "communities", q13: "healthy",
+            q14: "F", q15: "A", q16: "D", q17: "A",
+            q18: "genetic traits", q19: "heat loss", q20: "ears", q21: "insulating fat", q22: "emissions",
+            q23: "B", q24: "C", q25: "A", q26: "C",
+            q27: "C", q28: "A", q29: "B", q30: "B", q31: "D",
+            q32: "F", q33: "H", q34: "C", q35: "D", q36: "E",
+            q37: "NOT GIVEN", q38: "YES", q39: "NO", q40: "NO"
+        };
+
+        const KEY_LOCATIONS = {
+            q1: "Section B: Writer mentions happiness but not proposing everyone dances to work.",
+            q2: "Section C: Contrast between medieval construction and modern blueprints.",
+            q7: "Section E: Solution based on pedestrian safety.",
+            q14: "Section F: Technologies used to prevent mass extinctions in future.",
+            q23: "Michael Archer (B): Thylacines return could help devils with facial tumours.",
+            q27: "Para 1: Studying human psychology resources.",
+            q32: "Para 6: Australian National Uni study video (F - emotion).",
+            q39: "Para 7: Participants were allowed to quit the task at any point (NO - not fixed time)."
+        };
+
+        function submitTest() {
+            let score = 0;
+            let feedback = '';
+            const student = document.getElementById('studentName').value || "Chưa nhập tên";
+            const dateInput = document.getElementById('testDate').value;
+            const now = new Date();
+            const dateStr = dateInput ? new Date(dateInput).toLocaleDateString('vi-VN') : now.toLocaleDateString('vi-VN');
+            const timeStr = now.toLocaleTimeString('vi-VN');
+
+            for (let i = 1; i <= 40; i++) {
+                const key = "q" + i;
+                const input = document.getElementById(key);
+                if (!input) continue;
+
+                const studentVal = input.value.trim().toLowerCase();
+                const correctVal = ANSWERS[key].toLowerCase();
+                const isCorrect = studentVal === correctVal && studentVal !== "";
+
+                if (isCorrect) score++;
+
+                feedback += `
+                    <tr>
+                        <td class="text-center font-bold">${i}</td>
+                        <td class="${isCorrect ? 'correct' : 'incorrect'}">${input.value || "(Bỏ trống)"}</td>
+                        <td class="font-bold text-blue-900">${ANSWERS[key]}</td>
+                        <td class="italic text-gray-600">${KEY_LOCATIONS[key] || "Xem lại nội dung bài đọc."}</td>
+                    </tr>
+                `;
+            }
+
+            let assessment = "Band 4.0 - Cần cố gắng nhiều hơn.";
+            if(score >= 35) assessment = "Band 8.5 - 9.0: XUẤT SẮC!";
+            else if(score >= 30) assessment = "Band 7.0 - 7.5: RẤT TỐT!";
+            else if(score >= 23) assessment = "Band 6.0 - 6.5: KHÁ.";
+            else if(score >= 15) assessment = "Band 5.0 - 5.5: TRUNG BÌNH.";
+
+            document.getElementById('resName').innerHTML = "HỌC VIÊN: " + student.toUpperCase();
+            document.getElementById('resDate').innerHTML = "NGÀY THI: " + dateStr;
+            document.getElementById('resTime').innerHTML = "GIỜ NỘP: " + timeStr;
+            document.getElementById('resAssessment').innerText = assessment;
+            document.getElementById('finalScore').textContent = score + "/40";
+            document.getElementById('feedbackBody').innerHTML = feedback;
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('save-status').textContent = 'Đang lưu kết quả...';
+            // Calculate elapsed time based on which file it is
+            let timeElapsed = (typeof time !== 'undefined') ? (3600 - time) : (3600 - timeLeft);
+            
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'saveResult',
+                    name: document.getElementById('studentName').value || "Ẩn danh",
+                    exam: 'IELTS Reading 6',
+                    score: score + '/40',
+                    band: typeof assessment !== 'undefined' ? assessment : "Band " + ((score/40)*9).toFixed(1),
+                    time: timeElapsed + 's'
+                })
+            }).then(() => {
+                document.getElementById('save-status').textContent = 'Đã lưu kết quả thành công!';
+                if (score >= 30) {
+                    setTimeout(() => window.location.href = '../congratulations.html', 2000);
+                }
+            }).catch(() => {
+                document.getElementById('save-status').textContent = 'Lỗi kết nối lưu kết quả.';
+            });
+
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        let timeLeft = 3600;
+        setInterval(() => { if(!isStarted) return;
+            if (timeLeft <= 0) return;
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('timer').textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }, 1000);
+    </script>
+</body>
+</html>

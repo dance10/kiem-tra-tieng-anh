@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Reading Practice Test - Cô Thuý</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .reading-content p { margin-bottom: 1.25rem; line-height: 1.8; color: #374151; text-align: justify; }
+        .sticky-header { position: sticky; top: 0; z-index: 50; }
+        .passage-section { display: none; }
+        .passage-section.active { display: block; }
+        .correct { color: #059669; font-weight: 600; }
+        .incorrect { color: #dc2626; font-weight: 600; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+            .sticky-header { position: static; background: white; color: black; border-bottom: 2px solid black; }
+            .passage-section { display: block !important; }
+            .reading-content { display: none; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+
+    <!-- Header Branding -->
+    <header class="bg-white border-b border-gray-200 py-6 px-4 no-print">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-xl md:text-2xl font-bold text-blue-900 uppercase tracking-tight">Công Ty TNHH Giáo Dục Và Đào Tạo Hoài An Nhiên</h1>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-red-600 mt-1 uppercase">Trung Tâm Tiếng Anh Cô Thuý</h2>
+            <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+                <span><strong>MST:</strong> 0318842992</span>
+                <span class="hidden md:inline">|</span>
+                <span><strong>CS1:</strong> 202/1 Nguyễn Thị Lắng, Củ Chi</span>
+                <span class="hidden md:inline">|</span>
+                <span><strong>CS2:</strong> 61 Lê Đình Thám, Tân Phú</span>
+                <span class="hidden md:inline">|</span>
+                <span><strong>CS3:</strong> 325/5T Nguyễn Thị Thảnh, Hóc Môn</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Student Info Bar -->
+    <div class="sticky-header bg-blue-900 text-white py-3 px-4 shadow-lg no-print">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-4 items-center w-full md:w-auto">
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-semibold uppercase opacity-80">Học viên:</label>
+                    <input type="text" id="studentName" class="bg-blue-800 text-white px-3 py-1 rounded border border-blue-700 text-sm w-48 focus:w-64 transition-all" placeholder="Nhập họ tên...">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-semibold uppercase opacity-80">Ngày:</label>
+                    <input type="date" id="testDate" class="bg-blue-800 text-white px-3 py-1 rounded border border-blue-700 text-sm">
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="timer" class="font-mono text-lg font-bold bg-blue-800 px-3 py-1 rounded border border-blue-700">60:00</span>
+                <a href="../index.html" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-1.5 rounded-lg font-bold text-sm shadow-md transition-colors uppercase mr-2">🏠 Trang Chủ</a>
+                <button onclick="submitTest()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-1.5 rounded-lg font-bold text-sm shadow-md transition-colors uppercase">Nộp bài</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Header (Hidden on screen) -->
+    <div class="hidden print-only p-8 text-center border-b-2 mb-8">
+        <h1 class="text-2xl font-bold">KẾT QUẢ BÀI THI IELTS READING - TRUNG TÂM CÔ THUÝ</h1>
+        <p id="printStudentInfo" class="mt-4 text-lg font-semibold"></p>
+        <p id="printScore" class="text-xl font-bold text-red-600"></p>
+    </div>
+
+    <main class="max-w-6xl mx-auto p-4 md:p-8">
+        <!-- Navigation Tabs -->
+        <div class="flex border-b border-gray-300 mb-8 overflow-x-auto no-scrollbar no-print">
+            <button onclick="showPassage(1)" id="tab1" class="tab-btn py-4 px-6 font-semibold border-b-2 border-blue-600 text-blue-600 transition-all">Passage 1: Nutmeg</button>
+            <button onclick="showPassage(2)" id="tab2" class="tab-btn py-4 px-6 font-semibold border-b-2 border-transparent text-gray-500 hover:text-blue-600 transition-all">Passage 2: Driverless Cars</button>
+            <button onclick="showPassage(3)" id="tab3" class="tab-btn py-4 px-6 font-semibold border-b-2 border-transparent text-gray-500 hover:text-blue-600 transition-all">Passage 3: Exploration</button>
+        </div>
+
+        <!-- Passage 1: Nutmeg -->
+        <section id="passage1" class="passage-section active space-y-12">
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <div class="reading-content bg-white p-6 rounded-xl shadow-sm border border-gray-200 sticky top-24 max-h-[80vh] overflow-y-auto">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-600 pl-4">Nutmeg - a valuable spice</h3>
+                    <p>The nutmeg tree, <i>Myristica fragrans</i>, is a large evergreen tree native to Southeast Asia. Until the late 18th century, it only grew in one place in the world: a small group of islands in the Banda Sea, part of the Moluccas – or Spice Islands – in northeastern Indonesia. The tree is thickly branched with dense foliage of tough, dark green oval leaves, and produces small, yellow, bell-shaped flowers and pale yellow pear-shaped fruits.</p>
+                    <p>The fruit is encased in a fleshy husk. When the fruit is ripe, this husk splits into two halves along a ridge running the length of the fruit. Inside is a purple-brown shiny seed, 2-3 cm long by about 2 cm across, surrounded by a lacy red or crimson covering called an 'aril'. These are the sources of the two spices nutmeg and mace, the former being produced from the dried seed and the latter from the aril.</p>
+                    <p>Nutmeg was a highly prized and costly ingredient in European cuisine in the Middle Ages... Throughout this period, the Arabs were the exclusive importers of the spice to Europe. They sold nutmeg for high prices... but they never revealed the exact location of the source. The Arab-Venetian dominance ended in 1512, when the Portuguese reached the Banda Islands.</p>
+                    <p>In 1602, Dutch merchants founded the VOC... By 1617, the VOC was the richest commercial operation in the world. At the same time, thousands were dying of the plague... Doctors decided nutmeg held the cure. Nutmeg bought for a few pennies in Indonesia could be sold for 68,000 times its cost in London.</p>
+                </div>
+
+                <div class="questions-content space-y-8">
+                    <!-- Q1-4 -->
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 1-4: One Word Only</h4>
+                        <div class="space-y-4">
+                            <p>1. The leaves of the tree are <input type="text" id="q1" class="border-b border-gray-400 bg-transparent px-2 w-32 outline-none focus:border-blue-600"> in shape.</p>
+                            <p>2. The <input type="text" id="q2" class="border-b border-gray-400 bg-transparent px-2 w-32 outline-none focus:border-blue-600"> surrounds the fruit and breaks open when ripe.</p>
+                            <p>3. The <input type="text" id="q3" class="border-b border-gray-400 bg-transparent px-2 w-32 outline-none focus:border-blue-600"> is used to produce the spice nutmeg.</p>
+                            <p>4. The covering known as the aril is used to produce <input type="text" id="q4" class="border-b border-gray-400 bg-transparent px-2 w-32 outline-none focus:border-blue-600">.</p>
+                        </div>
+                    </div>
+                    <!-- Q5-7 -->
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 5-7: TRUE/FALSE/NOT GIVEN</h4>
+                        <div class="space-y-4">
+                            <p>5. In the Middle Ages, most Europeans knew where nutmeg was grown.
+                                <select id="q5" class="ml-2 border p-1 rounded"><option value="">Select</option><option>TRUE</option><option>FALSE</option><option>NOT GIVEN</option></select></p>
+                            <p>6. The VOC was the world's first major trading company.
+                                <select id="q6" class="ml-2 border p-1 rounded"><option value="">Select</option><option>TRUE</option><option>FALSE</option><option>NOT GIVEN</option></select></p>
+                            <p>7. Following the Treaty of Breda, the Dutch had control of all the islands where nutmeg grew.
+                                <select id="q7" class="ml-2 border p-1 rounded"><option value="">Select</option><option>TRUE</option><option>FALSE</option><option>NOT GIVEN</option></select></p>
+                        </div>
+                    </div>
+                    <!-- Q8-13 -->
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 8-13: Table Completion</h4>
+                        <div class="space-y-4 text-sm">
+                            <p>Middle Ages: Nutmeg brought to Europe by the 8. <input type="text" id="q8" class="border-b border-gray-400 bg-transparent px-2 w-24"></p>
+                            <p>17th Century: Believed to be effective against 9. <input type="text" id="q9" class="border-b border-gray-400 bg-transparent px-2 w-24"></p>
+                            <p>Dutch put 10. <input type="text" id="q10" class="border-b border-gray-400 bg-transparent px-2 w-24"> on nutmeg to avoid cultivation elsewhere.</p>
+                            <p>Obtained the island of 11. <input type="text" id="q11" class="border-b border-gray-400 bg-transparent px-2 w-24"> from the British.</p>
+                            <p>Late 18th Century: Plants secretly taken to 12. <input type="text" id="q12" class="border-b border-gray-400 bg-transparent px-2 w-24"></p>
+                            <p>1778: Plantations destroyed by a 13. <input type="text" id="q13" class="border-b border-gray-400 bg-transparent px-2 w-24"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Passage 2: Driverless Cars -->
+        <section id="passage2" class="passage-section space-y-12">
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <div class="reading-content bg-white p-6 rounded-xl shadow-sm border border-gray-200 sticky top-24 max-h-[80vh] overflow-y-auto">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-600 pl-4">Driverless cars</h3>
+                    <p><strong>Section A:</strong> The implementation of robotic car manufacture from the 1970s onwards led to significant cost savings...</p>
+                    <p><strong>Section B:</strong> Research on vehicle automation are not new. Google announced in 2010 trialling self-driving cars in California...</p>
+                    <p><strong>Section C:</strong> Safety is a motive; research at the UK's Transport Research Laboratory demonstrated more than 90 percent of collisions involve human error...</p>
+                    <p><strong>Section D:</strong> Average car spends 90 percent of life parked. Automation means car-sharing becomes more viable.</p>
+                    <p><strong>Section E:</strong> University of Michigan suggests ownership might reduce by 43 percent, but annual mileage would double...</p>
+                    <p><strong>Section F:</strong> Drivers will have freedom to select a vehicle that best suits their needs for a journey... smaller, efficient range of vehicles.</p>
+                    <p><strong>Section G:</strong> Technical difficulties, regulatory challenges, and societal trust are hurdles to overcome within next 10 years.</p>
+                </div>
+
+                <div class="questions-content space-y-8">
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 14-18: Section Matching</h4>
+                        <div class="space-y-3">
+                            <p>14. Time car is not in use: <input type="text" id="q14" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>15. Advantages for individuals: <input type="text" id="q15" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>16. Choosing appropriate vehicle: <input type="text" id="q16" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>17. Estimate for overcoming problems: <input type="text" id="q17" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>18. No effect on number manufactured: <input type="text" id="q18" class="w-10 border text-center uppercase" maxlength="1"></p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 19-22: Summary</h4>
+                        <div class="space-y-4">
+                            <p>Accidents due to 19. <input type="text" id="q19" class="border-b border-gray-400 bg-transparent px-2 w-32"></p>
+                            <p>Workable schemes for 20. <input type="text" id="q20" class="border-b border-gray-400 bg-transparent px-2 w-32"></p>
+                            <p>43% drop in 21. <input type="text" id="q21" class="border-b border-gray-400 bg-transparent px-2 w-32"></p>
+                            <p>Yearly 22. <input type="text" id="q22" class="border-b border-gray-400 bg-transparent px-2 w-32"> twice as high.</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 23-26: Multiple Choice (Pick 2)</h4>
+                        <p class="mb-2 font-semibold">23-24: Two benefits mentioned?</p>
+                        <div class="grid grid-cols-1 gap-2 mb-4" id="q23_24_container">
+                            <label><input type="checkbox" name="q23_24" value="A"> A. Cost savings</label>
+                            <label><input type="checkbox" name="q23_24" value="B"> B. Easier parking</label>
+                            <label><input type="checkbox" name="q23_24" value="C"> C. Spend journey doing other things</label>
+                            <label><input type="checkbox" name="q23_24" value="D"> D. People with driving difficulties travel independently</label>
+                            <label><input type="checkbox" name="q23_24" value="E"> E. Reduction in pollution</label>
+                        </div>
+                        <p class="mb-2 font-semibold">25-26: Two challenges mentioned?</p>
+                        <div class="grid grid-cols-1 gap-2" id="q25_26_container">
+                            <label><input type="checkbox" name="q25_26" value="A"> A. Public confidence</label>
+                            <label><input type="checkbox" name="q25_26" value="B"> B. Pace of transition</label>
+                            <label><input type="checkbox" name="q25_26" value="C"> C. Compensating drivers</label>
+                            <label><input type="checkbox" name="q25_26" value="D"> D. Infrastructure setup</label>
+                            <label><input type="checkbox" name="q25_26" value="E"> E. Adapting to driving conditions</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Passage 3: Exploration -->
+        <section id="passage3" class="passage-section space-y-12">
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <div class="reading-content bg-white p-6 rounded-xl shadow-sm border border-gray-200 sticky top-24 max-h-[80vh] overflow-y-auto">
+                    <h3 class="text-2xl font-bold mb-6 text-blue-900 border-l-4 border-blue-600 pl-4">What is exploration?</h3>
+                    <p>We are all explorers. Our desire to discover, and then share knowledge, is part of what makes us human...</p>
+                    <p>Thomas Hardy set some of his novels in Egdon Heath, a fictional area... delve into matters common to humanity. Peter Fleming talks of return to existence with loved ones.</p>
+                    <p>Word 'explorer' associated with past 'golden age' of 19th century... though truth is we named only 1.5 million species of 10 million. Understood only 10% of brains.</p>
+                    <p>Ran Fiennes: Done something no human done before and scientifically useful. Chris Bonington: Physically touching unknown. Hanbury-Tenison: Explorer changes the world. Thesiger: Bringing back information regardless of self-discovery.</p>
+                    <p>As a writer, I'm interested in exploration of ideas... fresh interpretation of a well-travelled route can give readers new insights.</p>
+                </div>
+
+                <div class="questions-content space-y-8">
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 27-32: Multiple Choice</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="font-medium">27. Visitors to NY illustrate:</p>
+                                <select id="q27" class="mt-1 w-full border p-1 rounded">
+                                    <option value="">Select</option><option value="A">A. Exploration is intrinsic</option><option value="B">B. Enthusiastic about exploring</option><option value="C">C. Surprising results</option><option value="D">D. Finding it daunting</option>
+                                </select>
+                            </div>
+                            <div>
+                                <p class="font-medium">28. Writer's view of explorers:</p>
+                                <select id="q28" class="mt-1 w-full border p-1 rounded">
+                                    <option value="">Select</option><option value="A">A. Benefits/disadvantages</option><option value="B">B. Teaching others</option><option value="C">C. Common urge</option><option value="D">D. Suit certain professions</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 33-37: Matching Explorers</h4>
+                        <div class="space-y-3">
+                            <p>33. Form of transport: <input type="text" id="q33" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>34. Feelings on coming home: <input type="text" id="q34" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>35. Benefit specific groups: <input type="text" id="q35" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>36. Not learning about self: <input type="text" id="q36" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <p>37. Unique and of value: <input type="text" id="q37" class="w-10 border text-center uppercase" maxlength="1"></p>
+                            <div class="text-xs text-gray-600 mt-2 bg-white p-2 rounded">A. Peter Fleming | B. Ran Fiennes | C. Bonington | D. Hanbury-Tenison | E. Thesiger</div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-lg mb-4 text-blue-900">Questions 38-40: Summary</h4>
+                        <div class="space-y-4">
+                            <p>Large number of 38. <input type="text" id="q38" class="border-b border-gray-400 bg-transparent px-2 w-32"></p>
+                            <p>Certain previously 39. <input type="text" id="q39" class="border-b border-gray-400 bg-transparent px-2 w-32"> people.</p>
+                            <p>Exploration of Earth's 40. <input type="text" id="q40" class="border-b border-gray-400 bg-transparent px-2 w-32"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-8 px-4 mt-20 no-print">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+            <div>
+                <h5 class="text-white font-bold mb-4 uppercase text-sm tracking-widest border-b border-gray-700 pb-2">Trung Tâm Cô Thuý</h5>
+                <p class="text-xs leading-relaxed">Cung cấp giải pháp luyện thi IELTS toàn diện, cam kết đầu ra và hỗ trợ học viên tận tâm.</p>
+            </div>
+            <div>
+                <h5 class="text-white font-bold mb-4 uppercase text-sm tracking-widest border-b border-gray-700 pb-2">Liên Hệ Trực Tiếp</h5>
+                <ul class="text-xs space-y-2">
+                    <li>CS1: 202/1 Nguyễn Thị Lắng, Củ Chi</li>
+                    <li>CS2: 61 Lê Đình Thám, Tân Phú</li>
+                    <li>CS3: 325/5T Nguyễn Thị Thảnh, Hóc Môn</li>
+                </ul>
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-semibold mb-2">MST: 0318842992</p>
+                <p class="text-[10px]">&copy; 2024 Hoài An Nhiên Education. Built for Excellence.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Result Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-[100] px-4 no-print">
+        <div class="bg-white rounded-2xl p-8 max-w-4xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-start mb-6 border-b pb-4">
+                <div class="text-left">
+                    <h2 class="text-3xl font-black text-blue-900">KẾT QUẢ BÀI THI</h2>
+                    <p class="text-gray-500">Cảm ơn học viên đã hoàn thành bài thi Reading.</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-5xl font-black text-red-600" id="scoreDisplay">0/40</div>
+                    <div class="text-sm font-bold text-gray-400 mt-1 uppercase tracking-widest">Score</div>
+                </div>
+            </div>
+
+            <!-- Feedback Table -->
+            <div class="mt-8 text-left">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-red-500 pl-3">Phản hồi chi tiết (Feedback)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">Câu</th>
+                                <th class="p-3 text-left">Bạn làm</th>
+                                <th class="p-3 text-left">Đáp án đúng</th>
+                                <th class="p-3 text-left">Giải thích / Vị trí</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedbackBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="save-status" class="mb-4 text-center font-bold text-blue-600"></div>
+            <div class="mt-10 flex flex-col md:flex-row gap-4">
+                <button onclick="window.print()" class="flex-1 bg-blue-900 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition-all flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    In bài test của tôi
+                </button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-200 text-gray-800 font-bold py-4 rounded-xl hover:bg-gray-300 transition-all">Quay lại xem lỗi</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Start overlay -->
+    <div id="start-overlay" class="fixed inset-0 bg-blue-900 bg-opacity-95 z-[200] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full text-center shadow-2xl">
+            <h2 class="text-2xl font-black text-blue-900 mb-4">${examName.toUpperCase()}</h2>
+            <p class="text-gray-600 mb-6 font-medium">Vui lòng nhập họ và tên của bạn để bắt đầu làm bài.</p>
+            <input type="text" id="overlay-name" class="w-full border-2 border-blue-200 rounded-lg px-4 py-3 mb-6 outline-none focus:border-blue-600 font-semibold text-center" placeholder="Họ và tên học viên...">
+            <button onclick="startTest()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-lg shadow-lg uppercase tracking-wide transition-all">Bắt đầu làm bài</button>
+        </div>
+    </div>
+    <script>
+        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec';
+        let isStarted = false;
+        function startTest() {
+            const name = document.getElementById('overlay-name').value.trim();
+            if (!name) {
+                alert('Vui lòng nhập họ và tên để bắt đầu làm bài!');
+                return;
+            }
+            document.getElementById('studentName').value = name;
+            document.getElementById('start-overlay').style.display = 'none';
+            isStarted = true;
+        }
+
+        const ANSWERS = {
+            q1: "oval", q2: "husk", q3: "seed", q4: "mace",
+            q5: "FALSE", q6: "NOT GIVEN", q7: "TRUE",
+            q8: "Arabs", q9: "plague", q10: "lime", q11: "Run", q12: "Mauritius", q13: "tsunami",
+            q14: "D", q15: "C", q16: "F", q17: "G", q18: "E",
+            q19: "human error", q20: "car-sharing", q21: "ownership", q22: "mileage",
+            q23_24: ["C", "D"], q25_26: ["A", "E"],
+            q27: "A", q28: "C", q29: "C", q30: "D", q31: "A", q32: "B",
+            q33: "E", q34: "A", q35: "D", q36: "E", q37: "B",
+            q38: "expeditions", q39: "uncontacted", q40: "surface"
+        };
+
+        const EXPLANATIONS = {
+            q1: "Đoạn 1: 'tough, dark green oval leaves'",
+            q2: "Đoạn 1: 'fruit is encased in a fleshy husk'",
+            q3: "Đoạn 1: 'purple-brown shiny seed... sources of the spices nutmeg'",
+            q4: "Đoạn 1: 'mace... from the aril'",
+            q5: "Đoạn 2: Arabs never revealed source (Europeans didn't know)",
+            q6: "Văn bản không nói VOC là 'first major', chỉ nói là 'richest'",
+            q7: "Đoạn 5: Trade of Run gave Dutch monopoly over 'every nutmeg island'",
+            q14: "Section D: 'car spends more than 90 percent of its life parked'",
+            q17: "Section G: 'conquered within the next 10 years'",
+            q27: "Paragraph 1: 'part of what makes us human'",
+            q33: "Wilfred Thesiger: 'camel when I could have gone by car'"
+        };
+
+        function showPassage(num) {
+            document.querySelectorAll('.passage-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('border-blue-600', 'text-blue-600'));
+            document.getElementById('passage' + num).classList.add('active');
+            document.getElementById('tab' + num).classList.add('border-blue-600', 'text-blue-600');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        let time = 3600;
+        setInterval(() => { if(!isStarted) return;
+            const min = Math.floor(time / 60);
+            const sec = time % 60;
+            document.getElementById('timer').textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+            if(time > 0) time--;
+        }, 1000);
+
+        function submitTest() {
+            let score = 0;
+            let feedbackHtml = '';
+
+            // Student Info for Printing
+            const name = document.getElementById('studentName').value || "Học viên ẩn danh";
+            const date = document.getElementById('testDate').value || new Date().toLocaleDateString();
+            document.getElementById('printStudentInfo').innerText = `Học viên: ${name} | Ngày thi: ${date}`;
+
+            for (let i = 1; i <= 40; i++) {
+                if (i >= 23 && i <= 26) continue; // Skip multiple selection handle below
+
+                let key = "q" + i;
+                let studentAns = document.getElementById(key)?.value?.trim() || "Chưa làm";
+                let correctAns = ANSWERS[key];
+                let isCorrect = studentAns.toLowerCase() === correctAns?.toLowerCase();
+
+                if (isCorrect) score++;
+
+                feedbackHtml += `
+                    <tr class="border-b">
+                        <td class="p-3 font-bold">${i}</td>
+                        <td class="p-3 ${isCorrect ? 'correct' : 'incorrect'}">${studentAns}</td>
+                        <td class="p-3 font-medium text-blue-600">${correctAns || "-"}</td>
+                        <td class="p-3 text-xs text-gray-500 italic">${EXPLANATIONS[key] || "Xem nội dung bài đọc."}</td>
+                    </tr>
+                `;
+            }
+
+            // Handle Pick 2 (23-24, 25-26)
+            [['q23_24', [23,24]], ['q25_26', [25,26]]].forEach(([name, ids]) => {
+                const selected = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e => e.value);
+                const correct = ANSWERS[name];
+                ids.forEach(id => {
+                    let studentChoice = selected[id - ids[0]] || "Chưa chọn";
+                    let isRight = correct.includes(studentChoice);
+                    if(isRight) score++;
+                    feedbackHtml += `
+                        <tr class="border-b">
+                            <td class="p-3 font-bold">${id}</td>
+                            <td class="p-3 ${isRight ? 'correct' : 'incorrect'}">${studentChoice}</td>
+                            <td class="p-3 font-medium text-blue-600">${correct.join(", ")}</td>
+                            <td class="p-3 text-xs text-gray-500 italic">Chọn 2 đáp án đúng.</td>
+                        </tr>
+                    `;
+                });
+            });
+
+            document.getElementById('scoreDisplay').textContent = `${score}/40`;
+            document.getElementById('printScore').textContent = `Tổng điểm: ${score}/40`;
+            document.getElementById('feedbackBody').innerHTML = feedbackHtml;
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('save-status').textContent = 'Đang lưu kết quả...';
+            // Calculate elapsed time based on which file it is
+            let timeElapsed = (typeof time !== 'undefined') ? (3600 - time) : (3600 - timeLeft);
+            
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'saveResult',
+                    name: document.getElementById('studentName').value || "Ẩn danh",
+                    exam: 'IELTS Reading 5',
+                    score: score + '/40',
+                    band: typeof assessment !== 'undefined' ? assessment : "Band " + ((score/40)*9).toFixed(1),
+                    time: timeElapsed + 's'
+                })
+            }).then(() => {
+                document.getElementById('save-status').textContent = 'Đã lưu kết quả thành công!';
+                if (score >= 30) {
+                    setTimeout(() => window.location.href = '../congratulations.html', 2000);
+                }
+            }).catch(() => {
+                document.getElementById('save-status').textContent = 'Lỗi kết nối lưu kết quả.';
+            });
+
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+    </script>
+</body>
+</html>
