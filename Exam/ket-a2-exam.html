@@ -575,5 +575,57 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const possibleIds = ['overlay-name', 'student-name', 'studentName', 'ket-student-name', 'cand-name', 'candidateName'];
+    let nameInput = null;
+    for (let id of possibleIds) {
+        if (document.getElementById(id)) {
+            nameInput = document.getElementById(id);
+            break;
+        }
+    }
+    
+    // Also try finding by placeholder if ID not matched
+    if (!nameInput) {
+        const inputs = document.querySelectorAll('input[type="text"]');
+        for (let input of inputs) {
+            if (input.placeholder && input.placeholder.toLowerCase().includes('tên')) {
+                nameInput = input;
+                break;
+            }
+        }
+    }
+
+    if (nameInput && !document.getElementById('dynamic-location-select')) {
+        const select = document.createElement('select');
+        select.id = 'dynamic-location-select';
+        select.innerHTML = '<option value="Củ Chi">Củ Chi</option><option value="Tân Phú">Tân Phú</option><option value="Hóc Môn">Hóc Môn</option><option value="Online">Online</option>';
+        select.className = nameInput.className;
+        select.style.marginTop = '10px';
+        select.style.marginBottom = '10px';
+        nameInput.parentNode.insertBefore(select, nameInput.nextSibling);
+
+        const originalFetch = window.fetch;
+        window.fetch = function() {
+            if (arguments[0] && arguments[0].includes('script.google.com')) {
+                try {
+                    let opts = arguments[1];
+                    let bodyObj = JSON.parse(opts.body);
+                    let loc = select.value;
+                    for (let key in bodyObj) {
+                        if (key === 'name' || key === 'student_name' || key === 'studentName') {
+                            bodyObj[key] = bodyObj[key] + ' - ' + loc;
+                        }
+                    }
+                    opts.body = JSON.stringify(bodyObj);
+                } catch(e) { console.error(e); }
+            }
+            return originalFetch.apply(this, arguments);
+        };
+    }
+});
+</script>
 </body>
 </html>
