@@ -475,9 +475,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     let loc = select.value;
                     for (let key in bodyObj) {
                         if (key === 'name' || key === 'student_name' || key === 'studentName') {
-                            bodyObj[key] = bodyObj[key] + ' - ' + loc;
+                            // bodyObj[key] = bodyObj[key] + ' - ' + loc;
                         }
                     }
+                    bodyObj['location'] = loc;
                     opts.body = JSON.stringify(bodyObj);
                 } catch(e) { console.error(e); }
             }
