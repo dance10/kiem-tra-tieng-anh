@@ -348,6 +348,7 @@
         function submitTest() {
             let score = 0;
             let feedback = '';
+            let answersSubmitted = {};
             const student = document.getElementById('studentName').value || "Chưa nhập tên";
             const dateInput = document.getElementById('testDate').value;
             const now = new Date();
@@ -360,6 +361,7 @@
                 if (!input) continue;
 
                 const studentVal = input.value.trim().toLowerCase();
+                answersSubmitted[i] = input.value;
                 const correctVal = ANSWERS[key].toLowerCase();
                 const isCorrect = studentVal === correctVal && studentVal !== "";
 
@@ -402,7 +404,8 @@
                     exam: 'IELTS Reading 6',
                     score: score + '/40',
                     band: typeof assessment !== 'undefined' ? assessment : "Band " + ((score/40)*9).toFixed(1),
-                    time: timeElapsed + 's'
+                    time: timeElapsed + 's',
+                    answers: answersSubmitted
                 })
             }).then(() => {
                 document.getElementById('save-status').textContent = 'Đã lưu kết quả thành công!';

@@ -435,7 +435,8 @@
                     exam: 'IELTS Reading 5',
                     score: score + '/40',
                     band: typeof assessment !== 'undefined' ? assessment : "Band " + ((score/40)*9).toFixed(1),
-                    time: timeElapsed + 's'
+                    time: timeElapsed + 's',
+                    answers: answersSubmitted
                 })
             }).then(() => {
                 document.getElementById('save-status').textContent = 'Đã lưu kết quả thành công!';
