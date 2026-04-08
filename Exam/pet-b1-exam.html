@@ -726,6 +726,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return originalFetch.apply(this, arguments);
         };
     }
+
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        if (!input.value) {
+            const vnTime = new Date(new Date().getTime() + 7 * 3600 * 1000);
+            input.value = vnTime.toISOString().split('T')[0];
+        }
+    });
 });
 </script>
 </body>
