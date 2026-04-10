@@ -375,13 +375,9 @@
             circle.style.strokeDashoffset = 552.92 - (552.92 * score / 40);
 
             // Redirect to congratulations page for high scores (band >= 7.0)
-            if (band >= 7.0) {
-                setTimeout(() => {
-                    if (confirm(`🎉 Chúc mừng ${window.studentName}! Band ${band} - Bạn có muốn xem trang vinh danh không?`)) {
-                        window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=40&band=${band}&exam=IELTS+Reading+Test+3`;
-                    }
+            setTimeout(() => {
+                    window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=40&band=${band}&exam=IELTS+Reading+Test+3`;
                 }, 2000);
-            }
 
             window.scrollTo(0,0);
         };

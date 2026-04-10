@@ -440,13 +440,9 @@
             circle.style.strokeDashoffset = 439.8 - (439.8 * score / 30);
 
             // Redirect to congratulations page for high scores (>= 400/495)
-            if (toeicReading >= 400) {
-                setTimeout(() => {
-                    if (confirm(`🎉 Chúc mừng ${window.studentName}! ${toeicReading}/495 - Bạn có muốn xem trang vinh danh không?`)) {
-                        window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=30&band=${toeicReading}/495&exam=TOEIC+Reading+Test+1`;
-                    }
+            setTimeout(() => {
+                    window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=30&band=${toeicReading}/495&exam=TOEIC+Reading+Test+1`;
                 }, 2000);
-            }
 
             window.scrollTo(0,0);
         }

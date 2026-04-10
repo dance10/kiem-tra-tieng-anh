@@ -447,13 +447,9 @@
             window.scrollTo(0,0);
 
             // Congrats Redirect
-            if (toeicReading >= 400) {
-                setTimeout(() => {
-                    if (confirm(`🎉 Chúc mừng ${window.studentName}! ${toeicReading}/495 - Bài làm xuất sắc, hãy xem bảng thành tích nhé!`)) {
-                        window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=40&band=${bandText}&exam=TOEIC+Reading+Test+2`;
-                    }
+            setTimeout(() => {
+                    window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=${score}&total=40&band=${bandText}&exam=TOEIC+Reading+Test+2`;
                 }, 2000);
-            }
         }
 
         window.onload = renderTest;

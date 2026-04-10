@@ -603,14 +603,10 @@
                 statusEl.innerText = "✅ Đã lưu kết quả Cloud!";
                 statusEl.className = "text-xs font-semibold text-green-600";
                 
-                // Redirect for high score
-                if (totalScore >= 24) {
-                    setTimeout(() => {
-                        if (confirm(`🎉 Chúc mừng ${_studentName}! ${totalScore}/32 (${_percentage}%) - Bạn có muốn xem trang vinh danh không?`)) {
-                            window.location.href = `../congratulations.html?name=${encodeURIComponent(_studentName)}&score=${totalScore}&total=32&band=${encodeURIComponent(_band)}&exam=B1+Preliminary`;
-                        }
-                    }, 1000);
-                }
+                // Redirect to Congratulations page
+                setTimeout(() => {
+                    window.location.href = `../congratulations.html?name=${encodeURIComponent(_studentName)}&score=${totalScore}&total=32&band=${encodeURIComponent(_band)}&exam=B1+Preliminary`;
+                }, 2000);
             }).catch(e => {
                 console.error(e);
                 statusEl.innerText = "❌ Lỗi lưu kết quả!";

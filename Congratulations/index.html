@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết Quả Bài Thi - Cô Thuý English Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+        /* ========== SHARED ANIMATIONS ========== */
+        .scale-in { animation: scaleIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes scaleIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .slide-up { animation: slideUp 1s ease-out forwards; opacity: 0; }
+        @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+
+        /* ========== EXCELLENT TIER (≥85%) ========== */
+        .tier-excellent .glow-pulse {
+            animation: glow-gold 2s ease-in-out infinite;
+        }
+        @keyframes glow-gold {
+            0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3), 0 0 60px rgba(251, 191, 36, 0.1); }
+            50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.5), 0 0 100px rgba(251, 191, 36, 0.2); }
+        }
+        .tier-excellent .gradient-text {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706, #fbbf24);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 4s ease infinite;
+        }
+        .tier-excellent .trophy-bounce { animation: trophyBounce 2s ease-in-out infinite; }
+        @keyframes trophyBounce {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            25% { transform: translateY(-15px) rotate(5deg); }
+            50% { transform: translateY(0) rotate(-5deg); }
+            75% { transform: translateY(-8px) rotate(3deg); }
+        }
+
+        /* ========== GOOD TIER (≥70%) ========== */
+        .tier-good .glow-pulse {
+            animation: glow-blue 2s ease-in-out infinite;
+        }
+        @keyframes glow-blue {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.5), 0 0 100px rgba(59, 130, 246, 0.2); }
+        }
+        .tier-good .gradient-text {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6, #2563eb, #60a5fa);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 4s ease infinite;
+        }
+        .tier-good .trophy-bounce { animation: floatStar 3s ease-in-out infinite; }
+        @keyframes floatStar {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.05); }
+        }
+
+        /* ========== OK TIER (≥50%) ========== */
+        .tier-ok .glow-pulse {
+            animation: glow-green 2.5s ease-in-out infinite;
+        }
+        @keyframes glow-green {
+            0%, 100% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.2), 0 0 40px rgba(34, 197, 94, 0.05); }
+            50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.3), 0 0 80px rgba(34, 197, 94, 0.1); }
+        }
+        .tier-ok .gradient-text {
+            background: linear-gradient(135deg, #22c55e, #16a34a, #15803d, #22c55e);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 4s ease infinite;
+        }
+        .tier-ok .trophy-bounce { animation: pulse-gentle 2.5s ease-in-out infinite; }
+        @keyframes pulse-gentle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* ========== NEED-IMPROVE TIER (<50%) ========== */
+        .tier-improve .glow-pulse {
+            animation: glow-warm 3s ease-in-out infinite;
+        }
+        @keyframes glow-warm {
+            0%, 100% { box-shadow: 0 0 15px rgba(251, 146, 60, 0.2), 0 0 40px rgba(251, 146, 60, 0.05); }
+            50% { box-shadow: 0 0 25px rgba(251, 146, 60, 0.3), 0 0 60px rgba(251, 146, 60, 0.1); }
+        }
+        .tier-improve .gradient-text {
+            background: linear-gradient(135deg, #fb923c, #f97316, #ea580c, #fb923c);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 4s ease infinite;
+        }
+        .tier-improve .trophy-bounce { animation: nod 3s ease-in-out infinite; }
+        @keyframes nod {
+            0%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+            60% { transform: translateY(2px); }
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Shine effect */
+        .shine {
+            background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+            background-size: 200% 200%;
+            animation: shine 3s infinite;
+        }
+        @keyframes shine { 0% { background-position: 200% 200%; } 100% { background-position: -100% -100%; } }
+
+        /* Star twinkle */
+        .twinkle { animation: twinkle 2s ease-in-out infinite alternate; }
+        @keyframes twinkle { from { opacity: 0.3; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+        /* Confetti */
+        .confetti { position: fixed; width: 10px; height: 10px; top: -10px; z-index: 99; animation: confetti-fall linear forwards; pointer-events: none; }
+        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+        /* Background particles */
+        .particle { position: fixed; border-radius: 50%; pointer-events: none; opacity: 0.6; animation: particle-float linear infinite; }
+        @keyframes particle-float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Progress ring */
+        .progress-ring-circle { transition: stroke-dashoffset 1.5s ease-out; }
+
+        /* Motivational banner for low scores */
+        .motivation-banner {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Study tips card */
+        .study-tip {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+        .study-tip:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white" id="main-body">
+
+    <!-- Background particles -->
+    <div id="particles"></div>
+    <!-- Confetti container -->
+    <div id="confetti-container"></div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 py-12" id="tier-wrapper">
+
+        <!-- Decorative elements -->
+        <div class="absolute top-8 left-8 text-4xl twinkle" style="animation-delay: 0s;" id="deco-1">✨</div>
+        <div class="absolute top-20 right-16 text-3xl twinkle" style="animation-delay: 0.5s;" id="deco-2">⭐</div>
+        <div class="absolute top-40 left-24 text-2xl twinkle" style="animation-delay: 1s;" id="deco-3">💫</div>
+        <div class="absolute bottom-20 right-12 text-3xl twinkle" style="animation-delay: 0.3s;" id="deco-4">✨</div>
+        <div class="absolute bottom-40 left-16 text-2xl twinkle" style="animation-delay: 0.7s;" id="deco-5">⭐</div>
+
+        <!-- Main Icon -->
+        <div class="scale-in mb-4">
+            <div class="trophy-bounce text-[120px] md:text-[160px] leading-none select-none" id="main-icon">🏆</div>
+        </div>
+
+        <!-- Title Section -->
+        <div class="text-center mb-8 slide-up" style="animation-delay: 0.3s;">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-4">
+                <span class="gradient-text" id="main-title">CHÚC MỪNG!</span>
+            </h1>
+            <p class="text-xl md:text-2xl font-medium italic opacity-80" id="sub-title">
+                🎊 Bạn đã đạt thành tích xuất sắc! 🎊
+            </p>
+        </div>
+
+        <!-- Student Card -->
+        <div class="slide-up w-full max-w-2xl" style="animation-delay: 0.6s;">
+            <div class="relative rounded-[3rem] p-1 glow-pulse" id="card-border">
+                <div class="rounded-[2.8rem] p-8 md:p-12" id="card-inner">
+                    
+                    <!-- Center Logo -->
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
+                            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">AN</div>
+                            <span class="text-xs font-black text-white/60 uppercase tracking-[4px]">Hoài An Nhiên Education</span>
+                        </div>
+                    </div>
+
+                    <!-- Student Name -->
+                    <div class="text-center mb-10">
+                        <p class="text-xs font-black uppercase tracking-[8px] mb-3 opacity-60" id="name-label">Học viên xuất sắc</p>
+                        <h2 id="student-name" class="text-4xl md:text-6xl font-black text-white tracking-tight leading-none"></h2>
+                    </div>
+
+                    <!-- Score Section -->
+                    <div class="grid grid-cols-3 gap-4 mb-10">
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/10 transition-all">
+                            <p class="text-[10px] font-black text-blue-300/50 uppercase tracking-[4px] mb-2">Bài thi</p>
+                            <p id="exam-type" class="text-lg font-black text-white leading-tight"></p>
+                        </div>
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/10 transition-all">
+                            <p class="text-[10px] font-black uppercase tracking-[4px] mb-2" id="score-label">Điểm số</p>
+                            <p class="text-4xl font-black leading-none" id="score-container">
+                                <span id="score-val">0</span><span class="text-lg text-white/30">/<span id="total-val">40</span></span>
+                            </p>
+                        </div>
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:bg-white/10 transition-all">
+                            <p class="text-[10px] font-black uppercase tracking-[4px] mb-2" id="band-label">Xếp loại</p>
+                            <p id="band-val" class="text-3xl font-black leading-none"></p>
+                        </div>
+                    </div>
+
+                    <!-- Progress Ring (Visual Score) -->
+                    <div class="flex justify-center mb-10">
+                        <div class="relative">
+                            <svg class="w-40 h-40 md:w-48 md:h-48 transform -rotate-90" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="85" stroke="rgba(255,255,255,0.08)" stroke-width="14" fill="none" />
+                                <circle cx="100" cy="100" r="85" id="progress-ring" class="progress-ring-circle" stroke-width="14" fill="none" stroke-linecap="round"
+                                    stroke-dasharray="534" stroke-dashoffset="534" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="percent-display" class="text-5xl md:text-6xl font-black">0</span>
+                                <span class="text-white/40 font-bold text-sm">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievement Badge -->
+                    <div class="flex justify-center mb-8">
+                        <div class="shine relative px-10 py-4 rounded-2xl shadow-2xl" id="badge-box">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-2xl"></div>
+                            <p id="achievement-text" class="relative font-black text-xl md:text-2xl uppercase tracking-[4px]">
+                                🏅 THÀNH TÍCH XUẤT SẮC 🏅
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Motivational Message -->
+                    <div class="text-center mb-6">
+                        <p id="motivation-text" class="font-medium text-lg italic leading-relaxed max-w-lg mx-auto opacity-80"></p>
+                    </div>
+
+                    <!-- Study Tips (only for lower scores) -->
+                    <div id="study-tips-section" class="hidden mt-8">
+                        <div class="motivation-banner rounded-3xl p-8">
+                            <h3 class="text-center font-black text-lg uppercase tracking-[3px] mb-6 flex items-center justify-center gap-3">
+                                <span>📋</span> Lời khuyên từ Cô Thuý
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4" id="tips-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Contact for improvement -->
+                    <div id="contact-section" class="hidden mt-8">
+                        <div class="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-2xl p-6 border border-blue-400/20 text-center">
+                            <p class="text-blue-200 font-bold mb-3">💬 Liên hệ đăng ký lớp nâng cao:</p>
+                            <a href="tel:0773117254" class="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-black py-3 px-8 rounded-xl transition-all hover:scale-105 text-lg no-underline">
+                                📞 0773 117 254
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="text-center mt-8">
+                        <p class="text-[10px] font-black text-white/20 uppercase tracking-[6px]">
+                            Ngày <span id="cert-date"></span> • Trung Tâm Tiếng Anh Cô Thuý
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="slide-up flex flex-wrap gap-4 mt-10 justify-center" style="animation-delay: 0.9s;">
+            <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-black py-4 px-10 rounded-2xl border border-white/10 transition-all hover:scale-105 active:scale-95 uppercase tracking-[3px] text-sm flex items-center gap-3">
+                🖨️ In giấy khen
+            </button>
+            <button onclick="shareResult()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-4 px-10 rounded-2xl shadow-xl shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 uppercase tracking-[3px] text-sm flex items-center gap-3">
+                📤 Chia sẻ kết quả
+            </button>
+            <a href="../index.html" class="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white/70 font-black py-4 px-10 rounded-2xl border border-white/5 transition-all hover:scale-105 uppercase tracking-[3px] text-sm flex items-center gap-3 no-underline">
+                🏠 Trang chủ
+            </a>
+            <button id="btn-retry" onclick="window.history.back()" class="hidden bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black py-4 px-10 rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 uppercase tracking-[3px] text-sm flex items-center gap-3">
+                🔄 Làm lại bài thi
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-8 border-t border-white/5">
+        <p class="text-[10px] text-white/15 uppercase tracking-[8px] font-black">
+            © 2026 Hoài An Nhiên Education • Trung Tâm Tiếng Anh Cô Thuý
+        </p>
+    </footer>
+
+    <script>
+        // ===================================================================
+        // PARSE URL PARAMS
+        // ===================================================================
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name') || 'Học viên';
+        const score = params.get('score') || '0';
+        const total = params.get('total') || '40';
+        const band = params.get('band') || '';
+        const exam = params.get('exam') || 'English Exam';
+
+        const percentage = Math.round(parseInt(score) / parseInt(total) * 100);
+
+        // ===================================================================
+        // TIER DEFINITIONS
+        // ===================================================================
+        const tiers = {
+            excellent: {
+                minPercent: 85,
+                bg: 'bg-gradient-to-br from-slate-900 via-amber-950/30 to-indigo-950',
+                borderGrad: 'bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400',
+                innerBg: 'bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-indigo-950/95 backdrop-blur-xl',
+                icon: '🏆',
+                title: 'CHÚC MỪNG!',
+                subtitle: '🎊 Bạn đã đạt thành tích xuất sắc! 🎊',
+                nameLabel: 'Học viên xuất sắc',
+                nameLabelColor: 'text-amber-400/60',
+                scoreLabelColor: 'text-green-300/50',
+                scoreColor: 'text-green-400',
+                bandLabelColor: 'text-amber-300/50',
+                bandColor: 'text-amber-400',
+                ringColor: '#fbbf24',
+                badgeBg: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500',
+                badgeText: 'text-slate-900',
+                decoEmojis: ['✨', '⭐', '💫', '✨', '⭐'],
+                tierClass: 'tier-excellent',
+                showConfetti: true,
+                showRetry: false,
+                showTips: false,
+                showContact: false,
+                getAchievement: (p) => {
+                    if (p >= 95) return { badge: '👑 HOÀN HẢO 👑', msg: (n) => `${n} đã đạt kết quả gần như hoàn hảo! Một tài năng thực sự đáng ngưỡng mộ. Hãy tiếp tục tỏa sáng!` };
+                    return { badge: '🏅 XUẤT SẮC 🏅', msg: (n) => `Tuyệt vời, ${n}! Kết quả xuất sắc thể hiện sự nỗ lực không ngừng. Bạn đang trên con đường chinh phục đỉnh cao!` };
+                }
+            },
+            good: {
+                minPercent: 70,
+                bg: 'bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950',
+                borderGrad: 'bg-gradient-to-br from-blue-400 via-sky-400 to-cyan-400',
+                innerBg: 'bg-gradient-to-br from-slate-900/95 via-blue-950/95 to-indigo-950/95 backdrop-blur-xl',
+                icon: '⭐',
+                title: 'GIỎI LẮM!',
+                subtitle: '🌟 Kết quả thật đáng tự hào! 🌟',
+                nameLabel: 'Học viên giỏi',
+                nameLabelColor: 'text-blue-400/60',
+                scoreLabelColor: 'text-cyan-300/50',
+                scoreColor: 'text-cyan-400',
+                bandLabelColor: 'text-blue-300/50',
+                bandColor: 'text-blue-400',
+                ringColor: '#3b82f6',
+                badgeBg: 'bg-gradient-to-r from-blue-500 via-sky-400 to-blue-500',
+                badgeText: 'text-white',
+                decoEmojis: ['🌟', '⭐', '💫', '🌟', '⭐'],
+                tierClass: 'tier-good',
+                showConfetti: true,
+                showRetry: false,
+                showTips: false,
+                showContact: false,
+                getAchievement: (p) => {
+                    return { badge: '⭐ GIỎI ⭐', msg: (n) => `Chúc mừng ${n}! Thành tích rất ấn tượng. Tiếp tục luyện tập và bạn sẽ còn tiến xa hơn nữa! Cô Thuý rất tự hào về bạn!` };
+                }
+            },
+            ok: {
+                minPercent: 50,
+                bg: 'bg-gradient-to-br from-slate-900 via-emerald-950/30 to-teal-950',
+                borderGrad: 'bg-gradient-to-br from-emerald-400 via-green-400 to-teal-400',
+                innerBg: 'bg-gradient-to-br from-slate-900/95 via-emerald-950/90 to-teal-950/95 backdrop-blur-xl',
+                icon: '💪',
+                title: 'RẤT TỐT!',
+                subtitle: '👏 Bạn đã hoàn thành bài thi! 👏',
+                nameLabel: 'Học viên nỗ lực',
+                nameLabelColor: 'text-emerald-400/60',
+                scoreLabelColor: 'text-green-300/50',
+                scoreColor: 'text-green-400',
+                bandLabelColor: 'text-emerald-300/50',
+                bandColor: 'text-emerald-400',
+                ringColor: '#22c55e',
+                badgeBg: 'bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-500',
+                badgeText: 'text-white',
+                decoEmojis: ['💪', '🌱', '📖', '💪', '🌱'],
+                tierClass: 'tier-ok',
+                showConfetti: false,
+                showRetry: true,
+                showTips: true,
+                showContact: true,
+                getAchievement: (p) => {
+                    return { badge: '💪 CỐ GẮNG TỐT 💪', msg: (n) => `${n} đã hoàn thành bài thi với nỗ lực đáng khen! Hãy ôn luyện thêm các phần chưa vững, bạn sẽ tiến bộ rất nhanh. Cô Thuý luôn ở đây hỗ trợ bạn!` };
+                },
+                tips: [
+                    { icon: '📖', title: 'Ôn lại từ vựng', desc: 'Ghi chép từ mới mỗi ngày, đọc sách tiếng Anh 15 phút/ngày' },
+                    { icon: '🎧', title: 'Nghe nhiều hơn', desc: 'Nghe podcast, xem phim tiếng Anh có phụ đề mỗi tối' },
+                    { icon: '✍️', title: 'Làm bài tập', desc: 'Làm thêm các bài practice test trên website của trung tâm' },
+                    { icon: '👩‍🏫', title: 'Hỏi giáo viên', desc: 'Đừng ngại hỏi Cô Thuý hoặc các thầy cô về phần chưa hiểu' }
+                ]
+            },
+            improve: {
+                minPercent: 0,
+                bg: 'bg-gradient-to-br from-slate-900 via-orange-950/20 to-red-950/30',
+                borderGrad: 'bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-400',
+                innerBg: 'bg-gradient-to-br from-slate-900/95 via-orange-950/80 to-red-950/90 backdrop-blur-xl',
+                icon: '📚',
+                title: 'CỐ LÊN NHÉ!',
+                subtitle: '🌱 Mỗi bước nhỏ đều là tiến bộ! 🌱',
+                nameLabel: 'Học viên tiềm năng',
+                nameLabelColor: 'text-orange-400/60',
+                scoreLabelColor: 'text-amber-300/50',
+                scoreColor: 'text-amber-400',
+                bandLabelColor: 'text-orange-300/50',
+                bandColor: 'text-orange-400',
+                ringColor: '#fb923c',
+                badgeBg: 'bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500',
+                badgeText: 'text-white',
+                decoEmojis: ['🌱', '📚', '✏️', '🌱', '📚'],
+                tierClass: 'tier-improve',
+                showConfetti: false,
+                showRetry: true,
+                showTips: true,
+                showContact: true,
+                getAchievement: (p) => {
+                    if (p >= 30) return { badge: '🌱 ĐANG TIẾN BỘ 🌱', msg: (n) => `${n} ơi, đừng nản chí! Việc học tiếng Anh cần thời gian. Hãy xem lại các câu sai, ghi chú lại và luyện tập mỗi ngày. Cô Thuý tin bạn sẽ làm tốt hơn lần sau!` };
+                    return { badge: '📚 HÃY CỐ GẮNG THÊM 📚', msg: (n) => `${n} ơi, bạn cần dành thêm thời gian ôn luyện nhé! Hãy bắt đầu từ những bài cơ bản, xem lại từ vựng và ngữ pháp. Cô Thuý và các thầy cô luôn sẵn sàng giúp đỡ bạn. Chúng mình cùng cố gắng nhé! 💪` };
+                },
+                tips: [
+                    { icon: '🎯', title: 'Xác định điểm yếu', desc: 'Xem lại các câu sai, xác định phần nào cần ôn tập nhiều hơn' },
+                    { icon: '📝', title: 'Lập kế hoạch học', desc: 'Dành 30 phút mỗi ngày để ôn bài, chia nhỏ kiến thức để dễ nhớ' },
+                    { icon: '📖', title: 'Học từ vựng cơ bản', desc: 'Tập trung học 10 từ mới mỗi ngày, viết ví dụ với mỗi từ' },
+                    { icon: '🗣️', title: 'Thực hành giao tiếp', desc: 'Nói tiếng Anh nhiều hơn, tập phát âm với video trên Youtube' },
+                    { icon: '👩‍🏫', title: 'Đăng ký lớp ôn tập', desc: 'Liên hệ Cô Thuý để được tư vấn lộ trình học phù hợp' },
+                    { icon: '🔄', title: 'Làm lại bài thi', desc: 'Thử làm lại bài thi này sau khi đã ôn luyện kỹ hơn' }
+                ]
+            }
+        };
+
+        // ===================================================================
+        // DETERMINE TIER
+        // ===================================================================
+        let currentTier;
+        if (percentage >= 85) currentTier = tiers.excellent;
+        else if (percentage >= 70) currentTier = tiers.good;
+        else if (percentage >= 50) currentTier = tiers.ok;
+        else currentTier = tiers.improve;
+
+        // ===================================================================
+        // APPLY TIER THEME
+        // ===================================================================
+        const body = document.getElementById('main-body');
+        body.className = `min-h-screen text-white ${currentTier.bg}`;
+
+        const wrapper = document.getElementById('tier-wrapper');
+        wrapper.classList.add(currentTier.tierClass);
+
+        // Populate content
+        document.getElementById('main-icon').textContent = currentTier.icon;
+        document.getElementById('main-title').textContent = currentTier.title;
+        document.getElementById('sub-title').textContent = currentTier.subtitle;
+
+        document.getElementById('student-name').textContent = name;
+        document.getElementById('score-val').textContent = score;
+        document.getElementById('total-val').textContent = total;
+        document.getElementById('band-val').textContent = band;
+        document.getElementById('exam-type').textContent = exam;
+
+        document.getElementById('name-label').textContent = currentTier.nameLabel;
+        document.getElementById('name-label').className = `text-xs font-black uppercase tracking-[8px] mb-3 ${currentTier.nameLabelColor}`;
+        document.getElementById('score-label').className = `text-[10px] font-black uppercase tracking-[4px] mb-2 ${currentTier.scoreLabelColor}`;
+        document.getElementById('score-container').querySelector('#score-val').className = currentTier.scoreColor;
+        document.getElementById('band-label').className = `text-[10px] font-black uppercase tracking-[4px] mb-2 ${currentTier.bandLabelColor}`;
+        document.getElementById('band-val').className = `text-3xl font-black leading-none ${currentTier.bandColor}`;
+
+        // Card border gradient
+        document.getElementById('card-border').className = `relative rounded-[3rem] p-1 glow-pulse ${currentTier.borderGrad}`;
+        document.getElementById('card-inner').className = `rounded-[2.8rem] p-8 md:p-12 ${currentTier.innerBg}`;
+
+        // Progress ring
+        const ring = document.getElementById('progress-ring');
+        ring.style.stroke = currentTier.ringColor;
+
+        // Badge
+        document.getElementById('badge-box').className = `shine relative px-10 py-4 rounded-2xl shadow-2xl ${currentTier.badgeBg}`;
+        document.getElementById('achievement-text').className = `relative font-black text-xl md:text-2xl uppercase tracking-[4px] ${currentTier.badgeText}`;
+
+        // Achievement text & motivation
+        const achievement = currentTier.getAchievement(percentage);
+        document.getElementById('achievement-text').textContent = achievement.badge;
+        document.getElementById('motivation-text').textContent = achievement.msg(name);
+
+        // Decorative emojis
+        currentTier.decoEmojis.forEach((emoji, i) => {
+            const el = document.getElementById(`deco-${i + 1}`);
+            if (el) el.textContent = emoji;
+        });
+
+        // Date
+        const today = new Date();
+        document.getElementById('cert-date').textContent = today.toLocaleDateString('vi-VN', {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+
+        // Show retry button for lower tiers
+        if (currentTier.showRetry) {
+            document.getElementById('btn-retry').classList.remove('hidden');
+            document.getElementById('btn-retry').classList.add('flex');
+        }
+
+        // Show study tips for lower tiers
+        if (currentTier.showTips && currentTier.tips) {
+            document.getElementById('study-tips-section').classList.remove('hidden');
+            const container = document.getElementById('tips-container');
+            currentTier.tips.forEach(tip => {
+                const div = document.createElement('div');
+                div.className = 'study-tip rounded-2xl p-5';
+                div.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <span class="text-3xl flex-shrink-0">${tip.icon}</span>
+                        <div>
+                            <h4 class="font-black text-white text-sm uppercase tracking-wider mb-1">${tip.title}</h4>
+                            <p class="text-white/60 text-sm leading-relaxed">${tip.desc}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Show contact section
+        if (currentTier.showContact) {
+            document.getElementById('contact-section').classList.remove('hidden');
+        }
+
+        // ===================================================================
+        // EFFECTS & ANIMATIONS
+        // ===================================================================
+
+        // Confetti (only for high scores)
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#fbbf24', '#f59e0b', '#ef4444', '#3b82f6', '#22c55e', '#a855f7', '#ec4899', '#14b8a6'];
+            for (let i = 0; i < 80; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 12 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 12 + 5) + 'px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                    container.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 5500);
+                }, i * 60);
+            }
+        }
+
+        // Background particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = [`${currentTier.ringColor}44`, 'rgba(59,130,246,0.15)', 'rgba(139,92,246,0.15)'];
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.width = (Math.random() * 6 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDelay = (Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Score animation
+        function animateScore() {
+            const scoreEl = document.getElementById('score-val');
+            const percentEl = document.getElementById('percent-display');
+            const targetScore = parseInt(score);
+            const targetPercent = percentage;
+            let currentScore = 0;
+            let currentPercent = 0;
+
+            const scoreStep = setInterval(() => {
+                if (currentScore >= targetScore) {
+                    scoreEl.textContent = targetScore;
+                    clearInterval(scoreStep);
+                } else {
+                    currentScore++;
+                    scoreEl.textContent = currentScore;
+                }
+            }, Math.max(20, 1500 / targetScore));
+
+            const percentStep = setInterval(() => {
+                if (currentPercent >= targetPercent) {
+                    percentEl.textContent = targetPercent;
+                    clearInterval(percentStep);
+                } else {
+                    currentPercent++;
+                    percentEl.textContent = currentPercent;
+                }
+            }, Math.max(10, 1500 / targetPercent));
+
+            // Animate ring
+            const circumference = 534;
+            const offset = circumference - (circumference * percentage / 100);
+            setTimeout(() => {
+                ring.style.strokeDashoffset = offset;
+            }, 300);
+        }
+
+        // Share result
+        function shareResult() {
+            let shareText;
+            if (percentage >= 70) {
+                shareText = `🏆 ${name} đã đạt ${score}/${total} (${band}) trong bài thi ${exam} tại Trung Tâm Tiếng Anh Cô Thuý! 🎉`;
+            } else {
+                shareText = `📚 ${name} đã hoàn thành bài thi ${exam} với ${score}/${total} điểm tại Trung Tâm Tiếng Anh Cô Thuý. Đang cố gắng mỗi ngày! 💪`;
+            }
+            if (navigator.share) {
+                navigator.share({ title: 'Kết quả bài thi', text: shareText, url: window.location.href }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('📋 Đã sao chép kết quả vào clipboard!\n\n' + shareText);
+                });
+            }
+        }
+
+        // ===================================================================
+        // INITIALIZE
+        // ===================================================================
+        createParticles();
+        
+        setTimeout(() => {
+            if (currentTier.showConfetti) createConfetti();
+            animateScore();
+        }, 800);
+
+        if (currentTier.showConfetti) {
+            setInterval(() => createConfetti(), 8000);
+        }
+    </script>
+</body>
+</html>

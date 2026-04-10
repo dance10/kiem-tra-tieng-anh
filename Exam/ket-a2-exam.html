@@ -213,14 +213,10 @@
                     }
                 }
 
-                // Redirect to congratulations page for Distinction results
-                if (s >= t * 0.8) {
-                    setTimeout(() => {
-                        if (confirm(`\ud83c\udf89 Chúc mừng ${studentName || 'bạn'}! ${gradeLabel} (${percentage}%) - Bạn có muốn xem trang vinh danh không?`)) {
-                            window.location.href = `congratulations.html?name=${encodeURIComponent(studentName || 'KET Student')}&score=${s}&total=${t}&band=${gradeLabel}&exam=KET+A2+Exam`;
-                        }
-                    }, 2000);
-                }
+                // Redirect to Congratulations page
+                setTimeout(() => {
+                    window.location.href = `congratulations.html?name=${encodeURIComponent(studentName || 'KET Student')}&score=${s}&total=${t}&band=${gradeLabel}&exam=KET+A2+Exam`;
+                }, 2000);
             };
 
             const calculateScore = () => {

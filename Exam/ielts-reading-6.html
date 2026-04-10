@@ -409,9 +409,7 @@ IELTS READING TEST 6<!DOCTYPE html>
                 })
             }).then(() => {
                 document.getElementById('save-status').textContent = 'Đã lưu kết quả thành công!';
-                if (score >= 30) {
-                    setTimeout(() => window.location.href = '../congratulations.html', 2000);
-                }
+                                    setTimeout(() => window.location.href = '../congratulations.html', 2000);
             }).catch(() => {
                 document.getElementById('save-status').textContent = 'Lỗi kết nối lưu kết quả.';
             });
