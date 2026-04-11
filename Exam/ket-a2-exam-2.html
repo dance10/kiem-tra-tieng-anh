@@ -612,7 +612,7 @@
                     cs.className = "text-green-600";
                 }
                 setTimeout(() => {
-                        window.location.href = `congratulations.html?name=${encodeURIComponent(state.name)}&score=${answered}&total=${state.totalQuestions}&band=${bandLabel}&exam=KET+Practice+Test+2`;
+                        window.location.href = `../congratulations.html?name=${encodeURIComponent(state.name)}&score=${answered}&total=${state.totalQuestions}&band=${bandLabel}&exam=KET+Practice+Test+2`;
                     }, 1500);
             }).catch(e => {
                 const cs = document.getElementById('cloud-status');
