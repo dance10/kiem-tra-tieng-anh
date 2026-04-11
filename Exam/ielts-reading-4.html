@@ -56,8 +56,8 @@
             <p class="text-sm text-gray-500">TRUNG TÂM TIẾNG ANH CÔ THUÝ</p>
         </div>
         <div class="text-right hidden sm:block">
-            <p class="text-xs text-gray-400">Time remaining (simulation)</p>
-            <p class="text-xl font-mono font-bold text-brand-700">60:00</p>
+            <p class="text-xs text-gray-400">Thời gian còn lại</p>
+            <p id="timer-display" class="text-xl font-mono font-bold text-brand-700">60:00</p>
         </div>
     </div>
 </header>
@@ -424,6 +424,9 @@
         }
     }
 
+    let timerSeconds = 3600;
+    let timerInterval = null;
+
     function startTest() {
         const nameInput = document.getElementById('student-name');
         if (nameInput.value.trim() === "") {
@@ -431,6 +434,28 @@
             return;
         }
         navigate('passage1');
+        startTimer();
+    }
+
+    function startTimer() {
+        if (timerInterval) return;
+        timerInterval = setInterval(() => {
+            timerSeconds--;
+            if (timerSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                alert('⏰ Hết giờ! Bài thi sẽ được nộp tự động.');
+                showResults();
+                return;
+            }
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            const display = document.getElementById('timer-display');
+            if (display) {
+                display.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                if (timerSeconds < 300) display.classList.add('animate-pulse', 'text-red-600');
+            }
+        }, 1000);
     }
 
     function getUserAnswer(qId) {
@@ -512,7 +537,7 @@
                         exam: 'IELTS Reading Test 4',
                         score: totalScore + '/40',
                         band: 'Band ' + band,
-                        time: '0s',
+                        time: (3600 - timerSeconds) + 's',
                         answers: answersSubmitted
                     })
                 });

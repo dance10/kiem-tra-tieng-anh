@@ -177,6 +177,11 @@
                     </div>
                 </div>
 
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-5 text-center">
+                    <h3 class="text-xs font-bold text-stone-400 uppercase mb-2 tracking-widest">Thời gian</h3>
+                    <p id="ket2-timer" class="text-2xl font-mono font-black text-teal-700">60:00</p>
+                </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-5">
                     <h3 class="text-xs font-bold text-stone-400 uppercase mb-4 tracking-widest">Tiến độ</h3>
                     <nav class="flex flex-col gap-2" id="nav-buttons">
@@ -531,6 +536,7 @@
             views.login.classList.add('hidden-view');
             views.exam.classList.remove('hidden-view');
             window.scrollTo(0, 0);
+            startKet2Timer();
         });
 
         const navBtns = document.querySelectorAll('.nav-btn');
@@ -560,6 +566,33 @@
         handleWriting('q32-text', 35);
 
         let chartInstance = null;
+        let ket2TimerSeconds = 3600;
+        let ket2TimerInterval = null;
+
+        function startKet2Timer() {
+            if (ket2TimerInterval) return;
+            ket2TimerInterval = setInterval(() => {
+                ket2TimerSeconds--;
+                if (ket2TimerSeconds <= 0) {
+                    clearInterval(ket2TimerInterval);
+                    ket2TimerInterval = null;
+                    alert('⏰ Hết giờ! Bài thi sẽ được nộp tự động.');
+                    document.getElementById('btn-submit').click();
+                    return;
+                }
+                const mins = Math.floor(ket2TimerSeconds / 60);
+                const secs = ket2TimerSeconds % 60;
+                const display = document.getElementById('ket2-timer');
+                if (display) {
+                    display.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                    if (ket2TimerSeconds < 300) {
+                        display.classList.remove('text-teal-700');
+                        display.classList.add('text-red-600', 'animate-pulse');
+                    }
+                }
+            }, 1000);
+        }
+
         document.getElementById('btn-submit').addEventListener('click', () => {
             if(!confirm('Xác nhận nộp bài?')) return;
             const inputs = document.querySelectorAll('.ans-input');
@@ -603,7 +636,8 @@
                     exam_type: 'KET Practice Test 2',
                     score: answered,
                     total: state.totalQuestions,
-                    band: bandLabel
+                    band: bandLabel,
+                    time: (3600 - ket2TimerSeconds) + 's'
                 })
             }).then(() => {
                 const cs = document.getElementById('cloud-status');

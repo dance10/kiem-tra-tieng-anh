@@ -34,6 +34,7 @@
                     <span class="inline-block bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded font-semibold uppercase tracking-wide">B1 Preliminary (PET)</span>
                 </div>
                 <p class="text-sm font-medium mt-1" id="header-status">Chế độ: Làm bài thi</p>
+                <p id="pet-timer" class="text-xl font-mono font-black text-sky-600 mt-1">45:00</p>
                 <div id="save-status" class="text-xs font-semibold text-green-600 hidden"></div>
             </div>
         </div>
@@ -316,6 +317,33 @@
             return currentAnswers;
         }
 
+        let petTimerSeconds = 2700; // 45 min
+        let petTimerInterval = null;
+
+        function startPetTimer() {
+            if (petTimerInterval) return;
+            petTimerInterval = setInterval(() => {
+                petTimerSeconds--;
+                if (petTimerSeconds <= 0) {
+                    clearInterval(petTimerInterval);
+                    petTimerInterval = null;
+                    alert('⏰ Hết giờ! Bài thi sẽ được nộp tự động.');
+                    submitTest();
+                    return;
+                }
+                const mins = Math.floor(petTimerSeconds / 60);
+                const secs = petTimerSeconds % 60;
+                const display = document.getElementById('pet-timer');
+                if (display) {
+                    display.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                    if (petTimerSeconds < 300) {
+                        display.classList.remove('text-sky-600');
+                        display.classList.add('text-red-600', 'animate-pulse');
+                    }
+                }
+            }, 1000);
+        }
+
         function startPetExam() {
             const nameVal = document.getElementById('pet-student-name').value.trim();
             if (!nameVal) {
@@ -324,6 +352,7 @@
             }
             petStudentName = nameVal;
             switchTab('part1');
+            startPetTimer();
         }
 
         function initApp() {
@@ -597,7 +626,8 @@
                     score: totalScore,
                     total: 32,
                     band: _band,
-                    answers: prepareAnswersForSheet()
+                    answers: prepareAnswersForSheet(),
+                    time: (2700 - petTimerSeconds) + 's'
                 })
             }).then(() => {
                 statusEl.innerText = "✅ Đã lưu kết quả Cloud!";
