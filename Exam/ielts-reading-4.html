@@ -449,6 +449,7 @@
     async function showResults() {
         let totalScore = 0;
         let p1Score = 0, p2Score = 0, p3Score = 0;
+        let answersSubmitted = {};
         
         const studentName = document.getElementById('student-name').value;
         document.getElementById('display-student-name').innerText = "Học viên: " + studentName;
@@ -500,22 +501,23 @@
             saveStatus.innerText = "⏳ Đang lưu kết quả...";
             saveStatus.className = "text-sm text-yellow-600 font-bold mb-4";
             try {
+                const band = (totalScore / 40 * 9).toFixed(1);
                 await fetch(GOOGLE_SHEET_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        student_name: studentName,
-                        exam_type: 'IELTS-004',
-                        score: totalScore,
-                        total: 40,
-                        band: (totalScore / 40 * 9).toFixed(1),
+                        action: 'saveResult',
+                        name: studentName,
+                        exam: 'IELTS Reading Test 4',
+                        score: totalScore + '/40',
+                        band: 'Band ' + band,
+                        time: '0s',
                         answers: answersSubmitted
                     })
                 });
                 saveStatus.innerText = "✅ Kết quả đã được lưu vào Google Sheet!";
                 saveStatus.className = "text-sm text-green-700 font-bold mb-4";
-                const band = (totalScore / 40 * 9).toFixed(1);
                 setTimeout(() => {
                     window.location.href = `../congratulations.html?name=${encodeURIComponent(studentName)}&score=${totalScore}&total=40&band=${band}&exam=IELTS+Reading+Test+4`;
                 }, 3000);

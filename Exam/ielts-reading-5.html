@@ -1,4 +1,4 @@
-IELTS READING TEST 5<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -372,6 +372,7 @@ IELTS READING TEST 5<!DOCTYPE html>
         function submitTest() {
             let score = 0;
             let feedbackHtml = '';
+            let answersSubmitted = {};
 
             // Student Info for Printing
             const name = document.getElementById('studentName').value || "Học viên ẩn danh";
@@ -383,6 +384,7 @@ IELTS READING TEST 5<!DOCTYPE html>
 
                 let key = "q" + i;
                 let studentAns = document.getElementById(key)?.value?.trim() || "Chưa làm";
+                answersSubmitted[i] = studentAns;
                 let correctAns = ANSWERS[key];
                 let isCorrect = studentAns.toLowerCase() === correctAns?.toLowerCase();
 
@@ -432,7 +434,7 @@ IELTS READING TEST 5<!DOCTYPE html>
                 body: JSON.stringify({
                     action: 'saveResult',
                     name: document.getElementById('studentName').value || "Ẩn danh",
-                    exam: 'IELTS Reading 5',
+                    exam: 'IELTS Reading Test 5',
                     score: score + '/40',
                     band: typeof assessment !== 'undefined' ? assessment : "Band " + ((score/40)*9).toFixed(1),
                     time: timeElapsed + 's',
