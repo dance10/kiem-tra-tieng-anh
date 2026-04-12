@@ -557,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                          bodyObj['timeTaken'] = "Không xác định";
                     }
-                    delete bodyObj.answers; // Tùy chọn: có thể ghi vào answers. Xin không xóa answers để không mất dữ liệu của học viên
+                    // delete bodyObj.answers; // Tùy chọn: có thể ghi vào answers. Xin không xóa answers để không mất dữ liệu của học viên
                     
                     // Để an toàn, ghi chú vào biến "timeTaken" để có thể gộp nếu Google sheet không map cột tự động
                     opts.body = JSON.stringify(bodyObj);
