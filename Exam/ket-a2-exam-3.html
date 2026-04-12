@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2 Key (KET) Reading Practice - Trung Tâm Cô Thuý</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Soft Stone & Sky Blue -->
+    <!-- Application Structure Plan: Ứng dụng mô phỏng bài thi KET (A2) với cấu trúc 5 phần chính. Sử dụng mô hình Single Page Application để chuyển cảnh mượt mà giữa các phần. Hệ thống quản lý trạng thái bằng JavaScript để lưu trữ câu trả lời của thí sinh và tính toán điểm số tức thì. Giao diện tập trung vào việc đọc hiểu với bộ đếm ngược 30 phút nhằm rèn luyện kỹ năng quản lý thời gian cho học sinh cấp độ cơ bản. -->
+    <!-- Visualization & Content Choices: 1. Question Interface -> Các lựa chọn trắc nghiệm và điền từ được thiết kế tối giản, dễ tương tác trên cả di động. 2. Timer & Progress -> Giúp học sinh theo dõi tiến độ thực tế. 3. Kết quả -> Sử dụng Chart.js để phân tích điểm số theo từng kỹ năng Reading khác nhau (hiểu thông báo, tìm thông tin, ngữ pháp, từ vựng). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        sky: {
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .hide { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        input[type="radio"] { accent-color: #0284c7; transform: scale(1.1); }
+        select, input[type="text"] { border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 0.6rem; width: 100%; background-color: white; font-size: 0.95rem; }
+        select:focus, input[type="text"]:focus { outline: none; border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+        .timer-warning { color: #ef4444; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="bg-sky-700 text-white shadow-lg py-4 px-6 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-white text-sky-700 font-black rounded px-2 py-1 text-sm">A2 KEY</div>
+            <div class="font-bold text-lg tracking-tight uppercase">TRUNG TÂM TIẾNG ANH CÔ THUÝ</div>
+        </div>
+        <div class="text-xs font-semibold opacity-80 hidden md:block">KET Reading Interactive Practice</div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
+        
+        <!-- Welcome View -->
+        <div id="welcome-view" class="bg-white rounded-2xl shadow-xl border border-stone-100 p-10 text-center fade-in">
+            <h1 class="text-3xl font-extrabold text-stone-900 mb-4">Luyện Thi A2 Key (KET) Reading</h1>
+            <p class="text-lg text-stone-500 mb-8 max-w-2xl mx-auto">Vui lòng điền thông tin bên dưới để bắt đầu bài thi thử. Hệ thống sẽ tự động tính điểm và phân tích kết quả cho bạn.</p>
+            
+            <div class="max-w-md mx-auto mb-12">
+                <label for="user-name" class="block text-xs font-black text-stone-400 mb-2 uppercase text-left tracking-widest">Họ và Tên Học Viên</label>
+                <input type="text" id="user-name" placeholder="Ví dụ: Nguyễn Văn A" class="w-full p-4 text-xl font-semibold border-2 border-stone-100 focus:border-sky-600 transition-all text-center rounded-xl">
+                <p id="name-error" class="text-red-500 text-xs mt-3 font-medium hide">Vui lòng nhập tên của bạn để tiếp tục.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="p-6 bg-stone-50 rounded-2xl border border-stone-100 transition hover:border-sky-200">
+                    <div class="text-3xl mb-3">📋</div>
+                    <h3 class="font-bold text-stone-800">30 Câu hỏi</h3>
+                    <p class="text-xs text-stone-500 mt-2">Bao quát 5 dạng bài trọng tâm của cấp độ A2.</p>
+                </div>
+                <div class="p-6 bg-stone-50 rounded-2xl border border-stone-100 transition hover:border-sky-200">
+                    <div class="text-3xl mb-3">⏳</div>
+                    <h3 class="font-bold text-stone-800">30 Phút</h3>
+                    <p class="text-xs text-stone-500 mt-2">Thời gian làm bài tiêu chuẩn để đạt hiệu quả cao nhất.</p>
+                </div>
+                <div class="p-6 bg-stone-50 rounded-2xl border border-stone-100 transition hover:border-sky-200">
+                    <div class="text-3xl mb-3">📈</div>
+                    <h3 class="font-bold text-stone-800">Phân tích</h3>
+                    <p class="text-xs text-stone-500 mt-2">Biểu đồ trực quan giúp nhận diện điểm yếu cần cải thiện.</p>
+                </div>
+            </div>
+
+            <button id="btn-start" class="bg-sky-600 hover:bg-sky-700 text-white font-black py-4 px-12 rounded-2xl transition duration-300 shadow-lg text-lg transform hover:-translate-y-1">
+                BẮT ĐẦU NGAY
+            </button>
+        </div>
+
+        <!-- Test View -->
+        <div id="test-view" class="hide flex flex-col lg:flex-row gap-8 items-start">
+            
+            <aside class="w-full lg:w-72 space-y-4 sticky top-24 shrink-0">
+                <div class="bg-white rounded-2xl shadow-md border border-stone-100 p-5 text-center">
+                    <div class="text-[10px] font-black text-stone-400 uppercase mb-2 tracking-widest">Thời gian còn lại</div>
+                    <div id="countdown-timer" class="text-4xl font-mono font-black text-sky-700">30:00</div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-md border border-stone-100 p-5">
+                    <h3 class="font-black text-stone-400 text-[10px] uppercase mb-4 tracking-widest">Danh sách phần thi</h3>
+                    <nav id="part-nav" class="space-y-2">
+                    </nav>
+
+                    <div class="mt-8 pt-6 border-t border-stone-50">
+                        <div class="flex justify-between text-[10px] font-black text-stone-400 uppercase mb-2">
+                            <span>Tiến độ</span>
+                            <span id="progress-text">0/30</span>
+                        </div>
+                        <div class="w-full bg-stone-100 rounded-full h-2">
+                            <div id="progress-bar" class="bg-sky-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="text-[10px] text-stone-400 font-black uppercase mb-1 tracking-widest">Học viên</div>
+                        <div id="display-name" class="text-sm font-bold text-stone-700 truncate">---</div>
+                    </div>
+
+                    <button id="btn-submit-test" class="w-full mt-8 bg-stone-900 hover:bg-black text-white font-black py-3 px-4 rounded-xl transition duration-200 hide uppercase text-xs tracking-widest">
+                        Nộp bài thi
+                    </button>
+                </div>
+            </aside>
+
+            <div class="flex-grow w-full space-y-6">
+                <div id="part-container" class="bg-white rounded-2xl shadow-md border border-stone-100 p-8 min-h-[500px] fade-in">
+                </div>
+                
+                <div class="flex justify-between items-center bg-white p-6 rounded-2xl shadow-md border border-stone-100">
+                    <button id="btn-prev" class="px-6 py-3 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 font-bold transition duration-200 disabled:opacity-30">
+                        ← TRƯỚC
+                    </button>
+                    <button id="btn-next" class="px-6 py-3 rounded-xl bg-sky-600 text-white hover:bg-sky-700 font-bold transition duration-200 disabled:opacity-30">
+                        TIẾP THEO →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="hide bg-white rounded-2xl shadow-xl border border-stone-100 p-10 fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-black text-stone-900 mb-3">Hoàn Thành!</h2>
+                <p id="result-user-info" class="text-stone-500 mb-8 font-medium">Kết quả của bạn đã được ghi lại thành công.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto">
+                    <div class="bg-sky-50 border border-sky-100 rounded-3xl px-8 py-6">
+                        <div class="text-xs font-black text-sky-800 uppercase tracking-widest mb-2">Điểm đạt được</div>
+                        <div class="text-5xl font-black text-sky-600"><span id="final-score"></span><span class="text-xl text-sky-800/40">/30</span></div>
+                    </div>
+                    <div class="bg-stone-50 border border-stone-100 rounded-3xl px-8 py-6">
+                        <div class="text-xs font-black text-stone-800 uppercase tracking-widest mb-2">Thời gian hoàn thành</div>
+                        <div id="time-taken" class="text-5xl font-black text-stone-600">00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container mb-16">
+                <canvas id="resultsChart"></canvas>
+            </div>
+
+            <div class="space-y-8">
+                <h3 class="text-xl font-black text-stone-800 text-center uppercase tracking-widest">Phân tích chi tiết câu trả lời</h3>
+                <div id="review-container" class="space-y-6">
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center">
+                <button onclick="location.reload()" class="bg-stone-900 hover:bg-black text-white font-black py-4 px-12 rounded-2xl transition duration-300 shadow-xl">
+                    LÀM LẠI BÀI THI
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-stone-900 text-stone-500 py-12 mt-auto">
+        <div class="container mx-auto px-4 max-w-5xl flex flex-col md:flex-row justify-between items-start gap-12">
+            <div class="space-y-4">
+                <h4 class="text-white font-black text-lg tracking-tight">HOÀI AN NHIÊN EDUCATION</h4>
+                <div class="text-sky-400 font-bold">TRUNG TÂM TIẾNG ANH CÔ THUÝ</div>
+                <div class="text-xs bg-stone-800 inline-block px-2 py-1 rounded">MST: 0318842992</div>
+            </div>
+            <div class="text-xs space-y-3 font-medium">
+                <div class="flex items-start gap-4"><span class="text-stone-700 font-black shrink-0">CS1</span> <span class="text-stone-300">202/1 Nguyễn Thị Lắng, Tân Phú Trung, Củ Chi, TP. HCM</span></div>
+                <div class="flex items-start gap-4"><span class="text-stone-700 font-black shrink-0">CS2</span> <span class="text-stone-300">61 Lê Đình Thám, Khu Phố 23, Tân Phú, TP. HCM</span></div>
+                <div class="flex items-start gap-4"><span class="text-stone-700 font-black shrink-0">CS3</span> <span class="text-stone-300">325/5T Nguyễn Thị Thảnh, Hóc Môn, TP. HCM</span></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Data structure for KET Reading (30 questions)
+        const testData = [
+            {
+                title: "Part 1: Short Messages",
+                intro: "Đọc 6 văn bản ngắn (thông báo, biển báo, ghi chú). Chọn ý nghĩa đúng nhất cho mỗi văn bản.",
+                type: "multiple-choice",
+                startIndex: 1,
+                questions: [
+                    { id: 1, text: "<b>Museum Notice</b><br>Students under 16 can visit for free on weekends with an adult.", prompt: "Who can get in free at the weekend?", options: ["Only adults.", "Children over 16.", "Children with an adult."], answer: 2 },
+                    { id: 2, text: "<b>Text from Jane to Tom</b><br>\"Tom, I left my umbrella at your house. Can you bring it to school tomorrow? Thanks!\"", prompt: "What does Jane want Tom to do?", options: ["Give her umbrella back.", "Borrow her umbrella.", "Go to her house."], answer: 0 },
+                    { id: 3, text: "<b>Bus Station Sign</b><br>No buses running today due to heavy snow. Please check website for updates.", prompt: "Why are there no buses?", options: ["The station is closed.", "The weather is bad.", "The website is broken."], answer: 1 },
+                    { id: 4, text: "<b>Cooking Class Sign</b><br>Lessons start at 6 PM. Please arrive 10 minutes early to wash your hands.", prompt: "Students should arrive at:", options: ["6:10 PM", "6:00 PM", "5:50 PM"], answer: 2 },
+                    { id: 5, text: "<b>Email from Mrs. Smith</b><br>\"Your piano lesson on Tuesday is cancelled. We will have it on Wednesday instead.\"", prompt: "When is the piano lesson now?", options: ["Monday", "Tuesday", "Wednesday"], answer: 2 },
+                    { id: 6, text: "<b>Store Door Sign</b><br>Buy one t-shirt and get the second one half price!", prompt: "If you buy two t-shirts:", options: ["The second is 50% cheaper.", "They are both free.", "You pay for three."], answer: 0 }
+                ]
+            },
+            {
+                title: "Part 2: Matching",
+                intro: "Ghép 7 thông tin của 3 người (A, B, C) với các mô tả phù hợp về sở thích đọc sách của họ.",
+                type: "matching",
+                startIndex: 7,
+                items: [
+                    { id: 7, text: "This person likes reading books about space and stars.", answer: "B" },
+                    { id: 8, text: "This person prefers books about famous people in history.", answer: "C" },
+                    { id: 9, text: "This person enjoys reading funny stories about talking animals.", answer: "A" },
+                    { id: 10, text: "This person wants a book that is very short and has many pictures.", answer: "A" },
+                    { id: 11, text: "This person is interested in how scientists work on other planets.", answer: "B" },
+                    { id: 12, text: "This person likes real-life stories about kings and queens.", answer: "C" },
+                    { id: 13, text: "This person likes books that make them laugh.", answer: "A" }
+                ],
+                options: [
+                    { val: "A", text: "A. The Laughing Cat: A hilarious comic book about a cat that lives in London. Very short chapters." },
+                    { val: "B", text: "B. Beyond Earth: A detailed book about Mars and the moon, focusing on science and astronauts." },
+                    { val: "C", text: "C. Royal Secrets: Discover the true stories of European kings from 200 years ago." }
+                ]
+            },
+            {
+                title: "Part 3: Reading Comprehension",
+                intro: "Đọc câu chuyện ngắn về một vận động viên trẻ và chọn đáp án đúng cho 5 câu hỏi trắc nghiệm.",
+                type: "text-mcq",
+                startIndex: 14,
+                passage: "<b>Young Runner: Mike Ross</b><br><br>Mike Ross is 14 years old and loves running. He started three years ago because his older brother, Ben, is a fast runner. At first, Mike found it very difficult and wanted to stop. However, his coach told him to keep trying. Last month, Mike won his first race in London. He was very happy and surprised! Now, he trains every morning before school. He hopes to be in the Olympics one day. Mike says, \"Running makes me feel strong and healthy.\"",
+                questions: [
+                    { id: 14, prompt: "Why did Mike start running?", options: ["He wanted to be like his brother.", "He always loved sports.", "His teacher told him to."], answer: 0 },
+                    { id: 15, prompt: "How did Mike feel about running at the beginning?", options: ["He found it easy.", "He wanted to quit.", "He was very fast."], answer: 1 },
+                    { id: 16, prompt: "Where did Mike win his race?", options: ["In his school.", "In a different country.", "In London."], answer: 2 },
+                    { id: 17, prompt: "When does Mike train now?", options: ["After school.", "Before school.", "Only on weekends."], answer: 1 },
+                    { id: 18, prompt: "What is Mike's dream?", options: ["To be a coach.", "To compete in the Olympics.", "To run with Ben."], answer: 1 }
+                ]
+            },
+            {
+                title: "Part 4: Multiple Choice Cloze",
+                intro: "Đọc văn bản 'The Great Barrier Reef' và chọn từ đúng (A, B hoặc C) để điền vào 6 chỗ trống.",
+                type: "cloze-mcq",
+                startIndex: 19,
+                passagePieces: [
+                    "<b>The Great Barrier Reef</b><br><br>The Great Barrier Reef is the largest coral reef in the ",
+                    ". It is located off the coast of Australia. More than 1,500 species of fish ",
+                    " there. Millions of tourists visit the reef every year ",
+                    " see the beautiful colors. However, the water is getting ",
+                    ", which is bad for the coral. We must work hard to ",
+                    " this natural wonder for the future. Scientists are currently ",
+                    " new ways to save it."
+                ],
+                questions: [
+                    { id: 19, options: ["world", "city", "place"], answer: 0 },
+                    { id: 20, options: ["living", "live", "lives"], answer: 1 },
+                    { id: 21, options: ["for", "to", "at"], answer: 1 },
+                    { id: 22, options: ["warm", "warmer", "warmest"], answer: 1 },
+                    { id: 23, options: ["protect", "make", "think"], answer: 0 },
+                    { id: 24, options: ["studied", "studies", "studying"], answer: 2 }
+                ]
+            },
+            {
+                title: "Part 5: Open Cloze",
+                intro: "Đọc tin nhắn từ Chloe gửi cho bạn của cô ấy. Điền duy nhất MỘT từ vào mỗi chỗ trống (6 câu).",
+                type: "cloze-open",
+                startIndex: 25,
+                passagePieces: [
+                    "Hi Sam,<br>Are you free ",
+                    " Saturday? I want to go to the cinema to see the new Spider-man movie. It starts ",
+                    " 4:30 PM. Would you like to come ",
+                    " me? My dad can drive ",
+                    " there and back. I hope ",
+                    " can join us. Let ",
+                    " know soon!<br>Chloe"
+                ],
+                answers: { 25: "on", 26: "at", 27: "with", 28: "us", 29: "you", 30: "me" }
+            }
+        ];
+
+        let currentPartIndex = 0;
+        let userAnswers = {};
+        const totalQuestions = 30;
+        let userName = "";
+        let timerInterval;
+        let secondsLeft = 30 * 60; // 30 minutes for KET Reading
+
+        // DOM Elements
+        const elWelcome = document.getElementById('welcome-view');
+        const elTest = document.getElementById('test-view');
+        const elResults = document.getElementById('results-view');
+        const elPartContainer = document.getElementById('part-container');
+        const elNav = document.getElementById('part-nav');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnSubmit = document.getElementById('btn-submit-test');
+        const elProgressText = document.getElementById('progress-text');
+        const elProgressBar = document.getElementById('progress-bar');
+        const elTimer = document.getElementById('countdown-timer');
+        const elNameInput = document.getElementById('user-name');
+        const elNameError = document.getElementById('name-error');
+
+        // Logic
+        document.getElementById('btn-start').addEventListener('click', () => {
+            userName = elNameInput.value.trim();
+            if (!userName) {
+                elNameError.classList.remove('hide');
+                elNameInput.classList.add('border-red-400');
+                return;
+            }
+            
+            elWelcome.classList.add('hide');
+            elTest.classList.remove('hide');
+            document.getElementById('display-name').innerText = userName;
+            initNav();
+            renderPart(currentPartIndex);
+            startTimer();
+        });
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                secondsLeft--;
+                updateTimerDisplay();
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest(true);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(secondsLeft / 60);
+            const secs = secondsLeft % 60;
+            elTimer.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            if (secondsLeft < 180) elTimer.classList.add('timer-warning');
+        }
+
+        function finishTest(auto = false) {
+            if (auto) alert("Thời gian đã hết! Bài thi của bạn đã được nộp tự động.");
+            clearInterval(timerInterval);
+            showResults();
+        }
+
+        function initNav() {
+            elNav.innerHTML = '';
+            testData.forEach((part, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase transition duration-200 border border-transparent tracking-widest';
+                btn.innerText = part.title;
+                btn.onclick = () => {
+                    currentPartIndex = index;
+                    renderPart(currentPartIndex);
+                };
+                elNav.appendChild(btn);
+            });
+        }
+
+        function updateUIState() {
+            Array.from(elNav.children).forEach((btn, index) => {
+                if (index === currentPartIndex) {
+                    btn.classList.add('bg-sky-50', 'text-sky-700', 'border-sky-200');
+                    btn.classList.remove('text-stone-400', 'hover:bg-stone-50');
+                } else {
+                    btn.classList.remove('bg-sky-50', 'text-sky-700', 'border-sky-200');
+                    btn.classList.add('text-stone-400', 'hover:bg-stone-50');
+                }
+            });
+
+            btnPrev.disabled = currentPartIndex === 0;
+            btnNext.disabled = currentPartIndex === testData.length - 1;
+            
+            if (currentPartIndex === testData.length - 1) {
+                btnSubmit.classList.remove('hide');
+            } else {
+                btnSubmit.classList.add('hide');
+            }
+
+            const answeredCount = Object.keys(userAnswers).length;
+            elProgressText.innerText = `${answeredCount}/${totalQuestions}`;
+            elProgressBar.style.width = `${(answeredCount / totalQuestions) * 100}%`;
+        }
+
+        function saveAnswer(id, val) {
+            if(!val) delete userAnswers[id];
+            else userAnswers[id] = val.toString().trim().toLowerCase();
+            updateUIState();
+        }
+
+        function renderPart(index) {
+            const part = testData[index];
+            elPartContainer.innerHTML = '';
+            elPartContainer.classList.remove('fade-in');
+            void elPartContainer.offsetWidth; 
+            elPartContainer.classList.add('fade-in');
+
+            const header = document.createElement('div');
+            header.innerHTML = `<h2 class="text-2xl font-black text-stone-900 mb-2">${part.title}</h2>
+                                <p class="text-stone-500 mb-8 bg-stone-50 p-5 rounded-2xl border border-stone-100 text-sm font-medium leading-relaxed">${part.intro}</p>`;
+            elPartContainer.appendChild(header);
+
+            if (part.type === 'multiple-choice') {
+                part.questions.forEach(q => {
+                    const qDiv = document.createElement('div');
+                    qDiv.className = 'mb-10 pb-8 border-b border-stone-50 last:border-0';
+                    let html = `<div class="bg-stone-50 p-6 rounded-2xl border border-stone-200 mb-6 text-stone-800 font-medium">${q.text}</div>`;
+                    html += `<p class="font-bold mb-4 text-stone-900">${q.id}. ${q.prompt}</p><div class="space-y-3">`;
+                    q.options.forEach((opt, oIdx) => {
+                        const checked = userAnswers[q.id] == oIdx ? 'checked' : '';
+                        html += `<label class="flex items-center gap-4 p-4 rounded-xl hover:bg-stone-50 cursor-pointer border-2 border-transparent hover:border-sky-100 transition shadow-sm">
+                                    <input type="radio" name="q${q.id}" value="${oIdx}" ${checked} onchange="saveAnswer(${q.id}, this.value)">
+                                    <span class="text-stone-700 font-bold">${String.fromCharCode(65 + oIdx)}. ${opt}</span>
+                                 </label>`;
+                    });
+                    html += `</div>`;
+                    qDiv.innerHTML = html;
+                    elPartContainer.appendChild(qDiv);
+                });
+            } else if (part.type === 'matching') {
+                const optBox = document.createElement('div');
+                optBox.className = 'bg-sky-50 p-6 rounded-2xl border border-sky-100 mb-10 text-sm space-y-3';
+                optBox.innerHTML = `<h4 class="font-black text-sky-800 mb-2 uppercase tracking-widest text-[10px]">Lựa chọn sách (A-C)</h4>` + part.options.map(o => `<div class="font-medium text-sky-900">${o.text}</div>`).join('');
+                elPartContainer.appendChild(optBox);
+
+                const grid = document.createElement('div');
+                grid.className = 'space-y-4';
+                part.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex flex-col md:flex-row md:items-center justify-between bg-white p-5 rounded-2xl border border-stone-100 shadow-sm gap-4 transition hover:border-sky-200';
+                    let selHtml = `<select onchange="saveAnswer(${item.id}, this.value)" class="md:w-48 font-black text-sky-700 uppercase tracking-widest text-xs"><option value="">Chọn sách...</option>`;
+                    part.options.forEach(o => {
+                        const selected = userAnswers[item.id] === o.val.toLowerCase() ? 'selected' : '';
+                        selHtml += `<option value="${o.val}" ${selected}>Sách ${o.val}</option>`;
+                    });
+                    selHtml += `</select>`;
+                    itemDiv.innerHTML = `<div class="text-stone-700 font-medium"><span class="font-black text-sky-700 mr-3">${item.id}</span> ${item.text}</div>${selHtml}`;
+                    grid.appendChild(itemDiv);
+                });
+                elPartContainer.appendChild(grid);
+            } else if (part.type === 'text-mcq') {
+                const passageDiv = document.createElement('div');
+                passageDiv.className = 'bg-stone-50 p-8 rounded-3xl border border-stone-200 mb-10 text-stone-800 leading-relaxed italic font-medium';
+                passageDiv.innerHTML = part.passage;
+                elPartContainer.appendChild(passageDiv);
+
+                part.questions.forEach(q => {
+                    const qDiv = document.createElement('div');
+                    qDiv.className = 'mb-8';
+                    let html = `<p class="font-bold mb-4 text-stone-900">${q.id}. ${q.prompt}</p><div class="space-y-3 pl-6 border-l-4 border-stone-100">`;
+                    q.options.forEach((opt, oIdx) => {
+                        const checked = userAnswers[q.id] == oIdx ? 'checked' : '';
+                        html += `<label class="flex items-center gap-4 p-3 rounded-xl hover:bg-stone-50 cursor-pointer transition">
+                                    <input type="radio" name="q${q.id}" value="${oIdx}" ${checked} onchange="saveAnswer(${q.id}, this.value)">
+                                    <span class="text-stone-700 font-bold">${String.fromCharCode(65 + oIdx)}. ${opt}</span>
+                                 </label>`;
+                    });
+                    html += `</div>`;
+                    qDiv.innerHTML = html;
+                    elPartContainer.appendChild(qDiv);
+                });
+            } else if (part.type === 'cloze-mcq') {
+                const txtDiv = document.createElement('div');
+                txtDiv.className = 'bg-white p-8 rounded-3xl border border-stone-200 text-stone-800 leading-loose text-lg font-medium';
+                let contentHtml = '';
+                part.passagePieces.forEach((piece, idx) => {
+                    contentHtml += piece;
+                    if (idx < part.questions.length) {
+                        const q = part.questions[idx];
+                        let selHtml = `<select onchange="saveAnswer(${q.id}, this.value)" class="inline-block w-auto mx-2 py-1 px-3 text-base font-black text-sky-700 bg-stone-50 border-2 border-stone-100 rounded-lg"><option value="">(${q.id})</option>`;
+                        q.options.forEach((opt, oIdx) => {
+                            const selected = userAnswers[q.id] == oIdx ? 'selected' : '';
+                            selHtml += `<option value="${oIdx}" ${selected}>${opt}</option>`;
+                        });
+                        selHtml += `</select>`;
+                        contentHtml += selHtml;
+                    }
+                });
+                txtDiv.innerHTML = contentHtml;
+                elPartContainer.appendChild(txtDiv);
+            } else if (part.type === 'cloze-open') {
+                const txtDiv = document.createElement('div');
+                txtDiv.className = 'bg-white p-8 rounded-3xl border border-stone-200 text-stone-800 leading-loose text-lg font-medium';
+                let contentHtml = '';
+                const gapIds = [25, 26, 27, 28, 29, 30];
+                part.passagePieces.forEach((piece, idx) => {
+                    contentHtml += piece;
+                    if (idx < gapIds.length) {
+                        const gId = gapIds[idx];
+                        const val = userAnswers[gId] || '';
+                        contentHtml += `<input type="text" oninput="saveAnswer(${gId}, this.value)" value="${val}" placeholder="(${gId})" class="inline-block w-24 mx-2 py-1 px-3 text-base font-black text-center text-sky-700 bg-stone-50 border-2 border-stone-100 rounded-lg">`;
+                    }
+                });
+                txtDiv.innerHTML = contentHtml;
+                elPartContainer.appendChild(txtDiv);
+            }
+
+            updateUIState();
+        }
+
+        function checkAnswer(partType, qId, val, answerData) {
+            if(!val) return false;
+            if(partType.includes('mcq')) return val == answerData;
+            return val.toLowerCase() === answerData.toString().toLowerCase();
+        }
+
+        function showResults() { 
+
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
+        try {
+            let theName = window.userName || (document.getElementById('user-name')? document.getElementById('user-name').value : 'Học Viên');
+            let theScore = typeof totalCorrect !== 'undefined' ? totalCorrect : (typeof score_val !== 'undefined' ? score_val : 0);
+            let theTotal = typeof totalQuestions !== 'undefined' ? totalQuestions : 40;
+            
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_name: theName,
+                    exam_type: 'KET A2 - Test 3',
+                    score: theScore,
+                    total: theTotal,
+                    band: (theScore/theTotal >= 0.8) ? 'Distinction' : 'Practice',
+                    answers: userAnswers || {}
+                })
+            }).then(() => {
+                setTimeout(() => {
+                    window.location.href = `../congratulations.html?name=${encodeURIComponent(theName)}&score=${theScore}&total=${theTotal}&exam=${encodeURIComponent('KET A2 - Test 3')}`;
+                }, 1500);
+            }).catch(console.error);
+        } catch(e) { console.error(e); }
+    
+            elTest.classList.add('hide');
+            elResults.classList.remove('hide');
+            
+            document.getElementById('result-user-info').innerText = `Học viên: ${userName} | Kết quả phân tích Reading A2.`;
+            document.getElementById('time-taken').innerText = formatTimeTaken(secondsLeft);
+
+            let totalCorrect = 0;
+            const partScores = [];
+            const partLabels = [];
+            const maxPartScores = [];
+            const revContainer = document.getElementById('review-container');
+            revContainer.innerHTML = '';
+
+            testData.forEach(part => {
+                let partCorrect = 0;
+                let partTotal = 0;
+                
+                const partSection = document.createElement('div');
+                partSection.className = 'bg-stone-50 p-6 rounded-3xl border border-stone-100 shadow-sm';
+                partSection.innerHTML = `<h4 class="font-black text-stone-400 text-[10px] uppercase mb-4 tracking-widest border-b border-stone-100 pb-2">${part.title}</h4>`;
+                const qGrid = document.createElement('div');
+                qGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3';
+
+                const processQ = (qId, correctAnsStr) => {
+                    partTotal++;
+                    const userVal = userAnswers[qId];
+                    const isCorrect = checkAnswer(part.type, qId, userVal, correctAnsStr);
+                    if (isCorrect) {
+                        partCorrect++;
+                        totalCorrect++;
+                    }
+                    
+                    let userDisplay = userVal === undefined ? 'Trống' : userVal;
+                    let displayCorrect = correctAnsStr;
+
+                    if(part.type.includes('mcq')) {
+                        if(userVal !== undefined) userDisplay = String.fromCharCode(65 + parseInt(userVal));
+                        displayCorrect = String.fromCharCode(65 + parseInt(correctAnsStr));
+                    } else if (part.type === 'matching') {
+                        if(userVal !== undefined) userDisplay = userVal.toUpperCase();
+                        displayCorrect = correctAnsStr.toUpperCase();
+                    }
+
+                    qGrid.innerHTML += `<div class="p-3 rounded-2xl ${isCorrect ? 'bg-green-100/50 border border-green-200' : 'bg-red-100/50 border border-red-200'} text-[10px] text-center">
+                        <div class="font-black text-stone-500 mb-1">Q${qId}</div>
+                        <div class="font-bold text-stone-800">BẠN: ${userDisplay}</div>
+                        ${!isCorrect ? `<div class="text-sky-700 font-black mt-1">ĐÚNG: ${displayCorrect}</div>` : `<div class="text-green-600 font-black mt-1 uppercase">ĐÚNG</div>`}
+                    </div>`;
+                };
+
+                if (part.type === 'multiple-choice' || part.type === 'text-mcq' || part.type === 'cloze-mcq') {
+                    part.questions.forEach(q => processQ(q.id, q.answer));
+                } else if (part.type === 'matching') {
+                    part.items.forEach(item => processQ(item.id, item.answer));
+                } else if (part.type === 'cloze-open') {
+                    Object.keys(part.answers).forEach(k => processQ(k, part.answers[k]));
+                }
+
+                partSection.appendChild(qGrid);
+                revContainer.appendChild(partSection);
+                
+                partLabels.push(part.title.split(':')[0]);
+                partScores.push(partCorrect);
+                maxPartScores.push(partTotal);
+            });
+
+            document.getElementById('final-score').innerText = totalCorrect;
+            renderChart(partLabels, partScores, maxPartScores);
+        }
+
+        function formatTimeTaken(timeLeft) {
+            const spent = (30 * 60) - timeLeft;
+            const m = Math.floor(spent / 60);
+            const s = spent % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function renderChart(labels, dataScores, maxScores) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            const percentages = dataScores.map((score, idx) => Math.round((score / maxScores[idx]) * 100));
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Chính xác (%)',
+                        data: percentages,
+                        backgroundColor: '#0284c7',
+                        borderRadius: 12,
+                        barPercentage: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { font: { size: 10, weight: 'bold' } },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: { 
+                            ticks: { font: { size: 10, weight: 'bold' } },
+                            grid: { display: false } 
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            padding: 12,
+                            cornerRadius: 12,
+                            callbacks: {
+                                label: (c) => ` ${dataScores[c.dataIndex]}/${maxScores[c.dataIndex]} câu đúng (${c.parsed.y}%)`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        btnPrev.onclick = () => { if(currentPartIndex > 0) { currentPartIndex--; renderPart(currentPartIndex); } };
+        btnNext.onclick = () => { if(currentPartIndex < testData.length-1) { currentPartIndex++; renderPart(currentPartIndex); } };
+        btnSubmit.onclick = () => { if(confirm("Nộp bài thi KET ngay bây giờ?")) finishTest(); };
+    </script>
+
+<!-- Timer & Location Patch (Auto Added) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const possibleIds = ['overlay-name', 'user-name', 'student-name', 'studentName', 'ket-student-name', 'cand-name', 'candidateName'];
+    let nameInput = null;
+    for (let id of possibleIds) {
+        if (document.getElementById(id)) { nameInput = document.getElementById(id); break; }
+    }
+    if (!nameInput) {
+        const inputs = document.querySelectorAll('input[type="text"]');
+        for (let input of inputs) {
+            if (input.placeholder && input.placeholder.toLowerCase().includes('tên')) { nameInput = input; break; }
+        }
+    }
+
+    if (nameInput && !document.getElementById('dynamic-location-select')) {
+        const select = document.createElement('select');
+        select.id = 'dynamic-location-select';
+        select.innerHTML = '<option value="Củ Chi">Củ Chi</option><option value="Tân Phú">Tân Phú</option><option value="Hóc Môn">Hóc Môn</option><option value="Online">Online</option>';
+        select.className = nameInput.className;
+        select.style.marginTop = '10px';
+        select.style.marginBottom = '10px';
+        nameInput.parentNode.insertBefore(select, nameInput.nextSibling);
+    }
+    
+    // Timer Patch
+    window.testStartTime = null;
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (btn && (btn.innerText.toLowerCase().includes('bắt đầu') || btn.innerText.toLowerCase().includes('start'))) {
+            if (!window.testStartTime) window.testStartTime = new Date();
+        }
+    });
+
+    const origFetch = window.fetch;
+    window.fetch = function() {
+        if (arguments[0] && arguments[0].includes('script.google.com')) {
+            try {
+                let opts = arguments[1];
+                if (opts && opts.body) {
+                    let bodyObj = JSON.parse(opts.body);
+                    const l = document.getElementById('dynamic-location-select');
+                    if (l) bodyObj['location'] = l.value;
+                    
+                    if (window.testStartTime) {
+                        const endTime = new Date();
+                        const formatDate = (d) => {
+                            const pad = n => n<10?'0'+n:n;
+                            return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+                        };
+                        bodyObj['startTime'] = formatDate(window.testStartTime);
+                        bodyObj['endTime'] = formatDate(endTime);
+                        const diffSecs = Math.floor((endTime - window.testStartTime) / 1000);
+                        bodyObj['timeTaken'] = Math.floor(diffSecs/60) + " phút " + (diffSecs%60) + " giây";
+                    }
+                    opts.body = JSON.stringify(bodyObj);
+                    arguments[1] = opts;
+                }
+            } catch(e) {}
+        }
+        return origFetch.apply(this, arguments);
+    };
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flyers Reading & Writing Full Test - Cô Thuý</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Fresh Mint & Sunset Amber -->
+    <!-- Application Structure Plan: 
+        1. Màn hình chào mừng: Thu thập tên học sinh.
+        2. Màn hình thi: Tích hợp bộ đếm ngược 40 phút và thanh điều hướng 7 phần.
+        3. Tính năng mới: Tự động tạo ảnh minh họa cho Part 7 bằng AI (Imagen 4.0).
+        4. Báo cáo: Chấm điểm tự động các phần trắc nghiệm/điền từ và hiển thị biểu đồ phân tích.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mint: { 50: '#f0fdf4', 100: '#dcfce7', 600: '#16a34a', 700: '#15803d', 900: '#064e3b' },
+                        amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap');
+        body { font-family: 'Lexend', sans-serif; background-color: #f0fdf4; color: #164e63; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin: 0 auto; height: 320px; }
+        .hide { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        input[type="radio"] { accent-color: #16a34a; transform: scale(1.2); }
+        select, input[type="text"], textarea { border: 2px solid #d1fae5; border-radius: 0.75rem; padding: 0.6rem; width: 100%; background-color: white; }
+        select:focus, input[type="text"]:focus, textarea:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1); }
+        .timer-warning { color: #dc2626; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        /* Loading Animation for AI Image */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #16a34a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="bg-mint-700 text-white shadow-xl py-4 px-6 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="bg-amber-400 text-mint-900 font-black rounded-lg px-3 py-1 text-xs shadow-md">FLYERS FULL</div>
+            <div class="font-extrabold text-lg tracking-tight uppercase leading-none">TRUNG TÂM TIẾNG ANH CÔ THUÝ</div>
+        </div>
+        <div class="hidden md:block text-[10px] font-bold uppercase tracking-widest opacity-80 italic">Hoài An Nhiên Education</div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Welcome Screen -->
+        <div id="welcome-view" class="bg-white rounded-3xl shadow-2xl border border-mint-100 p-8 text-center fade-in">
+            <div class="text-6xl mb-6">🎯</div>
+            <h1 class="text-4xl font-extrabold text-mint-900 mb-4 uppercase">Thử Thách Flyers Toàn Diện</h1>
+            <p class="text-lg text-stone-500 mb-10 max-w-2xl mx-auto">Chào mừng con đến với bài thi đầy đủ 7 phần. Con sẽ có 40 phút để hoàn thành thử thách này. Hãy chuẩn bị thật tốt nhé!</p>
+            
+            <div class="max-w-md mx-auto mb-12">
+                <label for="user-name" class="block text-xs font-black text-mint-700 mb-3 uppercase tracking-widest text-left">Họ và Tên của con:</label>
+                <input type="text" id="user-name" placeholder="Ví dụ: Nguyễn Minh Anh" class="w-full p-4 text-xl font-bold border-2 border-mint-50 focus:border-mint-600 transition-all text-center rounded-2xl shadow-inner bg-stone-50">
+                <p id="name-error" class="text-red-500 text-sm mt-3 font-bold hide">Vui lòng nhập tên để bắt đầu bài thi.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12 text-left">
+                <div class="p-5 bg-mint-50 rounded-2xl border border-mint-100">
+                    <div class="text-2xl mb-1">📝</div>
+                    <div class="font-black text-[10px] uppercase text-mint-800">7 Phần thi</div>
+                </div>
+                <div class="p-5 bg-mint-50 rounded-2xl border border-mint-100">
+                    <div class="text-2xl mb-1">🔢</div>
+                    <div class="font-black text-[10px] uppercase text-mint-800">44 Câu hỏi</div>
+                </div>
+                <div class="p-5 bg-amber-50 rounded-2xl border border-amber-100">
+                    <div class="text-2xl mb-1">⏱️</div>
+                    <div class="font-black text-[10px] uppercase text-amber-800">40 Phút</div>
+                </div>
+                <div class="p-5 bg-mint-50 rounded-2xl border border-mint-100">
+                    <div class="text-2xl mb-1">📊</div>
+                    <div class="font-black text-[10px] uppercase text-mint-800">Phân tích</div>
+                </div>
+            </div>
+
+            <button id="btn-start" class="bg-mint-600 hover:bg-mint-700 text-white font-black py-4 px-16 rounded-2xl transition duration-300 shadow-xl text-xl transform hover:scale-105">
+                BẮT ĐẦU LÀM BÀI
+            </button>
+        </div>
+
+        <!-- Test View -->
+        <div id="test-view" class="hide flex flex-col lg:flex-row gap-8 items-start">
+            <!-- Sidebar -->
+            <aside class="w-full lg:w-72 space-y-4 sticky top-24 shrink-0">
+                <div class="bg-white rounded-2xl shadow-lg border border-mint-100 p-6 text-center">
+                    <div class="text-[10px] font-black text-mint-400 uppercase mb-2 tracking-widest">Thời gian còn lại</div>
+                    <div id="countdown-timer" class="text-4xl font-black text-mint-700">40:00</div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg border border-mint-100 p-5">
+                    <h3 class="font-black text-mint-400 text-[10px] uppercase mb-4 tracking-widest">Danh mục phần thi</h3>
+                    <nav id="part-nav" class="space-y-1">
+                    </nav>
+
+                    <div class="mt-8 pt-6 border-t border-stone-100">
+                        <div class="flex justify-between text-[10px] font-black text-stone-400 uppercase mb-2">
+                            <span>Tiến độ</span>
+                            <span id="progress-text">0/44</span>
+                        </div>
+                        <div class="w-full bg-stone-100 rounded-full h-2 shadow-inner">
+                            <div id="progress-bar" class="bg-mint-600 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex items-center gap-3 p-3 bg-mint-50 rounded-xl border border-mint-100">
+                        <span class="text-xl">🧑‍🎓</span>
+                        <div id="display-name" class="text-xs font-bold text-mint-800 truncate uppercase">---</div>
+                    </div>
+
+                    <button id="btn-submit-test" class="w-full mt-8 bg-stone-900 hover:bg-black text-white font-black py-3 px-4 rounded-xl transition duration-200 hide uppercase text-[10px] tracking-widest">
+                        Nộp Bài Thi
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Question Area -->
+            <div class="flex-grow w-full space-y-6">
+                <div id="part-container" class="bg-white rounded-3xl shadow-xl border border-mint-100 p-8 min-h-[550px] fade-in">
+                </div>
+                
+                <div class="flex justify-between items-center bg-white p-6 rounded-2xl shadow-lg border border-mint-100">
+                    <button id="btn-prev" class="px-8 py-3 rounded-xl border-2 border-mint-100 text-mint-600 hover:bg-mint-50 font-bold transition duration-200 disabled:opacity-30">
+                        ← PHẦN TRƯỚC
+                    </button>
+                    <button id="btn-next" class="px-8 py-3 rounded-xl bg-mint-600 text-white hover:bg-mint-700 font-bold transition duration-200 disabled:opacity-30">
+                        TIẾP THEO →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="hide bg-white rounded-3xl shadow-2xl border border-mint-100 p-10 fade-in">
+            <div class="text-center mb-12">
+                <div class="text-6xl mb-4">🏆</div>
+                <h2 class="text-4xl font-extrabold text-stone-900 mb-2 uppercase">Kết Quả Bài Thi</h2>
+                <p id="result-user-info" class="text-mint-600 font-bold mb-10">Chúc mừng con đã hoàn thành bài thi Flyers Full Part!</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
+                    <div class="bg-mint-50 border-4 border-mint-200 rounded-3xl px-10 py-8 shadow-inner">
+                        <div class="text-[10px] font-black text-mint-800 uppercase tracking-widest mb-2">Điểm (Phần 1-6)</div>
+                        <div class="text-6xl font-black text-mint-600"><span id="final-score"></span><span class="text-xl text-mint-800/30">/43</span></div>
+                    </div>
+                    <div class="bg-amber-50 border-4 border-amber-200 rounded-3xl px-10 py-8 shadow-inner">
+                        <div class="text-[10px] font-black text-amber-800 uppercase tracking-widest mb-2">Thời gian làm bài</div>
+                        <div id="time-taken" class="text-5xl font-black text-amber-600">00:00</div>
+                    </div>
+                </div>
+                <p class="mt-6 text-xs text-stone-400 font-medium italic">* Lưu ý: Phần 7 (Viết truyện) cần giáo viên chấm điểm trực tiếp.</p>
+            </div>
+
+            <div class="chart-container mb-16">
+                <canvas id="resultsChart"></canvas>
+            </div>
+
+            <div class="space-y-10">
+                <h3 class="text-2xl font-black text-stone-800 text-center uppercase tracking-widest">Xem lại đáp án</h3>
+                <div id="review-container" class="space-y-8">
+                </div>
+            </div>
+            
+            <div class="mt-20 text-center">
+                <button onclick="location.reload()" class="bg-stone-900 hover:bg-black text-white font-black py-4 px-12 rounded-2xl transition duration-300 shadow-xl">
+                    LÀM LẠI BÀI THI
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-mint-900 text-mint-500 py-16 mt-auto">
+        <div class="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row justify-between items-start gap-12">
+            <div class="space-y-4">
+                <h4 class="text-white font-black text-xl tracking-tight uppercase">HOÀI AN NHIÊN EDUCATION</h4>
+                <div class="text-amber-400 font-bold text-lg">TRUNG TÂM TIẾNG ANH CÔ THUÝ</div>
+                <div class="text-[10px] bg-mint-800 text-mint-300 inline-block px-3 py-1 rounded">MST: 0318842992</div>
+            </div>
+            <div class="text-[11px] space-y-3 font-medium opacity-80 uppercase tracking-widest text-stone-300">
+                <div class="flex items-start gap-4"><span class="text-amber-500 font-black shrink-0">CS1</span> <span>202/1 Nguyễn Thị Lắng, Tân Phú Trung, Củ Chi, TP. HCM</span></div>
+                <div class="flex items-start gap-4"><span class="text-amber-500 font-black shrink-0">CS2</span> <span>61 Lê Đình Thám, Khu Phố 23, Tân Phú, TP. HCM</span></div>
+                <div class="flex items-start gap-4"><span class="text-amber-500 font-black shrink-0">CS3</span> <span>325/5T Nguyễn Thị Thảnh, Hóc Môn, TP. HCM</span></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const testData = [
+            {
+                id: 0,
+                title: "Part 1: Definitions",
+                intro: "Nối các từ vựng với mô tả đúng. Có 10 câu mô tả các đồ vật và địa điểm.",
+                type: "matching",
+                startIndex: 1,
+                items: [
+                    { id: 1, text: "You use these to cut paper or hair.", answer: "scissors" },
+                    { id: 2, text: "This person looks at your teeth to keep them healthy.", answer: "dentist" },
+                    { id: 3, text: "Bees make this and many people like eating it for breakfast.", answer: "honey" },
+                    { id: 4, text: "You wear this around your waist to hold up your trousers.", answer: "belt" },
+                    { id: 5, text: "You can see yourself when you look in this object.", answer: "mirror" },
+                    { id: 6, text: "Birds and planes use these to fly high in the sky.", answer: "wings" },
+                    { id: 7, text: "You use this to wash your hands or body with water.", answer: "soap" },
+                    { id: 8, text: "You use this to help you see in the dark when you go camping.", answer: "torch" },
+                    { id: 9, text: "This is a very large bird that lives high in the mountains.", answer: "eagle" },
+                    { id: 10, text: "This is a large area where lots of trees and plants grow.", answer: "forest" }
+                ],
+                options: ["cinema", "dentist", "honey", "torch", "scissors", "belt", "mirror", "wings", "soap", "eagle", "forest", "bakery", "nurse", "pilot", "fridge"]
+            },
+            {
+                id: 1,
+                title: "Part 2: Dialogue",
+                intro: "William đang nói chuyện với Sarah. Chọn câu trả lời (A-G) phù hợp nhất cho mỗi lượt lời.",
+                type: "dialogue",
+                startIndex: 11,
+                questions: [
+                    { id: 11, text: "William: Hi, Sarah. What are you doing?", answer: "E" },
+                    { id: 12, text: "William: Is it for our history homework?", answer: "A" },
+                    { id: 13, text: "William: Can I help you find it?", answer: "D" },
+                    { id: 14, text: "William: Where did you last have it?", answer: "B" },
+                    { id: 15, text: "William: Let's go and look in the library now.", answer: "G" }
+                ],
+                options: [
+                    { val: "A", text: "A. Yes, I have to finish it today." },
+                    { val: "B", text: "B. I think I left it in the library." },
+                    { val: "C", text: "C. It's next to the supermarket." },
+                    { val: "D", text: "D. That's very kind of you, thanks." },
+                    { val: "E", text: "E. I'm looking for my history book." },
+                    { val: "F", text: "F. No, I prefer chocolate ice cream." },
+                    { val: "G", text: "G. Great idea! Let's go." }
+                ]
+            },
+            {
+                id: 2,
+                title: "Part 3: Story Gaps",
+                intro: "Đọc câu chuyện và chọn từ đúng điền vào chỗ trống. Cuối cùng, chọn tiêu đề hay nhất.",
+                type: "story-gaps",
+                startIndex: 16,
+                passagePieces: [
+                    "Last Saturday, Daisy and her family went to the ",
+                    ". It was a beautiful day. Daisy's dad took his ",
+                    " because he wanted to take pictures of the animals. They saw a large elephant eating ",
+                    ". Daisy was hungry, so they sat on the grass and had a ",
+                    ". Suddenly, a small monkey came and took a piece of bread! Everyone started to ",
+                    ". It was a very funny day."
+                ],
+                gaps: [
+                    { id: 16, options: ["zoo", "school", "office"], answer: 0 },
+                    { id: 17, options: ["camera", "book", "guitar"], answer: 0 },
+                    { id: 18, options: ["grass", "meat", "pizza"], answer: 0 },
+                    { id: 19, options: ["picnic", "bath", "lesson"], answer: 0 },
+                    { id: 20, options: ["laugh", "cry", "sleep"], answer: 0 }
+                ],
+                titleQuestion: {
+                    id: 21,
+                    prompt: "Chọn tiêu đề đúng nhất cho câu chuyện này:",
+                    options: ["Daisy's day at the zoo", "Dad loses his camera", "The elephant's birthday"],
+                    answer: 0
+                }
+            },
+            {
+                id: 3,
+                title: "Part 4: Information Facts",
+                intro: "Đọc văn bản về 'Chim Cánh Cụt' và chọn từ đúng điền vào chỗ trống (10 câu).",
+                type: "cloze-mcq",
+                startIndex: 22,
+                passagePieces: [
+                    "<b>Penguins</b><br><br>Penguins are birds, but they ",
+                    " fly. They spend most of their time in the ",
+                    ". They are excellent swimmers and can find fish to eat. Penguins live in places where it is very ",
+                    ". They have thick feathers to keep them warm. Most penguins live in Antarctica, but ",
+                    " kinds live in warmer places. They lay eggs and take care of their ",
+                    " carefully. When it's winter, they stand ",
+                    " to stay warm. Many people ",
+                    " to see them in the wild. Some penguins ",
+                    " walk very long distances. They are very ",
+                    " animals and can live for 20 years. We should help ",
+                    " them and the ocean."
+                ],
+                questions: [
+                    { id: 22, options: ["cannot", "can", "could"], answer: 0 },
+                    { id: 23, options: ["water", "sky", "trees"], answer: 0 },
+                    { id: 24, options: ["cold", "hot", "dry"], answer: 0 },
+                    { id: 25, options: ["some", "any", "much"], answer: 0 },
+                    { id: 26, options: ["babies", "baby", "children"], answer: 0 },
+                    { id: 27, options: ["together", "alone", "away"], answer: 0 },
+                    { id: 28, options: ["like", "likes", "liking"], answer: 0 },
+                    { id: 29, options: ["must", "might", "shall"], answer: 0 },
+                    { id: 30, options: ["interesting", "interested", "interest"], answer: 0 },
+                    { id: 31, options: ["protect", "protected", "protecting"], answer: 0 }
+                ]
+            },
+            {
+                id: 4,
+                title: "Part 5: Story Completion",
+                intro: "Đọc đoạn văn và điền từ (1-3 từ) vào chỗ trống để hoàn thành các câu.",
+                type: "cloze-open",
+                startIndex: 32,
+                passage: "<b>Emma's Birthday Surprise</b><br><br>Emma was very excited because it was her birthday. Her mother gave her a beautiful new bike. It was purple and had a small basket on the front. Emma decided to ride it to the park to meet her friend, Lucy. While she was riding, she saw a cute kitten under a large oak tree. She stopped and gave it some fresh water from her bottle. When she arrived at the park, Lucy was waiting for her with a big chocolate cake and some colorful balloons.",
+                questions: [
+                    { id: 32, prompt: "Emma nhận được một ______ từ mẹ của mình.", answer: "new bike" },
+                    { id: 33, prompt: "Chiếc xe đạp có màu tím và có một ______ ở phía trước.", answer: "small basket" },
+                    { id: 34, prompt: "Emma muốn gặp bạn ______ ở công viên.", answer: "Lucy" },
+                    { id: 35, prompt: "Emma nhìn thấy một ______ khi đang đạp xe.", answer: "cute kitten" },
+                    { id: 36, prompt: "Chú mèo con ở dưới một cây ______ lớn.", answer: "oak" },
+                    { id: 37, prompt: "Emma đã cho chú mèo uống ______ từ chai nước của mình.", answer: "fresh water" },
+                    { id: 38, prompt: "Lucy đang đợi Emma với bánh socola và ______.", answer: "balloons" }
+                ]
+            },
+            {
+                id: 5,
+                title: "Part 6: Open Cloze",
+                intro: "Điền duy nhất MỘT từ vào mỗi chỗ trống để hoàn thành bức thư của Sarah.",
+                type: "cloze-open-free",
+                startIndex: 39,
+                passagePieces: [
+                    "Dear David,<br>How are you? I am having ",
+                    " wonderful time on my holiday. The weather is very hot ",
+                    " sunny here. Yesterday, we went to the beach and I swam ",
+                    " the sea. I saw some beautiful fish! Tomorrow, we are going ",
+                    " visit a famous castle. I will take many photos to show ",
+                    ". See you soon!<br>Best, Sarah"
+                ],
+                answers: { 39: "a", 40: "and", 41: "in", 42: "to", 43: "you" }
+            },
+            {
+                id: 6,
+                title: "Part 7: Writing Story",
+                intro: "Dựa vào tranh mô tả phía dưới, hãy viết một câu chuyện ngắn (khoảng 20-30 từ).",
+                type: "writing",
+                startIndex: 44,
+                task: "Tranh minh họa gồm 3 cảnh: 1. Gia đình đến một hồ nước đẹp. 2. Họ đang ăn picnic vui vẻ. 3. Trời bất ngờ đổ mưa và họ chạy nhanh về xe.",
+                prompt: "Viết câu chuyện của con tại đây:",
+                hasAIImage: true
+            }
+        ];
+
+        let currentPartIndex = 0;
+        let userAnswers = {};
+        const totalQuestions = 44;
+        let userName = "";
+        let timerInterval;
+        let secondsLeft = 40 * 60;
+        let part7ImageUrl = null;
+        const apiKey = ""; // API key is provided by the environment
+
+        // Elements
+        const elWelcome = document.getElementById('welcome-view');
+        const elTest = document.getElementById('test-view');
+        const elResults = document.getElementById('results-view');
+        const elPartContainer = document.getElementById('part-container');
+        const elNav = document.getElementById('part-nav');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnSubmit = document.getElementById('btn-submit-test');
+        const elProgressText = document.getElementById('progress-text');
+        const elProgressBar = document.getElementById('progress-bar');
+        const elTimer = document.getElementById('countdown-timer');
+        const elNameInput = document.getElementById('user-name');
+        const elNameError = document.getElementById('name-error');
+
+        // Logic
+        document.getElementById('btn-start').addEventListener('click', () => {
+            userName = elNameInput.value.trim();
+            if (!userName) {
+                elNameError.classList.remove('hide');
+                elNameInput.classList.add('border-red-400');
+                return;
+            }
+            elWelcome.classList.add('hide');
+            elTest.classList.remove('hide');
+            document.getElementById('display-name').innerText = userName;
+            initNav();
+            renderPart(currentPartIndex);
+            startTimer();
+        });
+
+        async function fetchWithRetry(url, payload, retries = 5) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) return await response.json();
+                } catch (e) {
+                    if (i === retries - 1) throw e;
+                }
+                await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
+            }
+        }
+
+        async function generatePart7Image() {
+            const container = document.getElementById('ai-image-area');
+            if (!container) return;
+            
+            if (part7ImageUrl) {
+                container.innerHTML = `<img src="${part7ImageUrl}" class="w-full rounded-2xl shadow-lg border-4 border-white mb-6" alt="Part 7 Illustration">`;
+                return;
+            }
+
+            container.innerHTML = `<div class="p-8 text-center bg-stone-50 rounded-2xl border-2 border-dashed border-mint-200">
+                                    <div class="loader"></div>
+                                    <p class="text-xs font-bold text-mint-600 animate-pulse">Cô đang vẽ tranh minh họa cho con nhé...</p>
+                                  </div>`;
+
+            const prompt = "A three-panel cartoon illustration for a children's English test. Panel 1: A happy family arriving at a blue lake with a car. Panel 2: The family having a picnic by the lake with food on a blanket. Panel 3: Sudden rain, the family running back to their car looking surprised. Bright colors, friendly style.";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            const payload = { instances: { prompt: prompt }, parameters: { sampleCount: 1 } };
+
+            try {
+                const result = await fetchWithRetry(url, payload);
+                const base64 = result.predictions[0].bytesBase64Encoded;
+                part7ImageUrl = `data:image/png;base64,${base64}`;
+                container.innerHTML = `<img src="${part7ImageUrl}" class="w-full rounded-2xl shadow-lg border-4 border-white mb-6 fade-in" alt="Part 7 Illustration">`;
+            } catch (error) {
+                container.innerHTML = `<div class="p-6 bg-red-50 rounded-xl border border-red-100 text-red-600 text-xs font-bold text-center">
+                                        Ôi! Có lỗi khi vẽ tranh rồi. Con hãy đọc phần mô tả chữ nhé.
+                                       </div>`;
+            }
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                secondsLeft--;
+                updateTimerDisplay();
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest(true);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(secondsLeft / 60);
+            const s = secondsLeft % 60;
+            elTimer.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            if (secondsLeft < 300) elTimer.classList.add('timer-warning');
+        }
+
+        function finishTest(auto = false) {
+            if (auto) alert("Thời gian đã hết! Hệ thống đã nộp bài tự động.");
+            clearInterval(timerInterval);
+            showResults();
+        }
+
+        function initNav() {
+            elNav.innerHTML = '';
+            testData.forEach((part, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left px-4 py-2 rounded-xl text-[10px] font-black uppercase transition duration-200 border border-transparent tracking-widest';
+                btn.innerText = `Part ${index + 1}`;
+                btn.onclick = () => {
+                    currentPartIndex = index;
+                    renderPart(currentPartIndex);
+                };
+                elNav.appendChild(btn);
+            });
+        }
+
+        function updateUIState() {
+            Array.from(elNav.children).forEach((btn, index) => {
+                if (index === currentPartIndex) {
+                    btn.classList.add('bg-mint-50', 'text-mint-700', 'border-mint-200');
+                    btn.classList.remove('text-stone-400', 'hover:bg-stone-50');
+                } else {
+                    btn.classList.remove('bg-mint-50', 'text-mint-700', 'border-mint-200');
+                    btn.classList.add('text-stone-400', 'hover:bg-stone-50');
+                }
+            });
+
+            btnPrev.disabled = currentPartIndex === 0;
+            btnNext.disabled = currentPartIndex === testData.length - 1;
+            
+            if (currentPartIndex === testData.length - 1) {
+                btnSubmit.classList.remove('hide');
+            } else {
+                btnSubmit.classList.add('hide');
+            }
+
+            const answeredCount = Object.keys(userAnswers).length;
+            elProgressText.innerText = `${answeredCount}/${totalQuestions}`;
+            elProgressBar.style.width = `${(answeredCount / totalQuestions) * 100}%`;
+        }
+
+        function saveAnswer(id, val) {
+            if(!val) delete userAnswers[id];
+            else userAnswers[id] = val.toString().trim().toLowerCase();
+            updateUIState();
+        }
+
+        function renderPart(index) {
+            const part = testData[index];
+            elPartContainer.innerHTML = '';
+            elPartContainer.classList.remove('fade-in');
+            void elPartContainer.offsetWidth; 
+            elPartContainer.classList.add('fade-in');
+
+            const header = document.createElement('div');
+            header.innerHTML = `<h2 class="text-2xl font-black text-stone-900 mb-2">${part.title}</h2>
+                                <p class="text-stone-500 mb-8 bg-mint-50 p-4 rounded-2xl border border-mint-100 text-sm font-medium leading-relaxed italic">${part.intro}</p>`;
+            elPartContainer.appendChild(header);
+
+            if (part.type === 'matching') {
+                const grid = document.createElement('div');
+                grid.className = 'space-y-4';
+                part.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex flex-col md:flex-row md:items-center justify-between bg-white p-5 rounded-2xl border border-stone-100 shadow-sm gap-4 transition hover:border-mint-200';
+                    let selHtml = `<select onchange="saveAnswer(${item.id}, this.value)" class="md:w-48 font-black text-mint-700 uppercase tracking-widest text-xs"><option value="">Chọn từ...</option>`;
+                    part.options.sort().forEach(o => {
+                        const selected = userAnswers[item.id] === o.toLowerCase() ? 'selected' : '';
+                        selHtml += `<option value="${o}" ${selected}>${o}</option>`;
+                    });
+                    selHtml += `</select>`;
+                    itemDiv.innerHTML = `<div class="text-stone-700 font-medium"><span class="font-black text-mint-700 mr-3">Q${item.id}</span> ${item.text}</div>${selHtml}`;
+                    grid.appendChild(itemDiv);
+                });
+                elPartContainer.appendChild(grid);
+            } else if (part.type === 'dialogue') {
+                const optBox = document.createElement('div');
+                optBox.className = 'bg-amber-50 p-6 rounded-2xl border border-amber-100 mb-10 text-sm space-y-3';
+                optBox.innerHTML = `<h4 class="font-black text-amber-800 mb-2 uppercase tracking-widest text-[10px]">Câu trả lời của Sarah (A-G)</h4>` + part.options.map(o => `<div class="font-medium text-amber-900">${o.text}</div>`).join('');
+                elPartContainer.appendChild(optBox);
+
+                part.questions.forEach(q => {
+                    const qDiv = document.createElement('div');
+                    qDiv.className = 'mb-8 p-4 rounded-xl border border-stone-50';
+                    let html = `<p class="font-bold mb-4 text-stone-900">Q${q.id}. ${q.text}</p><div class="flex flex-wrap gap-2">`;
+                    ["A", "B", "C", "D", "E", "F", "G"].forEach(v => {
+                        const checked = userAnswers[q.id] === v.toLowerCase() ? 'checked' : '';
+                        html += `<label class="flex items-center gap-2 px-3 py-2 bg-stone-50 rounded-lg hover:bg-mint-50 cursor-pointer border-2 border-transparent transition">
+                                    <input type="radio" name="q${q.id}" value="${v}" ${checked} onchange="saveAnswer(${q.id}, this.value)">
+                                    <span class="text-xs font-black text-stone-600">${v}</span>
+                                 </label>`;
+                    });
+                    html += `</div>`;
+                    qDiv.innerHTML = html;
+                    elPartContainer.appendChild(qDiv);
+                });
+            } else if (part.type === 'story-gaps') {
+                const txtDiv = document.createElement('div');
+                txtDiv.className = 'bg-white p-8 rounded-3xl border border-stone-200 text-stone-800 leading-loose text-lg font-medium mb-10 shadow-inner';
+                let contentHtml = '';
+                part.passagePieces.forEach((piece, idx) => {
+                    contentHtml += piece;
+                    if (idx < part.gaps.length) {
+                        const gap = part.gaps[idx];
+                        let selHtml = `<select onchange="saveAnswer(${gap.id}, this.value)" class="inline-block w-auto mx-2 py-1 px-3 text-base font-black text-mint-700 bg-mint-50 border-2 border-mint-100 rounded-lg"><option value="">(${gap.id})</option>`;
+                        gap.options.forEach((opt, oIdx) => {
+                            const selected = userAnswers[gap.id] == oIdx ? 'selected' : '';
+                            selHtml += `<option value="${oIdx}" ${selected}>${opt}</option>`;
+                        });
+                        selHtml += `</select>`;
+                        contentHtml += selHtml;
+                    }
+                });
+                txtDiv.innerHTML = contentHtml;
+                elPartContainer.appendChild(txtDiv);
+
+                const titleQ = part.titleQuestion;
+                const tDiv = document.createElement('div');
+                tDiv.className = 'bg-amber-50 p-6 rounded-2xl border-2 border-amber-200';
+                tDiv.innerHTML = `<p class="font-black text-amber-900 mb-4 uppercase text-xs tracking-widest">${titleQ.prompt}</p>`;
+                titleQ.options.forEach((opt, oIdx) => {
+                    const checked = userAnswers[titleQ.id] == oIdx ? 'checked' : '';
+                    tDiv.innerHTML += `<label class="flex items-center gap-4 p-4 mb-2 bg-white rounded-xl hover:bg-amber-100 cursor-pointer transition shadow-sm border border-transparent">
+                                        <input type="radio" name="q${titleQ.id}" value="${oIdx}" ${checked} onchange="saveAnswer(${titleQ.id}, this.value)">
+                                        <span class="font-bold text-stone-700">${opt}</span>
+                                     </label>`;
+                });
+                elPartContainer.appendChild(tDiv);
+            } else if (part.type === 'cloze-mcq') {
+                const txtDiv = document.createElement('div');
+                txtDiv.className = 'bg-white p-8 rounded-3xl border border-stone-200 text-stone-800 leading-loose text-lg font-medium';
+                let contentHtml = '';
+                part.passagePieces.forEach((piece, idx) => {
+                    contentHtml += piece;
+                    if (idx < part.questions.length) {
+                        const q = part.questions[idx];
+                        let selHtml = `<select onchange="saveAnswer(${q.id}, this.value)" class="inline-block w-auto mx-2 py-1 px-3 text-base font-black text-mint-700 bg-mint-50 border-2 border-mint-100 rounded-lg"><option value="">(${q.id})</option>`;
+                        q.options.forEach((opt, oIdx) => {
+                            const selected = userAnswers[q.id] == oIdx ? 'selected' : '';
+                            selHtml += `<option value="${oIdx}" ${selected}>${opt}</option>`;
+                        });
+                        selHtml += `</select>`;
+                        contentHtml += selHtml;
+                    }
+                });
+                txtDiv.innerHTML = contentHtml;
+                elPartContainer.appendChild(txtDiv);
+            } else if (part.type === 'cloze-open') {
+                const passage = document.createElement('div');
+                passage.className = 'bg-stone-50 p-8 rounded-3xl border border-stone-100 mb-10 text-stone-800 leading-relaxed italic font-medium';
+                passage.innerHTML = part.passage;
+                elPartContainer.appendChild(passage);
+
+                const grid = document.createElement('div');
+                grid.className = 'space-y-4';
+                part.questions.forEach(q => {
+                    const row = document.createElement('div');
+                    row.className = 'p-5 bg-white rounded-2xl border border-stone-100 flex flex-col sm:flex-row sm:items-center gap-4 shadow-sm';
+                    const val = userAnswers[q.id] || '';
+                    row.innerHTML = `<div class="flex-grow font-semibold text-stone-700">Q${q.id}. ${q.prompt.replace('______', '<span class="text-mint-600 font-black">...</span>') }</div>
+                                     <input type="text" oninput="saveAnswer(${q.id}, this.value)" value="${val}" placeholder="1-3 từ..." class="sm:w-64 font-bold text-mint-700">`;
+                    grid.appendChild(row);
+                });
+                elPartContainer.appendChild(grid);
+            } else if (part.type === 'cloze-open-free') {
+                const txtDiv = document.createElement('div');
+                txtDiv.className = 'bg-white p-8 rounded-3xl border border-stone-200 text-stone-800 leading-loose text-lg font-medium';
+                let contentHtml = '';
+                const gapIds = Object.keys(part.answers).map(Number);
+                part.passagePieces.forEach((piece, idx) => {
+                    contentHtml += piece;
+                    if (idx < gapIds.length) {
+                        const gId = gapIds[idx];
+                        const val = userAnswers[gId] || '';
+                        contentHtml += `<input type="text" oninput="saveAnswer(${gId}, this.value)" value="${val}" placeholder="(${gId})" class="inline-block w-24 mx-2 py-1 px-3 text-base font-black text-center text-mint-700 bg-mint-50 border-2 border-mint-100 rounded-lg">`;
+                    }
+                });
+                txtDiv.innerHTML = contentHtml;
+                elPartContainer.appendChild(txtDiv);
+            } else if (part.type === 'writing') {
+                if (part.hasAIImage) {
+                    const imgArea = document.createElement('div');
+                    imgArea.id = 'ai-image-area';
+                    elPartContainer.appendChild(imgArea);
+                    generatePart7Image();
+                }
+
+                const taskDiv = document.createElement('div');
+                taskDiv.className = 'bg-stone-50 p-8 rounded-3xl border border-stone-100 mb-8 text-stone-800 font-medium leading-relaxed text-sm';
+                taskDiv.innerHTML = `<p class="font-bold mb-2">Đề bài:</p>${part.task}`;
+                elPartContainer.appendChild(taskDiv);
+
+                const area = document.createElement('textarea');
+                area.className = 'w-full h-64 p-6 text-lg';
+                area.placeholder = part.prompt;
+                area.value = userAnswers[part.startIndex] || '';
+                area.oninput = (e) => saveAnswer(part.startIndex, e.target.value);
+                elPartContainer.appendChild(area);
+            }
+
+            updateUIState();
+        }
+
+        function checkAnswer(partIndex, qId, val) {
+            if(!val) return false;
+            const part = testData[partIndex];
+            if(part.type === 'matching') {
+                const item = part.items.find(i => i.id == qId);
+                return item && val.toLowerCase() === item.answer.toLowerCase();
+            }
+            if(part.type === 'dialogue') {
+                const q = part.questions.find(i => i.id == qId);
+                return q && val.toLowerCase() === q.answer.toLowerCase();
+            }
+            if(part.type === 'story-gaps') {
+                if(qId == part.titleQuestion.id) return val == part.titleQuestion.answer;
+                const gap = part.gaps.find(g => g.id == qId);
+                return gap && val == gap.answer;
+            }
+            if(part.type === 'cloze-mcq') {
+                const q = part.questions.find(i => i.id == qId);
+                return q && val == q.answer;
+            }
+            if(part.type === 'cloze-open') {
+                const q = part.questions.find(i => i.id == qId);
+                return q && q.answer.toLowerCase().includes(val.toLowerCase());
+            }
+            if(part.type === 'cloze-open-free') {
+                return part.answers[qId] && part.answers[qId].toLowerCase() === val.toLowerCase();
+            }
+            return false;
+        }
+
+        function showResults() { 
+
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec";
+        try {
+            let theName = window.userName || (document.getElementById('user-name')? document.getElementById('user-name').value : 'Học Viên');
+            let theScore = typeof totalCorrect !== 'undefined' ? totalCorrect : (typeof score_val !== 'undefined' ? score_val : 0);
+            let theTotal = typeof totalQuestions !== 'undefined' ? totalQuestions : 40;
+            
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    student_name: theName,
+                    exam_type: 'Flyers Level - Test 2',
+                    score: theScore,
+                    total: theTotal,
+                    band: (theScore/theTotal >= 0.8) ? 'Distinction' : 'Practice',
+                    answers: userAnswers || {}
+                })
+            }).then(() => {
+                setTimeout(() => {
+                    window.location.href = `../congratulations.html?name=${encodeURIComponent(theName)}&score=${theScore}&total=${theTotal}&exam=${encodeURIComponent('Flyers Level - Test 2')}`;
+                }, 1500);
+            }).catch(console.error);
+        } catch(e) { console.error(e); }
+    
+            elTest.classList.add('hide');
+            elResults.classList.remove('hide');
+            
+            document.getElementById('result-user-info').innerText = `Học viên: ${userName} | Chúc mừng con đã chinh phục Flyers!`;
+            document.getElementById('time-taken').innerText = formatTimeTaken(secondsLeft);
+
+            let totalCorrect = 0;
+            const partScores = [];
+            const partLabels = [];
+            const maxPartScores = [];
+            const revContainer = document.getElementById('review-container');
+            revContainer.innerHTML = '';
+
+            testData.forEach((part, pIdx) => {
+                if(part.type === 'writing') return;
+
+                let partCorrect = 0;
+                let partTotal = 0;
+                
+                const partSection = document.createElement('div');
+                partSection.className = 'bg-stone-50 p-6 rounded-3xl border border-stone-100 shadow-sm';
+                partSection.innerHTML = `<h4 class="font-black text-stone-400 text-[10px] uppercase mb-4 tracking-widest border-b border-stone-100 pb-2">${part.title}</h4>`;
+                const qGrid = document.createElement('div');
+                qGrid.className = 'grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3';
+
+                const processQ = (qId, correctStr) => {
+                    partTotal++;
+                    const userVal = userAnswers[qId];
+                    const isCorrect = checkAnswer(pIdx, qId, userVal);
+                    if (isCorrect) {
+                        partCorrect++;
+                        totalCorrect++;
+                    }
+                    
+                    let userDisplay = userVal === undefined ? 'Trống' : userVal;
+                    let displayCorrect = correctStr;
+
+                    if(part.type === 'dialogue') {
+                        userDisplay = userDisplay.toUpperCase();
+                        displayCorrect = displayCorrect.toUpperCase();
+                    } else if (part.type === 'story-gaps' || part.type === 'cloze-mcq') {
+                        if(userVal !== undefined && !isNaN(userVal)) {
+                            const source = (qId == part.titleQuestion?.id) ? part.titleQuestion : (part.gaps?.find(g=>g.id==qId) || part.questions?.find(q=>q.id==qId));
+                            if(source) {
+                                userDisplay = source.options[userVal];
+                                displayCorrect = source.options[correctStr];
+                            }
+                        }
+                    }
+
+                    qGrid.innerHTML += `<div class="p-3 rounded-2xl ${isCorrect ? 'bg-green-100 border border-green-200' : 'bg-red-100 border border-red-200'} text-[10px] text-center">
+                        <div class="font-black text-stone-500 mb-1">Q${qId}</div>
+                        <div class="font-black text-stone-800 truncate" title="${userDisplay}">CON: ${userDisplay}</div>
+                        ${!isCorrect ? `<div class="text-mint-700 font-black mt-1 uppercase truncate" title="${displayCorrect}">ĐÚNG: ${displayCorrect}</div>` : `<div class="text-green-600 font-black mt-1 uppercase">✓ ĐÚNG</div>`}
+                    </div>`;
+                };
+
+                if(part.type === 'matching') part.items.forEach(i => processQ(i.id, i.answer));
+                else if(part.type === 'dialogue') part.questions.forEach(i => processQ(i.id, i.answer));
+                else if(part.type === 'story-gaps') {
+                    part.gaps.forEach(g => processQ(g.id, g.answer));
+                    processQ(part.titleQuestion.id, part.titleQuestion.answer);
+                }
+                else if(part.type === 'cloze-mcq') part.questions.forEach(i => processQ(i.id, i.answer));
+                else if(part.type === 'cloze-open') part.questions.forEach(i => processQ(i.id, i.answer));
+                else if(part.type === 'cloze-open-free') Object.keys(part.answers).forEach(k => processQ(k, part.answers[k]));
+
+                partSection.appendChild(qGrid);
+                revContainer.appendChild(partSection);
+                
+                partLabels.push(`Part ${pIdx + 1}`);
+                partScores.push(partCorrect);
+                maxPartScores.push(partTotal);
+            });
+
+            document.getElementById('final-score').innerText = totalCorrect;
+            renderChart(partLabels, partScores, maxPartScores);
+        }
+
+        function formatTimeTaken(timeLeft) {
+            const spent = (40 * 60) - timeLeft;
+            const m = Math.floor(spent / 60);
+            const s = spent % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function renderChart(labels, dataScores, maxScores) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            const percentages = dataScores.map((score, idx) => Math.round((score / maxScores[idx]) * 100));
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Chính xác (%)',
+                        data: percentages,
+                        backgroundColor: '#16a34a',
+                        borderRadius: 12,
+                        barPercentage: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { font: { weight: 'bold' } },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#064e3b',
+                            callbacks: {
+                                label: (c) => ` ${dataScores[c.dataIndex]}/${maxScores[c.dataIndex]} câu đúng (${c.parsed.y}%)`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        btnPrev.onclick = () => { if(currentPartIndex > 0) { currentPartIndex--; renderPart(currentPartIndex); } };
+        btnNext.onclick = () => { if(currentPartIndex < testData.length-1) { currentPartIndex++; renderPart(currentPartIndex); } };
+        btnSubmit.onclick = () => { if(confirm("Nộp bài thi ngay bây giờ?")) finishTest(); };
+    </script>
+
+<!-- Timer & Location Patch (Auto Added) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const possibleIds = ['overlay-name', 'user-name', 'student-name', 'studentName', 'ket-student-name', 'cand-name', 'candidateName'];
+    let nameInput = null;
+    for (let id of possibleIds) {
+        if (document.getElementById(id)) { nameInput = document.getElementById(id); break; }
+    }
+    if (!nameInput) {
+        const inputs = document.querySelectorAll('input[type="text"]');
+        for (let input of inputs) {
+            if (input.placeholder && input.placeholder.toLowerCase().includes('tên')) { nameInput = input; break; }
+        }
+    }
+
+    if (nameInput && !document.getElementById('dynamic-location-select')) {
+        const select = document.createElement('select');
+        select.id = 'dynamic-location-select';
+        select.innerHTML = '<option value="Củ Chi">Củ Chi</option><option value="Tân Phú">Tân Phú</option><option value="Hóc Môn">Hóc Môn</option><option value="Online">Online</option>';
+        select.className = nameInput.className;
+        select.style.marginTop = '10px';
+        select.style.marginBottom = '10px';
+        nameInput.parentNode.insertBefore(select, nameInput.nextSibling);
+    }
+    
+    // Timer Patch
+    window.testStartTime = null;
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (btn && (btn.innerText.toLowerCase().includes('bắt đầu') || btn.innerText.toLowerCase().includes('start'))) {
+            if (!window.testStartTime) window.testStartTime = new Date();
+        }
+    });
+
+    const origFetch = window.fetch;
+    window.fetch = function() {
+        if (arguments[0] && arguments[0].includes('script.google.com')) {
+            try {
+                let opts = arguments[1];
+                if (opts && opts.body) {
+                    let bodyObj = JSON.parse(opts.body);
+                    const l = document.getElementById('dynamic-location-select');
+                    if (l) bodyObj['location'] = l.value;
+                    
+                    if (window.testStartTime) {
+                        const endTime = new Date();
+                        const formatDate = (d) => {
+                            const pad = n => n<10?'0'+n:n;
+                            return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+                        };
+                        bodyObj['startTime'] = formatDate(window.testStartTime);
+                        bodyObj['endTime'] = formatDate(endTime);
+                        const diffSecs = Math.floor((endTime - window.testStartTime) / 1000);
+                        bodyObj['timeTaken'] = Math.floor(diffSecs/60) + " phút " + (diffSecs%60) + " giây";
+                    }
+                    opts.body = JSON.stringify(bodyObj);
+                    arguments[1] = opts;
+                }
+            } catch(e) {}
+        }
+        return origFetch.apply(this, arguments);
+    };
+});
+</script>
+
+</body>
+</html>
