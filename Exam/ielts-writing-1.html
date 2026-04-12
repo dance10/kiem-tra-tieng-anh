@@ -367,6 +367,9 @@
                     saveStatus.innerText = "✅ Kết quả học viên đã được đồng bộ để chấm điểm.";
                     saveStatus.className = "text-green-800 font-bold";
                     saveStatus.parentElement.className = "p-4 bg-green-50 rounded-2xl border border-green-200 mb-8 inline-block";
+                    setTimeout(() => {
+                        window.location.href = `../congratulations.html?name=${encodeURIComponent(window.studentName)}&score=0&total=${parseInt(wc1) + parseInt(wc2)}&band=Reviewing&exam=${encodeURIComponent('IELTS Writing Test 1')}`;
+                    }, 1500);
                 } catch (e) {
                     saveStatus.innerText = "⚠️ Lỗi: Không thể tải bài lên máy chủ.";
                     saveStatus.className = "text-red-600 font-bold";

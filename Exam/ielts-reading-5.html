@@ -432,12 +432,11 @@
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'saveResult',
-                    name: document.getElementById('studentName').value || "Ẩn danh",
-                    exam: 'IELTS Reading Test 5',
-                    score: score + '/40',
+                    student_name: document.getElementById('studentName').value || "Ẩn danh",
+                    exam_type: 'IELTS Reading Test 5',
+                    score: score,
+                    total: 40,
                     band: typeof assessment !== 'undefined' ? assessment : "Band " + ((score/40)*9).toFixed(1),
-                    time: timeElapsed + 's',
                     answers: answersSubmitted
                 })
             }).then(() => {

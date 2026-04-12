@@ -532,12 +532,11 @@
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        action: 'saveResult',
-                        name: studentName,
-                        exam: 'IELTS Reading Test 4',
-                        score: totalScore + '/40',
+                        student_name: studentName,
+                        exam_type: 'IELTS Reading Test 4',
+                        score: totalScore,
+                        total: 40,
                         band: 'Band ' + band,
-                        time: (3600 - timerSeconds) + 's',
                         answers: answersSubmitted
                     })
                 });
