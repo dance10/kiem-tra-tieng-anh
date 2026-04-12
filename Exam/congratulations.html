@@ -10,5 +10,60 @@
 </head>
 <body>
     <p style="text-align:center;margin-top:40vh;font-family:sans-serif;color:#888;">Đang chuyển hướng...</p>
+
+<!-- Timer Logger Patch -->
+<script>
+(function(){
+    if (window.timerPatchApplied) return;
+    window.timerPatchApplied = true;
+    window.testStartTime = null;
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (btn && (btn.innerText.toLowerCase().includes('bắt đầu') || btn.innerText.toLowerCase().includes('start') || btn.innerText.toLowerCase().includes('bắt đâu'))) {
+            if (!window.testStartTime) {
+                window.testStartTime = new Date();
+                console.log("Test started at: " + window.testStartTime);
+            }
+        }
+    });
+
+    const origFetch = window.fetch;
+    window.fetch = function() {
+        if (arguments[0] && arguments[0].includes('script.google.com')) {
+            try {
+                let opts = arguments[1];
+                if (opts && opts.body) {
+                    let bodyObj = JSON.parse(opts.body);
+                    if (window.testStartTime) {
+                        const endTime = new Date();
+                        // Định dạng dd/mm/yyyy hh:mm:ss
+                        const formatDate = (d) => {
+                            const pad = n => n<10?'0'+n:n;
+                            return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+                        };
+                        bodyObj['startTime'] = formatDate(window.testStartTime);
+                        bodyObj['endTime'] = formatDate(endTime);
+                        
+                        const diffSecs = Math.floor((endTime - window.testStartTime) / 1000);
+                        const mins = Math.floor(diffSecs / 60);
+                        const secs = diffSecs % 60;
+                        bodyObj['timeTaken'] = `${mins} phút ${secs} giây`;
+                    } else {
+                         bodyObj['timeTaken'] = "Không xác định";
+                    }
+                    delete bodyObj.answers; // Tùy chọn: có thể ghi vào answers. Xin không xóa answers để không mất dữ liệu của học viên
+                    
+                    // Để an toàn, ghi chú vào biến "timeTaken" để có thể gộp nếu Google sheet không map cột tự động
+                    opts.body = JSON.stringify(bodyObj);
+                    arguments[1] = opts;
+                }
+            } catch(e) { console.error("Timer Patch Error:", e); }
+        }
+        return origFetch.apply(this, arguments);
+    };
+})();
+</script>
+
 </body>
 </html>
