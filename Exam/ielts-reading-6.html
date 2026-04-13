@@ -21,7 +21,7 @@
         .highlight-yellow { background-color: #fef08a; border-radius: 2px; }
         #highlightMenu {
             display: none;
-            position: absolute;
+            position: fixed;
             background: #1e3a8a;
             color: white;
             padding: 4px 12px;
@@ -300,8 +300,8 @@
             const sel = window.getSelection();
             if (sel.toString().trim().length > 0) {
                 highlightMenu.style.display = 'block';
-                highlightMenu.style.left = e.pageX + 'px';
-                highlightMenu.style.top = (e.pageY - 40) + 'px';
+                highlightMenu.style.left = e.clientX + 'px';
+                highlightMenu.style.top = (e.clientY - 40) + 'px';
             } else { highlightMenu.style.display = 'none'; }
         });
         highlightMenu.addEventListener('mousedown', (e) => {
@@ -408,7 +408,10 @@
                 })
             }).then(() => {
                 document.getElementById('save-status').textContent = 'Đã lưu kết quả thành công!';
-                                    setTimeout(() => window.location.href = '../congratulations.html', 2000);
+                                    setTimeout(() => {
+                                        const nameStr = document.getElementById('studentName').value || "Ẩn danh";
+                                        window.location.href = '../congratulations.html?name=' + encodeURIComponent(nameStr) + '&score=' + score + '&total=40&band=' + encodeURIComponent(assessment) + '&exam=' + encodeURIComponent('IELTS Reading Test 6');
+                                    }, 2000);
             }).catch(() => {
                 document.getElementById('save-status').textContent = 'Lỗi kết nối lưu kết quả.';
             });

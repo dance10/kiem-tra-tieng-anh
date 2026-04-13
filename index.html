@@ -386,6 +386,38 @@
             border-radius: 2px;
         }
 
+        /* Time tabs */
+        .lb-time-tabs-wrapper {
+            background: rgba(0,0,0,0.15);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.5rem 1rem;
+        }
+        .lb-time-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .lb-time-tabs::-webkit-scrollbar { display: none; }
+        .lb-time-tab {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+        .lb-time-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.1); }
+        .lb-time-tab.active {
+            color: var(--bg-main);
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
         /* Sub-tabs (Level 2) */
         .lb-subtabs-wrapper {
             position: relative;
@@ -523,6 +555,16 @@
             letter-spacing: 0.15em;
             color: var(--text-secondary);
         }
+        .podium-time {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: rgba(148,163,184,0.8);
+            margin-top: 0.35rem;
+            background: rgba(0,0,0,0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            display: inline-block;
+        }
 
         /* Rest of leaderboard rows */
         .lb-row {
@@ -575,11 +617,14 @@
             text-align: right;
         }
         .lb-time {
-            font-size: 0.6rem;
-            color: rgba(148,163,184,0.5);
+            font-size: 0.65rem;
+            color: rgba(148,163,184,0.8);
+            background: rgba(255,255,255,0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
             flex-shrink: 0;
-            min-width: 80px;
-            text-align: right;
+            min-width: 90px;
+            text-align: center;
         }
 
 
@@ -729,7 +774,7 @@
             .lb-podium { flex-direction: column; align-items: center; }
             .podium-item { order: unset !important; max-width: 300px; width: 100%; }
 
-            .lb-time { display: none; }
+            .lb-time { font-size: 0.55rem; min-width: auto; padding: 0.15rem 0.3rem; }
             .lb-row { gap: 0.5rem; padding: 0.7rem 0.5rem; }
         }
 
@@ -1184,6 +1229,15 @@
         <div class="leaderboard-section">
             <div class="section-title">🏆 Bảng xếp hạng</div>
             <div class="leaderboard-container">
+                <!-- Level 0: Time filters -->
+                <div class="lb-time-tabs-wrapper">
+                    <div class="lb-time-tabs" id="lb-time-tabs">
+                        <button class="lb-time-tab active" data-time="all">Tất cả thời gian</button>
+                        <button class="lb-time-tab" data-time="day">Top Hôm nay</button>
+                        <button class="lb-time-tab" data-time="week">Top Tuần này</button>
+                        <button class="lb-time-tab" data-time="month">Top Tháng này</button>
+                    </div>
+                </div>
                 <!-- Level 1: Category tabs -->
                 <div class="lb-tabs-wrapper">
                     <div class="lb-tabs" id="lb-tabs">
@@ -1298,6 +1352,7 @@
         let leaderboardData = [];
         let currentCategory = 'all';
         let currentSubFilter = 'all';
+        let currentTimeFilter = 'all';
 
         // Category → keyword mapping for filtering exam names
         const CATEGORIES = {
@@ -1337,7 +1392,20 @@
                                 }
                             } catch (e) {}
                         }
-                        return { ...row, score: parsedScore };
+                        
+                        let parsedDate = null;
+                        if (row.time && row.time !== 'Không có') {
+                            let parts = String(row.time).trim().split(' ');
+                            let timeP = parts.find(p => p.includes(':'));
+                            let dateP = parts.find(p => p.includes('/'));
+                            if (timeP && dateP) {
+                                let dparts = dateP.split('/');
+                                if (dparts.length >= 3) {
+                                    parsedDate = new Date(dparts[2], dparts[1] - 1, dparts[0], ...timeP.split(':').map(Number));
+                                }
+                            }
+                        }
+                        return { ...row, score: parsedScore, parsedDate };
                     });
                     buildSubTabs();
                     renderLeaderboard();
@@ -1449,6 +1517,24 @@
                 filteredData = filteredData.filter(r => r.exam === currentSubFilter);
             }
 
+            // Step 3: Filter by time
+            if (currentTimeFilter !== 'all') {
+                const now = new Date();
+                let filterStart = new Date(now);
+                if (currentTimeFilter === 'day') {
+                    filterStart.setHours(0, 0, 0, 0);
+                } else if (currentTimeFilter === 'week') {
+                    const day = now.getDay();
+                    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+                    filterStart = new Date(now.setDate(diff));
+                    filterStart.setHours(0, 0, 0, 0);
+                } else if (currentTimeFilter === 'month') {
+                    filterStart.setDate(1);
+                    filterStart.setHours(0, 0, 0, 0);
+                }
+                filteredData = filteredData.filter(r => r.parsedDate && r.parsedDate >= filterStart);
+            }
+
             // Sort by percentage score (descending)
             filteredData.sort((a, b) => {
                 const sa = parseScore(a.score);
@@ -1501,6 +1587,7 @@
                             <div class="podium-name" title="${escapeHtml(row.name || 'Ẩn danh')}">${escapeHtml(row.name || 'Ẩn danh')}</div>
                             <div class="podium-score">${row.score || '—'}</div>
                             <div class="podium-band">${escapeHtml(formatBand(row.band, row.exam))}</div>
+                            <div class="podium-time">⏱️ ${escapeHtml((row.timeTaken && row.timeTaken !== 'Không có') ? row.timeTaken : '--')}</div>
                         </div>
                     `;
                 });
@@ -1517,7 +1604,7 @@
                             <div class="lb-name">${escapeHtml(row.name || 'Ẩn danh')}</div>
                             <div class="lb-score">${row.score || '—'}</div>
                             <div class="lb-band">${escapeHtml(formatBand(row.band, row.exam))}</div>
-                            <div class="lb-time">${escapeHtml(row.time || '')}</div>
+                            <div class="lb-time">⏱️ ${escapeHtml((row.timeTaken && row.timeTaken !== 'Không có') ? row.timeTaken : '--')}</div>
                         </div>
                     `;
                 });
@@ -1525,6 +1612,18 @@
 
             content.innerHTML = html;
         }
+
+        // Time tab switching
+        document.getElementById('lb-time-tabs').addEventListener('click', function(e) {
+            const tab = e.target.closest('.lb-time-tab');
+            if (!tab) return;
+            
+            this.querySelectorAll('.lb-time-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            currentTimeFilter = tab.dataset.time;
+            renderLeaderboard();
+        });
 
         // Level 1: Category tab switching
         document.getElementById('lb-tabs').addEventListener('click', function(e) {

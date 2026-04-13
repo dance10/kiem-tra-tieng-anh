@@ -441,7 +441,11 @@
                 })
             }).then(() => {
                 document.getElementById('save-status').textContent = 'Đã lưu kết quả thành công!';
-                                    setTimeout(() => window.location.href = '../congratulations.html', 2000);
+                                    setTimeout(() => {
+                                        const nameStr = document.getElementById('studentName').value || "Ẩn danh";
+                                        const bandStr = typeof assessment !== 'undefined' ? assessment : ("Band " + ((score/40)*9).toFixed(1));
+                                        window.location.href = '../congratulations.html?name=' + encodeURIComponent(nameStr) + '&score=' + score + '&total=40&band=' + encodeURIComponent(bandStr) + '&exam=' + encodeURIComponent('IELTS Reading Test 5');
+                                    }, 2000);
             }).catch(() => {
                 document.getElementById('save-status').textContent = 'Lỗi kết nối lưu kết quả.';
             });
