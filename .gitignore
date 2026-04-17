@@ -7,3 +7,7 @@ Huongdan/
 KiemThu/
 Template/
 .agent/
+
+# Ignore internal scripts & tools
+*.py
+GoogleAppScriptBackup.js
