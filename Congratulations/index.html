@@ -158,6 +158,183 @@
             transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
+
+        /* ========== PRINT STYLES ========== */
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        @media print {
+            /* Force backgrounds & colors to print */
+            *, *::before, *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            /* Reset body */
+            html, body {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+            }
+
+            body {
+                background: #0f172a !important;
+            }
+
+            /* Scale entire content to fit A4 */
+            #tier-wrapper {
+                transform: scale(0.72) !important;
+                transform-origin: top center !important;
+                min-height: auto !important;
+                padding: 8px !important;
+                margin: 0 auto !important;
+            }
+
+            /* Kill ALL animations */
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+
+            /* Gradient text → static color for print
+               (browsers can NOT print -webkit-background-clip: text) */
+            .gradient-text,
+            .tier-excellent .gradient-text,
+            .tier-good .gradient-text,
+            .tier-ok .gradient-text,
+            .tier-improve .gradient-text {
+                background: none !important;
+                -webkit-background-clip: unset !important;
+                -webkit-text-fill-color: currentColor !important;
+                background-clip: unset !important;
+            }
+            .tier-excellent .gradient-text { color: #fbbf24 !important; }
+            .tier-good .gradient-text { color: #60a5fa !important; }
+            .tier-ok .gradient-text { color: #22c55e !important; }
+            .tier-improve .gradient-text { color: #fb923c !important; }
+
+            /* Ensure card backgrounds print */
+            [id="card-border"] {
+                box-shadow: none !important;
+            }
+
+            /* Make sure opacity elements are visible */
+            .slide-up, .scale-in {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+
+            /* Trophy / main icon - no animation, show static */
+            .trophy-bounce {
+                animation: none !important;
+                font-size: 100px !important;
+            }
+
+            /* Progress ring - ensure SVG prints */
+            svg { overflow: visible !important; }
+            .progress-ring-circle {
+                transition: none !important;
+            }
+
+            /* Compact spacing for A4 */
+            .mb-4 { margin-bottom: 8px !important; }
+            .mb-8 { margin-bottom: 12px !important; }
+            .mb-10 { margin-bottom: 16px !important; }
+            .p-8 { padding: 16px !important; }
+            .md\:p-12 { padding: 20px !important; }
+            .p-6 { padding: 10px !important; }
+            .gap-4 { gap: 8px !important; }
+
+            /* Shrink texts slightly */
+            h1 { font-size: 3rem !important; }
+            h2 { font-size: 2.5rem !important; }
+
+            /* Progress ring smaller */
+            svg.w-40, svg.md\:w-48 { width: 120px !important; height: 120px !important; }
+            #percent-display { font-size: 2.5rem !important; }
+
+            /* Hide non-printable elements */
+            #particles,
+            #confetti-container,
+            .confetti,
+            .particle,
+            .twinkle,
+            #deco-1, #deco-2, #deco-3, #deco-4, #deco-5,
+            footer,
+            #study-tips-section,
+            #contact-section,
+            #btn-retry {
+                display: none !important;
+            }
+
+            /* Hide action buttons */
+            .slide-up.flex.flex-wrap {
+                display: none !important;
+            }
+
+            /* Shine overlay → static */
+            .shine {
+                background: none !important;
+            }
+
+            /* Glow pulse → static border */
+            .glow-pulse {
+                animation: none !important;
+                box-shadow: 0 0 15px rgba(255,255,255,0.1) !important;
+            }
+
+            /* Backdrop filter doesn't print, use solid fallback */
+            [class*="backdrop-blur"] {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            /* Ensure white text on dark bg */
+            #student-name {
+                color: #ffffff !important;
+            }
+
+            /* Badge box needs solid bg */
+            #badge-box {
+                background: #f59e0b !important;
+            }
+            .tier-good #badge-box,
+            .tier-good [id="badge-box"] { background: #3b82f6 !important; }
+            .tier-ok #badge-box,
+            .tier-ok [id="badge-box"] { background: #22c55e !important; }
+            .tier-improve #badge-box,
+            .tier-improve [id="badge-box"] { background: #f97316 !important; }
+            #achievement-text { color: #ffffff !important; }
+
+            /* Score label colors for print */
+            #score-val { color: inherit !important; }
+            #band-val { color: inherit !important; }
+
+            /* Motivation text → fully visible */
+            #motivation-text {
+                opacity: 1 !important;
+                color: rgba(255,255,255,0.85) !important;
+            }
+
+            /* Date line → visible */
+            .text-white\/20 { color: rgba(255,255,255,0.5) !important; }
+
+            /* Card inner bg → solid dark */
+            [id="card-inner"] {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            /* Logo badge → solid bg */
+            .bg-white\/10 {
+                background-color: rgba(255,255,255,0.1) !important;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen text-white" id="main-body">

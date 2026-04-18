@@ -494,7 +494,7 @@
                 <div class="p-10 flex flex-col md:flex-row items-center gap-10">
                     <div class="flex-grow space-y-6">
                         <div class="bg-stone-50 p-6 rounded-lg border text-sm font-bold text-stone-500 uppercase tracking-widest">
-                            <div class="flex justify-between mb-2"><span>Hoàn thành:</span> <span id="res-answered" class="text-teal-600">0</span></div>
+                            <div class="flex justify-between mb-2"><span>Điểm số:</span> <span id="res-score" class="text-teal-600">0</span></div>
                             <div class="flex justify-between border-t pt-2"><span>Chưa làm:</span> <span id="res-missed" class="text-rose-500">0</span></div>
                             <div class="flex justify-between border-t pt-2"><span>Lưu điểm Đám Mây:</span> <span id="cloud-status" class="text-stone-400">Đang lưu...</span></div>
                         </div>
@@ -504,6 +504,13 @@
                         <canvas id="resultChart"></canvas>
                     </div>
                 </div>
+            </div>
+
+            <!-- Answer Review Section -->
+            <div class="bg-white rounded-2xl shadow-xl border border-stone-200 p-8">
+                <h3 class="text-xl font-bold text-stone-800 mb-2">📝 Đáp án chi tiết từng câu</h3>
+                <p class="text-sm text-stone-500 mb-6">So sánh câu trả lời của bạn với đáp án chính thức (chỉ phần trắc nghiệm, Part 1-5).</p>
+                <div id="answerReviewContainer" class="space-y-4"></div>
             </div>
         </section>
 
@@ -524,7 +531,47 @@
         };
 
         const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrDJupIOU4PY92cMNRfafeQ-RH9Pra5EaHrnlELAnwsaVqaWiWzuIanPRY_BCM8Ohv/exec';
-        const state = { name: '', totalQuestions: 32 };
+        const state = { name: '', totalQuestions: 32, mcqTotal: 30 };
+
+        // Answer Key for MCQ questions (Part 1-5, Q1-Q30)
+        // Part 6 (Q31) & Part 7 (Q32) are writing tasks - graded manually
+        const answerKey = {
+            // Part 1: Short Messages (Q1-6)
+            q1: { ans: 'C', label: 'You will have to pay money if you miss the deadline.' },
+            q2: { ans: 'B', label: 'To ask Sam to return something.' },
+            q3: { ans: 'B', label: "You don't pay for a drink if you buy a big pizza early." },
+            q4: { ans: 'B', label: 'You must only use them for study or finding information.' },
+            q5: { ans: 'A', label: 'Sarah wants to have dinner before the concert.' },
+            q6: { ans: 'B', label: 'You pay full price for two and 50% for the next one.' },
+            // Part 2: Matching (Q7-13)
+            q7: { ans: 'B', label: 'Victory Sports' },
+            q8: { ans: 'C', label: 'Sunrise Gym' },
+            q9: { ans: 'A', label: 'The Blue Whale' },
+            q10: { ans: 'B', label: 'Victory Sports' },
+            q11: { ans: 'C', label: 'Sunrise Gym' },
+            q12: { ans: 'A', label: 'The Blue Whale' },
+            q13: { ans: 'B', label: 'Victory Sports' },
+            // Part 3: Reading Comprehension (Q14-18)
+            q14: { ans: 'B', label: 'A birthday present.' },
+            q15: { ans: 'A', label: 'It would be boring.' },
+            q16: { ans: 'A', label: 'True - He goes to the forest every Saturday.' },
+            q17: { ans: 'B', label: 'False - His friends prefer gaming.' },
+            q18: { ans: 'A', label: 'True - He draws the birds in a notebook.' },
+            // Part 4: Cloze (Q19-24)
+            q19: { ans: 'A', label: 'was' },
+            q20: { ans: 'B', label: 'discovered' },
+            q21: { ans: 'A', label: 'beans' },
+            q22: { ans: 'C', label: 'popular' },
+            q23: { ans: 'B', label: 'factories' },
+            q24: { ans: 'A', label: 'flavors' },
+            // Part 5: Gap Fill (Q25-30)
+            q25: { ans: 'to', label: 'to' },
+            q26: { ans: 'on', label: 'on' },
+            q27: { ans: 'bring', label: 'bring' },
+            q28: { ans: 'at', label: 'at' },
+            q29: { ans: 'with', label: 'with' },
+            q30: { ans: 'from', label: 'from' }
+        };
 
         document.getElementById('btn-start').addEventListener('click', () => {
             const nameInput = document.getElementById('cand-name').value.trim();
@@ -593,30 +640,89 @@
             }, 1000);
         }
 
+        // Get user answer for a question
+        function getUserAnswer(qName) {
+            // Radio buttons (Part 1, Part 3)
+            const radio = document.querySelector(`input[name="${qName}"]:checked`);
+            if (radio) return radio.value;
+            // Select dropdowns (Part 2, Part 4)
+            const select = document.querySelector(`select[name="${qName}"]`);
+            if (select) return select.value;
+            // Text inputs (Part 5)
+            const textInput = document.querySelector(`input[type="text"][name="${qName}"]`);
+            if (textInput) return textInput.value.trim();
+            return '';
+        }
+
         document.getElementById('btn-submit').addEventListener('click', () => {
             if(!confirm('Xác nhận nộp bài?')) return;
-            const inputs = document.querySelectorAll('.ans-input');
-            let answered = 0;
-            inputs.forEach(input => {
-                if (input.type === 'radio' && input.checked) answered++;
-                else if (input.tagName === 'SELECT' && input.value !== '') answered++;
-                else if ((input.tagName === 'TEXTAREA' || input.type === 'text') && input.value.trim().length > 1) answered++;
+            clearInterval(ket2TimerInterval);
+            ket2TimerInterval = null;
+
+            // Grade MCQ questions
+            let correct = 0;
+            let totalAnswered = 0;
+            let reviewHtml = '';
+            const partNames = [
+                { label: 'Part 1: Short Messages', range: [1, 6] },
+                { label: 'Part 2: Matching', range: [7, 13] },
+                { label: 'Part 3: Reading Comprehension', range: [14, 18] },
+                { label: 'Part 4: Cloze Test', range: [19, 24] },
+                { label: 'Part 5: Gap Fill', range: [25, 30] }
+            ];
+
+            partNames.forEach(part => {
+                reviewHtml += `<div class="mb-6"><h4 class="font-bold text-stone-700 text-sm uppercase tracking-wider mb-3 pb-2 border-b border-stone-100">${part.label}</h4><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">`;
+                for (let i = part.range[0]; i <= part.range[1]; i++) {
+                    const key = `q${i}`;
+                    const userAns = getUserAnswer(key);
+                    if (userAns) totalAnswered++;
+                    const correctAns = answerKey[key].ans;
+                    const isCorrect = userAns.toLowerCase() === correctAns.toLowerCase();
+                    if (isCorrect) correct++;
+
+                    const userDisplay = userAns || '—';
+                    const correctDisplay = `${correctAns}. ${answerKey[key].label}`;
+
+                    reviewHtml += `<div class="p-4 rounded-xl border-2 ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-black text-stone-600 text-sm">Câu ${i}</span>
+                            <span class="text-xs font-bold px-2 py-1 rounded-full ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">${isCorrect ? '✓ Đúng' : '✗ Sai'}</span>
+                        </div>
+                        <div class="text-xs text-stone-500 mb-1">Bạn chọn: <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-600'}">${userDisplay}</span></div>
+                        ${!isCorrect ? `<div class="text-xs text-stone-500">Đáp án: <span class="font-bold text-teal-700">${correctDisplay}</span></div>` : ''}
+                    </div>`;
+                }
+                reviewHtml += `</div></div>`;
             });
-            const missed = state.totalQuestions - answered;
+
+            // Check writing parts answered
+            const q31Text = document.getElementById('q31-text').value.trim();
+            const q32Text = document.getElementById('q32-text').value.trim();
+            if (q31Text.length > 1) totalAnswered++;
+            if (q32Text.length > 1) totalAnswered++;
+
+            const missed = state.totalQuestions - totalAnswered;
+
+            // Update result UI
             document.getElementById('res-name').textContent = state.name;
-            document.getElementById('res-answered').textContent = answered;
+            document.getElementById('res-score').textContent = `${correct}/${state.mcqTotal}`;
             document.getElementById('res-missed').textContent = missed;
+            document.getElementById('answerReviewContainer').innerHTML = reviewHtml;
+
             views.exam.classList.add('hidden-view');
             views.result.classList.remove('hidden-view');
             window.scrollTo(0, 0);
+
+            // Draw chart - Correct vs Incorrect
             const ctx = document.getElementById('resultChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Hoàn thành', 'Chưa làm'],
+                    labels: ['Đúng', 'Sai'],
                     datasets: [{
-                        data: [answered, missed],
+                        data: [correct, state.mcqTotal - correct],
                         backgroundColor: ['#0d9488', '#fecaca'],
                         borderWidth: 8,
                         borderColor: '#ffffff'
@@ -626,7 +732,7 @@
             });
 
             // Post result to Google Sheet
-            const bandLabel = (answered / state.totalQuestions >= 0.8) ? 'Distinction' : (answered / state.totalQuestions >= 0.6 ? 'Pass' : 'Practice');
+            const bandLabel = (correct / state.mcqTotal >= 0.8) ? 'Distinction' : (correct / state.mcqTotal >= 0.6 ? 'Pass' : 'Practice');
             fetch(GOOGLE_SHEET_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -634,8 +740,8 @@
                 body: JSON.stringify({
                     student_name: state.name || 'Học viên ẩn danh',
                     exam_type: 'KET Practice Test 2',
-                    score: answered,
-                    total: state.totalQuestions,
+                    score: correct,
+                    total: state.mcqTotal,
                     band: bandLabel,
                     time: (3600 - ket2TimerSeconds) + 's'
                 })
@@ -646,8 +752,8 @@
                     cs.className = "text-green-600";
                 }
                 setTimeout(() => {
-                        window.location.href = `../congratulations.html?name=${encodeURIComponent(state.name)}&score=${answered}&total=${state.totalQuestions}&band=${bandLabel}&exam=KET+Practice+Test+2`;
-                    }, 1500);
+                    window.location.href = `../congratulations.html?name=${encodeURIComponent(state.name)}&score=${correct}&total=${state.mcqTotal}&band=${bandLabel}&exam=KET+Practice+Test+2`;
+                }, 1500);
             }).catch(e => {
                 const cs = document.getElementById('cloud-status');
                 if (cs) {

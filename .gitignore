@@ -1,13 +1,61 @@
-# Ignore all markdown files
+# ============================================================
+# .gitignore - Quy định file/thư mục KHÔNG được push lên GitHub
+# Cập nhật: 18/04/2026
+# ============================================================
+
+# ─────────────────────────────────────────────────────────────
+# THƯ MỤC NỘI BỘ (không public)
+# ─────────────────────────────────────────────────────────────
+# File gốc chưa chuẩn hóa - chỉ dùng local
+Fix/
+
+# Mẫu template - chỉ dùng cho agent tạo exam
+Template/
+
+# Hướng dẫn nội bộ
+Huongdan/
+
+# Thư mục test thử
+KiemThu/
+
+# Agent config (Antigravity/Gemini)
+.agent/
+.gemini/
+.vscode/
+
+# ─────────────────────────────────────────────────────────────
+# FILE NỘI BỘ (scripts, backup, docs)
+# ─────────────────────────────────────────────────────────────
+# Scripts Python nội bộ (audit, fix, inject...)
+*.py
+
+# Backup Google Apps Script
+GoogleAppScriptBackup.js
+
+# Công cụ in chứng chỉ (nội bộ)
+reprint.html
+
+# Tài liệu nội bộ (markdown)
 *.md
 
-# Ignore Fix reference files
-Fix/
-Huongdan/
-KiemThu/
-Template/
-.agent/
+# File PDF báo cáo
+*.pdf
 
-# Ignore internal scripts & tools
-*.py
-GoogleAppScriptBackup.js
+# ─────────────────────────────────────────────────────────────
+# FILE HỆ THỐNG
+# ─────────────────────────────────────────────────────────────
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# Editor temp files
+*.swp
+*.swo
+*~
+
+# Node (nếu có)
+node_modules/
+package-lock.json
