@@ -20,8 +20,15 @@ KiemThu/
 
 # Agent config (Antigravity/Gemini)
 .agent/
+.agents/
 .gemini/
 .vscode/
+
+# Model config (AI model selection - internal)
+model-config.json
+
+# Large binary files (audio/video archives)
+*.zip
 
 # ─────────────────────────────────────────────────────────────
 # FILE NỘI BỘ (scripts, backup, docs)
