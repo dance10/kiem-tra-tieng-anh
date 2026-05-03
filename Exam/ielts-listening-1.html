@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Listening Test 1 - Cô Thuý English Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .sticky-timer { position: sticky; top: 0; z-index: 50; }
+        .question-box { border-left: 4px solid #3b82f6; padding-left: 1rem; margin-bottom: 1rem; background: #f8fafc; padding: 1rem; border-radius: 0 0.5rem 0.5rem 0; }
+        .answer-correct { background-color: #dcfce7 !important; border-left-color: #16a34a !important; }
+        .answer-wrong { background-color: #fef2f2 !important; border-left-color: #dc2626 !important; }
+        .answer-missed { background-color: #fffbeb !important; border-left-color: #f59e0b !important; }
+        input[type="text"]:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        audio { width: 100%; max-width: 600px; margin: 0 auto; display: block; }
+        .section-badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-p1 { background: #dbeafe; color: #1d4ed8; }
+        .badge-p2 { background: #fef3c7; color: #b45309; }
+        .badge-p3 { background: #ede9fe; color: #6d28d9; }
+        .badge-p4 { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-12">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md border-b-4 border-blue-600 p-6 text-center relative">
+        <a href="../index.html" class="absolute left-4 top-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-full transition-all no-underline inline-flex items-center gap-1">🏠 Trang Chủ</a>
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">CÔNG TY TNHH GIÁO DỤC VÀ ĐÀO TẠO HOÀI AN NHIÊN</h2>
+        <h1 class="text-4xl font-extrabold text-blue-800 my-2">TRUNG TÂM TIẾNG ANH CÔ THUÝ</h1>
+        <p class="text-sm text-gray-600 font-medium">MST: 0318842992</p>
+        <div class="mt-3 text-xs text-gray-500 flex flex-wrap justify-center gap-6">
+            <span class="flex items-center gap-1">📍 <b>CS1:</b> 202/1 Nguyễn Thị Lắng, Củ Chi</span>
+            <span class="flex items-center gap-1">📍 <b>CS2:</b> 61 Lê Đình Thám, Tân Phú</span>
+            <span class="flex items-center gap-1">📍 <b>CS3:</b> 325/5T Nguyễn Thị Thảnh, Hóc Môn</span>
+        </div>
+    </header>
+
+    <div id="app" class="max-w-6xl mx-auto px-4 py-8">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="bg-white p-10 rounded-2xl shadow-xl text-center border border-gray-100">
+            <div class="mb-6 inline-block p-4 bg-blue-50 rounded-full">
+                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m0 0l-2.828 2.828a1 1 0 000 1.414l.707.707a1 1 0 001.414 0L8.121 18.07m9.9-9.9l2.828-2.828a1 1 0 000-1.414l-.707-.707a1 1 0 00-1.414 0L15.9 5.172"></path></svg>
+            </div>
+            <h3 class="text-3xl font-black text-gray-900 mb-6">BÀI THI THỬ IELTS LISTENING FULL TEST (40 CÂU)</h3>
+
+            <div class="max-w-md mx-auto mb-8">
+                <label class="block text-left text-gray-700 font-bold mb-2">Họ và tên học sinh:</label>
+                <input type="text" id="student-name" placeholder="Nhập tên của bạn để bắt đầu..." 
+                    class="w-full p-4 border-2 border-blue-100 rounded-xl focus:border-blue-500 transition-all text-lg shadow-inner">
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 max-w-2xl mx-auto">
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Thời gian</p>
+                    <p class="text-xl font-bold text-blue-700">~30 Phút</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Số phần</p>
+                    <p class="text-xl font-bold text-blue-700">04 Sections</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Tổng số câu</p>
+                    <p class="text-xl font-bold text-blue-700">40 Câu</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500 uppercase font-bold">Nguồn</p>
+                    <p class="text-xl font-bold text-blue-700">Cambridge 15</p>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-500 mb-6">⚠️ Hãy chuẩn bị tai nghe và kiểm tra âm thanh trước khi bắt đầu.</p>
+
+            <button id="btn-start" onclick="startTest()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-16 rounded-full shadow-lg transform transition active:scale-95 text-lg cursor-pointer">
+                BẮT ĐẦU BÀI THI
+            </button>
+        </div>
+
+        <!-- Test Content -->
+        <div id="test-container" class="hidden">
+            <div class="sticky-timer bg-white/95 backdrop-blur-md shadow-lg p-4 rounded-xl flex justify-between items-center mb-8 border border-blue-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold" id="user-initial">?</div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-bold uppercase">Thí sinh</p>
+                        <p id="display-name" class="font-bold text-gray-800"></p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-gray-500 font-bold uppercase">Thời gian còn lại</p>
+                    <div id="timer" class="text-3xl font-mono font-black text-red-600">30:00</div>
+                </div>
+            </div>
+
+            <!-- SECTION 1: Bankside Recruitment Agency -->
+            <section class="bg-white p-8 rounded-2xl shadow-sm mb-12 border border-gray-100" id="s1">
+                <div class="mb-6 flex items-center gap-3 flex-wrap">
+                    <span class="section-badge badge-p1">Section 1</span>
+                    <h2 class="text-2xl font-black text-gray-900">Bankside Recruitment Agency</h2>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">📋 Questions 1-10: Complete the notes below. Write <b>NO MORE THAN TWO WORDS AND/OR A NUMBER</b> for each answer.</p>
+
+                <div class="mb-6 bg-blue-50 rounded-xl p-4 text-center">
+                    <p class="text-xs font-bold text-blue-700 uppercase mb-2">🎧 Audio Section 1</p>
+                    <audio controls class="mx-auto">
+                        <source src="../Audio/ielts15_test1_audio1.m4a" type="audio/mp4">
+                        Trình duyệt không hỗ trợ audio.
+                    </audio>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-6">
+                    <h4 class="font-bold text-gray-700 border-b border-gray-300 pb-2 mb-4">JOB DETAILS</h4>
+                    <div class="space-y-3 text-sm">
+                        <p><b>Type of job:</b> <span class="text-green-700 font-medium">Retail Assistant</span></p>
+                        <p><b>Store name:</b> <span class="text-green-700 font-medium">Buyright</span></p>
+                        <p><b>Branch:</b> <span class="text-green-700 font-medium">Buyright (1) _______________</span></p>
+                        <p><b>Manager's name:</b> <span class="text-green-700 font-medium">(2) _______________ Waters</span></p>
+                        <p><b>Duties include:</b> dealing with (3) _______________</p>
+                        <p><b>Requirements:</b> must have a (4) _______________</p>
+                        <p><b>Salary:</b> £ (5) _______________ per hour</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <h4 class="font-bold text-gray-700 border-b border-gray-300 pb-2 mb-4">HOURS AND CONDITIONS</h4>
+                    <div class="space-y-3 text-sm">
+                        <p><b>Working days:</b> (6) _______________ including Saturday</p>
+                        <p><b>Interview time:</b> (7) _______________</p>
+                        <p><b>Job reference number:</b> (8) _______________</p>
+                        <p><b>Documents to bring:</b> (9) _______________ and a CV</p>
+                        <p><b>Nearest bus stop:</b> next to the (10) _______________</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 space-y-3">
+                    <div class="question-box" data-q="1"><p><b>1.</b> Branch name</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="1" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="2"><p><b>2.</b> Manager's first name</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="2" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="3"><p><b>3.</b> Duties include dealing with...</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="3" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="4"><p><b>4.</b> Must have a...</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="4" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="5"><p><b>5.</b> Salary per hour (£)</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="5" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="6"><p><b>6.</b> Working days</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="6" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="7"><p><b>7.</b> Interview time</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="7" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="8"><p><b>8.</b> Job reference number</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="8" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="9"><p><b>9.</b> Documents to bring (first one)</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="9" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="10"><p><b>10.</b> Nearest bus stop location</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="10" placeholder="Your answer..."></div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Island Holidays -->
+            <section class="bg-white p-8 rounded-2xl shadow-sm mb-12 border border-gray-100" id="s2">
+                <div class="mb-6 flex items-center gap-3 flex-wrap">
+                    <span class="section-badge badge-p2">Section 2</span>
+                    <h2 class="text-2xl font-black text-gray-900">Island Holidays – Isle of Man</h2>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">📋 Questions 11-16: Choose the correct letter, <b>A</b>, <b>B</b> or <b>C</b>.</p>
+
+                <div class="mb-6 bg-amber-50 rounded-xl p-4 text-center">
+                    <p class="text-xs font-bold text-amber-700 uppercase mb-2">🎧 Audio Section 2</p>
+                    <audio controls class="mx-auto">
+                        <source src="../Audio/ielts15_test1_audio2.m4a" type="audio/mp4">
+                        Trình duyệt không hỗ trợ audio.
+                    </audio>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <div class="question-box" data-q="11">
+                        <p><b>11.</b> According to the speaker, the company</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="11"><option value="">-- Select --</option><option value="A">A. has been in business for longer than most of its competitors.</option><option value="B">B. arranges holidays to more destinations than its competitors.</option><option value="C">C. has more customers than its competitors.</option></select>
+                    </div>
+                    <div class="question-box" data-q="12">
+                        <p><b>12.</b> Where can customers meet the tour manager before travelling to the Isle of Man?</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="12"><option value="">-- Select --</option><option value="A">A. Liverpool</option><option value="B">B. Heysham</option><option value="C">C. Luton</option></select>
+                    </div>
+                    <div class="question-box" data-q="13">
+                        <p><b>13.</b> The company's tours of the Isle of Man</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="13"><option value="">-- Select --</option><option value="A">A. are all guided tours.</option><option value="B">B. include a mix of guided and free time.</option><option value="C">C. are mostly self-guided.</option></select>
+                    </div>
+                    <div class="question-box" data-q="14">
+                        <p><b>14.</b> What does the speaker say about the Tynwald exhibition?</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="14"><option value="">-- Select --</option><option value="A">A. It is included in the tour price.</option><option value="B">B. It requires a separate ticket.</option><option value="C">C. It is closed on weekends.</option></select>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500 mb-4">📋 Questions 15-20: Complete the table below. Write <b>NO MORE THAN TWO WORDS AND/OR A NUMBER</b> for each answer.</p>
+
+                <div class="overflow-x-auto mb-6">
+                    <table class="min-w-full border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="p-3 border text-left">Day</th>
+                                <th class="p-3 border text-left">Activity</th>
+                                <th class="p-3 border text-left">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="p-3 border font-semibold">Day 1</td><td class="p-3 border">Arrive</td><td class="p-3 border">Hotel dining room has view of the (15) _______________</td></tr>
+                            <tr><td class="p-3 border font-semibold">Day 2</td><td class="p-3 border">Tynwald Exhibition</td><td class="p-3 border">Tynwald may have been founded in (16) _______________, not 979.</td></tr>
+                            <tr><td class="p-3 border font-semibold">Day 3</td><td class="p-3 border">Trip to Snaefell</td><td class="p-3 border">Take the (17) _______________ to the top of Snaefell</td></tr>
+                            <tr><td class="p-3 border font-semibold">Day 4</td><td class="p-3 border">Free day</td><td class="p-3 border">Company provides a (18) _______________ for local transport.</td></tr>
+                            <tr><td class="p-3 border font-semibold">Day 5</td><td class="p-3 border">Visit Castle Rushen</td><td class="p-3 border">Castle Rushen is an example of a (19) _______________</td></tr>
+                            <tr><td class="p-3 border font-semibold">Day 6</td><td class="p-3 border">Departure</td><td class="p-3 border">Leave by (20) _______________</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="question-box" data-q="15"><p><b>15.</b> View from hotel dining room</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="15" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="16"><p><b>16.</b> Year Tynwald may have been founded</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="16" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="17"><p><b>17.</b> Transport to top of Snaefell</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="17" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="18"><p><b>18.</b> Provided by company for transport</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="18" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="19"><p><b>19.</b> Castle Rushen type</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="19" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="20"><p><b>20.</b> Departure method</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="20" placeholder="Your answer..."></div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Sibling Psychology -->
+            <section class="bg-white p-8 rounded-2xl shadow-sm mb-12 border border-gray-100" id="s3">
+                <div class="mb-6 flex items-center gap-3 flex-wrap">
+                    <span class="section-badge badge-p3">Section 3</span>
+                    <h2 class="text-2xl font-black text-gray-900">Birth Order and Personality</h2>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">📋 Questions 21-26: Match each statement to the correct birth order position, <b>A-H</b>.</p>
+
+                <div class="mb-6 bg-purple-50 rounded-xl p-4 text-center">
+                    <p class="text-xs font-bold text-purple-700 uppercase mb-2">🎧 Audio Section 3</p>
+                    <audio controls class="mx-auto">
+                        <source src="../Audio/ielts15_test1_audio3.m4a" type="audio/mp4">
+                        Trình duyệt không hỗ trợ audio.
+                    </audio>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-gray-50 p-4 rounded-lg border text-sm">
+                        <h4 class="font-bold text-gray-700 mb-2">Options (A-H)</h4>
+                        <ul class="grid grid-cols-2 gap-2">
+                            <li><b>A.</b> outgoing</li><li><b>B.</b> selfish</li><li><b>C.</b> independent</li><li><b>D.</b> attention-seeking</li>
+                            <li><b>E.</b> introverted</li><li><b>F.</b> co-operative</li><li><b>G.</b> caring</li><li><b>H.</b> competitive</li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="question-box flex items-center justify-between" data-q="21"><p><b>21.</b> The eldest child</p><select class="user-ans p-2 border rounded" data-id="21"><option value="">?</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                        <div class="question-box flex items-center justify-between" data-q="22"><p><b>22.</b> A middle child</p><select class="user-ans p-2 border rounded" data-id="22"><option value="">?</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                        <div class="question-box flex items-center justify-between" data-q="23"><p><b>23.</b> The youngest child</p><select class="user-ans p-2 border rounded" data-id="23"><option value="">?</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                        <div class="question-box flex items-center justify-between" data-q="24"><p><b>24.</b> A twin</p><select class="user-ans p-2 border rounded" data-id="24"><option value="">?</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                        <div class="question-box flex items-center justify-between" data-q="25"><p><b>25.</b> An only child</p><select class="user-ans p-2 border rounded" data-id="25"><option value="">?</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                        <div class="question-box flex items-center justify-between" data-q="26"><p><b>26.</b> A child with much older siblings</p><select class="user-ans p-2 border rounded" data-id="26"><option value="">?</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500 mb-4">📋 Questions 27-30: Choose the correct letter, <b>A</b>, <b>B</b> or <b>C</b>.</p>
+
+                <div class="space-y-4">
+                    <div class="question-box" data-q="27">
+                        <p><b>27.</b> What does the research say about birth order?</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="27"><option value="">-- Select --</option><option value="A">A. It has a strong proven effect on personality.</option><option value="B">B. There is ongoing debate about its effects.</option><option value="C">C. It only affects identical twins.</option></select>
+                    </div>
+                    <div class="question-box" data-q="28">
+                        <p><b>28.</b> According to the discussion, first-born children tend to be</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="28"><option value="">-- Select --</option><option value="A">A. more likely to follow rules.</option><option value="B">B. less successful academically.</option><option value="C">C. more creative than their siblings.</option></select>
+                    </div>
+                    <div class="question-box" data-q="29">
+                        <p><b>29.</b> The students agree that research on twins</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="29"><option value="">-- Select --</option><option value="A">A. is conclusive about personality traits.</option><option value="B">B. provides interesting but limited data.</option><option value="C">C. should not be used in psychology studies.</option></select>
+                    </div>
+                    <div class="question-box" data-q="30">
+                        <p><b>30.</b> The main conclusion of the discussion is that</p>
+                        <select class="user-ans mt-2 w-full p-2 border rounded" data-id="30"><option value="">-- Select --</option><option value="A">A. birth order determines personality completely.</option><option value="B">B. environment matters more than birth order.</option><option value="C">C. more research is needed on the topic.</option></select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Eucalyptus Ecology -->
+            <section class="bg-white p-8 rounded-2xl shadow-sm mb-12 border border-gray-100" id="s4">
+                <div class="mb-6 flex items-center gap-3 flex-wrap">
+                    <span class="section-badge badge-p4">Section 4</span>
+                    <h2 class="text-2xl font-black text-gray-900">Eucalyptus Ecology in Australia</h2>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">📋 Questions 31-40: Complete the notes below. Write <b>NO MORE THAN TWO WORDS AND/OR A NUMBER</b> for each answer.</p>
+
+                <div class="mb-6 bg-emerald-50 rounded-xl p-4 text-center">
+                    <p class="text-xs font-bold text-emerald-700 uppercase mb-2">🎧 Audio Section 4</p>
+                    <audio controls class="mx-auto">
+                        <source src="../Audio/ielts15_test1_audio4.m4a" type="audio/mp4">
+                        Trình duyệt không hỗ trợ audio.
+                    </audio>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-6">
+                    <h4 class="font-bold text-gray-700 border-b border-gray-300 pb-2 mb-4">A) DISEASES AFFECTING EUCALYPTUS</h4>
+                    <div class="space-y-3 text-sm">
+                        <p><b>'Mundulla Yellows':</b> caused by lime used for making (31) _______________ being absorbed into the soil.</p>
+                        <p><b>'Bell-miner Associated Die-back':</b> (32) _______________ feed on eucalyptus leaves and secrete a sugary substance. This attracts bell-miner birds.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <h4 class="font-bold text-gray-700 border-b border-gray-300 pb-2 mb-4">B) BUSHFIRES (William Jackson's Theory)</h4>
+                    <div class="space-y-3 text-sm">
+                        <p>• <b>High-frequency fires</b> (every 2-5 years): lead to growth of (33) _______________ rather than eucalyptus.</p>
+                        <p>• <b>Medium-frequency fires</b> (every (34) _______________ years): ideal for eucalyptus forests. Eucalyptus trees produce more (35) _______________ than other species. They also help maintain the quality of (36) _______________.</p>
+                        <p>• <b>Low-frequency fires</b> (very rare): allow (37) _______________ to grow, creating an ideal environment for the (38) _______________ of the bell-miner bird.</p>
+                        <p>• Eucalyptus forests need a specific balance of fire to maintain the (39) _______________ of the ecosystem.</p>
+                        <p>• Without this balance, the (40) _______________ of eucalyptus forests declines significantly.</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 space-y-3">
+                    <div class="question-box" data-q="31"><p><b>31.</b> Lime used for making...</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="31" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="32"><p><b>32.</b> What feeds on eucalyptus leaves (causing die-back)</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="32" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="33"><p><b>33.</b> High-frequency fires lead to growth of...</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="33" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="34"><p><b>34.</b> Medium-frequency fires: every ___ years</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="34" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="35"><p><b>35.</b> Eucalyptus trees produce more...</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="35" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="36"><p><b>36.</b> They help maintain the quality of...</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="36" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="37"><p><b>37.</b> Low-frequency fires allow ___ to grow</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="37" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="38"><p><b>38.</b> Ideal environment for the ___ of bell-miner</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="38" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="39"><p><b>39.</b> Fire balance maintains the ___ of the ecosystem</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="39" placeholder="Your answer..."></div>
+                    <div class="question-box" data-q="40"><p><b>40.</b> Without balance, the ___ of eucalyptus forests declines</p><input type="text" class="user-ans w-full p-2 border rounded" data-id="40" placeholder="Your answer..."></div>
+                </div>
+            </section>
+
+            <!-- Submit Section -->
+            <div class="text-center mt-8">
+                <button id="btn-submit" onclick="submitTest()" class="bg-green-600 hover:bg-green-700 text-white font-black py-4 px-16 rounded-full shadow-lg transform transition active:scale-95 text-lg">
+                    📝 NỘP BÀI THI
+                </button>
+                <p class="text-xs text-gray-400 mt-2">Bạn chỉ được nộp bài một lần. Hãy kiểm tra kỹ trước khi nộp.</p>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="hidden mt-8 bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center">
+                <h3 class="text-3xl font-black text-gray-900 mb-4">📊 KẾT QUẢ BÀI THI</h3>
+                <div id="result-content"></div>
+                <button onclick="location.reload()" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-all">🔄 LÀM LẠI BÀI THI</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── ANSWER KEY ──
+        // Based on Cambridge IELTS 15 Test 1 Listening
+        const answerKey = {
+            1:  "central",         // Buyright Central
+            2:  "stuart",          // Stuart Waters
+            3:  "customers",       // dealing with customers
+            4:  "certificate",     // must have a certificate
+            5:  "8.50",            // £8.50 per hour
+            6:  "weekdays",        // weekdays including Saturday
+            7:  "10 am",           // interview at 10 am
+            8:  "ar421",           // reference number AR421
+            9:  "passport",        // passport and a CV
+            10: "church",          // next to the church
+            11: "A",               // has been in business for longer
+            12: "B",               // Heysham
+            13: "B",               // mix of guided and free time
+            14: "A",               // included in tour price
+            15: "sea",             // view of the sea
+            16: "979",             // founded in 979 (correction)
+            17: "train",           // take the train
+            18: "pass",            // provides a pass
+            19: "castle",          // example of a castle
+            20: "ferry",           // leave by ferry
+            21: "H",               // eldest: competitive
+            22: "F",               // middle: co-operative
+            23: "D",               // youngest: attention-seeking
+            24: "C",               // twin: independent
+            25: "A",               // only child: outgoing
+            26: "E",               // much older siblings: introverted
+            27: "B",               // ongoing debate
+            28: "A",               // more likely to follow rules
+            29: "B",               // interesting but limited data
+            30: "C",               // more research needed
+            31: "cement",          // lime for making cement
+            32: "insects",         // insects feed on leaves
+            33: "grassland",       // grassland/scrub
+            34: "10",              // every 10 years
+            35: "seeds",           // produce more seeds
+            36: "soil",            // maintain quality of soil
+            37: "rainforest",      // allow rainforest to grow
+            38: "population",      // population of bell-miner
+            39: "biodiversity",    // maintain biodiversity
+            40: "health"           // health declines
+        };
+
+        // ── STATE ──
+        let testStarted = false;
+        let timerInterval = null;
+        let timeRemaining = 30 * 60; // 30 minutes in seconds
+
+        function startTest() {
+            const nameInput = document.getElementById('student-name');
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert('Vui lòng nhập họ và tên của bạn!');
+                nameInput.focus();
+                return;
+            }
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-container').classList.remove('hidden');
+            document.getElementById('display-name').textContent = name;
+            document.getElementById('user-initial').textContent = name.charAt(0).toUpperCase();
+            
+            testStarted = true;
+            startTimer();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert('⏰ Hết giờ! Bài thi sẽ được tự động nộp.');
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeRemaining / 60);
+            const secs = timeRemaining % 60;
+            document.getElementById('timer').textContent = 
+                String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+            
+            if (timeRemaining <= 300) {
+                document.getElementById('timer').classList.add('animate-pulse');
+            }
+        }
+
+        function submitTest() {
+            if (!testStarted) return;
+            
+            clearInterval(timerInterval);
+            testStarted = false;
+
+            let totalScore = 0;
+            const totalQuestions = 40;
+
+            // Collect all inputs
+            const inputs = document.querySelectorAll('.user-ans');
+            const userAnswers = {};
+            
+            inputs.forEach(input => {
+                const id = parseInt(input.getAttribute('data-id'));
+                let userValue = '';
+                if (input.tagName === 'SELECT') {
+                    userValue = input.value.trim().toUpperCase();
+                } else {
+                    userValue = input.value.trim().toLowerCase();
+                }
+                userAnswers[id] = userValue;
+                
+                // Disable all inputs
+                input.disabled = true;
+            });
+
+            // Grade each question
+            for (let q = 1; q <= totalQuestions; q++) {
+                const correctAns = String(answerKey[q]).toLowerCase();
+                const userAns = (userAnswers[q] || '').toLowerCase();
+                const questionBox = document.querySelector(`[data-q="${q}"]`);
+                
+                if (!userAns) {
+                    // No answer given
+                    if (questionBox) questionBox.classList.add('answer-missed');
+                } else if (correctAns === userAns) {
+                    totalScore++;
+                    if (questionBox) questionBox.classList.add('answer-correct');
+                } else {
+                    if (questionBox) questionBox.classList.add('answer-wrong');
+                }
+            }
+
+            // Calculate IELTS band score (approximate)
+            let bandScore;
+            if (totalScore >= 39) bandScore = '9.0';
+            else if (totalScore >= 37) bandScore = '8.5';
+            else if (totalScore >= 35) bandScore = '8.0';
+            else if (totalScore >= 33) bandScore = '7.5';
+            else if (totalScore >= 30) bandScore = '7.0';
+            else if (totalScore >= 27) bandScore = '6.5';
+            else if (totalScore >= 23) bandScore = '6.0';
+            else if (totalScore >= 20) bandScore = '5.5';
+            else if (totalScore >= 16) bandScore = '5.0';
+            else if (totalScore >= 13) bandScore = '4.5';
+            else if (totalScore >= 10) bandScore = '4.0';
+            else if (totalScore >= 8) bandScore = '3.5';
+            else if (totalScore >= 6) bandScore = '3.0';
+            else bandScore = '2.5';
+
+            // Display results
+            const resultSection = document.getElementById('result-section');
+            const resultContent = document.getElementById('result-content');
+            resultSection.classList.remove('hidden');
+
+            const percentage = Math.round((totalScore / totalQuestions) * 100);
+            const studentName = document.getElementById('display-name').textContent;
+            const emoji = totalScore >= 30 ? '🎉' : totalScore >= 20 ? '👍' : totalScore >= 10 ? '📚' : '💪';
+
+            resultContent.innerHTML = `
+                <div class="mb-6">
+                    <div class="text-6xl mb-4">${emoji}</div>
+                    <p class="text-xl text-gray-600">Thí sinh: <b class="text-gray-900">${studentName}</b></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-lg mx-auto mb-6">
+                    <div class="bg-green-50 rounded-xl p-4 border border-green-200">
+                        <p class="text-xs text-green-600 uppercase font-bold">Điểm số</p>
+                        <p class="text-3xl font-black text-green-700">${totalScore}/40</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                        <p class="text-xs text-blue-600 uppercase font-bold">Tỉ lệ đúng</p>
+                        <p class="text-3xl font-black text-blue-700">${percentage}%</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                        <p class="text-xs text-purple-600 uppercase font-bold">IELTS Band</p>
+                        <p class="text-3xl font-black text-purple-700">${bandScore}</p>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <p>✅ <span class="text-green-600 font-bold">Đúng:</span> ${totalScore} câu</p>
+                    <p>❌ <span class="text-red-600 font-bold">Sai:</span> ${totalQuestions - totalScore - Object.values(userAnswers).filter(a => !a).length} câu</p>
+                    <p>⚠️ <span class="text-yellow-600 font-bold">Chưa trả lời:</span> ${Object.values(userAnswers).filter(a => !a).length} câu</p>
+                </div>
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg text-left text-xs text-gray-600 max-h-64 overflow-y-auto">
+                    <p class="font-bold mb-2">📋 ĐÁP ÁN THAM KHẢO:</p>
+                    ${Object.entries(answerKey).map(([q, ans]) => `<span class="inline-block mr-3 mb-1">Q${q}: <b>${ans}</b></span>`).join('')}
+                </div>
+            `;
+
+            // Scroll to results
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ── Keyboard shortcut: Enter to start ──
+        document.getElementById('student-name').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                startTest();
+            }
+        });
+    </script>
+</body>
+</html>
