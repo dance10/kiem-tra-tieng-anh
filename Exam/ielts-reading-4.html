@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IELTS Academic Reading: Interactive Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
     tailwind.config = {
         theme: {
@@ -39,7 +42,8 @@
     .status-correct { color: #15803d; font-weight: bold; }
     .status-incorrect { color: #b91c1c; font-weight: bold; }
     input[type="text"], select { border: 1px solid #cbd5e1; border-radius: 0.25rem; padding: 0.25rem 0.5rem; width: 100%; max-width: 300px; }
-    input[type="text"]:focus, select:focus { outline: none; border-color: #0f766e; ring: 2px solid #ccfbf1; }
+    input[type="text"]:focus, select:focus { outline: none; border-color: #0f766e; box-shadow: 0 0 0 3px #ccfbf1; }
+    .band-cell { width: 70px; text-align: center; }
 </style>
 </head>
 <body class="font-sans antialiased flex flex-col h-screen overflow-hidden">
@@ -337,6 +341,10 @@
                 </div>
             </div>
 
+            <div id="band-score-display" class="mb-6 text-center hidden">
+                <p class="text-lg font-bold text-brand-900">IELTS Band Score: <span id="band-value" class="text-2xl"></span></p>
+            </div>
+
             <div class="grid grid-cols-3 gap-4 mb-8 text-left">
                 <div class="bg-gray-50 p-4 rounded border">
                     <h4 class="font-bold text-sm text-gray-500">Passage 1</h4>
@@ -376,38 +384,49 @@
     let chartInstance = null;
 
     function initChart() {
-        const ctx = document.getElementById('overviewChart').getContext('2d');
-        if (chartInstance) chartInstance.destroy();
-        
-        chartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Matching Headings', 'T/F/NG & Y/N/NG', 'Completion/Short Ans', 'Multiple Choice', 'Matching Features'],
-                datasets: [{
-                    data: [5, 11, 14, 5, 5],
-                    backgroundColor: ['#0f766e', '#14b8a6', '#5eead4', '#cbd5e1', '#64748b'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 12, font: { family: 'Inter' } } },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed !== null) { label += context.parsed + ' Questions'; }
-                                return label;
+        try {
+            const canvas = document.getElementById('overviewChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded. Skipping chart initialization.');
+                return;
+            }
+            
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Matching Headings', 'T/F/NG & Y/N/NG', 'Completion/Short Ans', 'Multiple Choice', 'Matching Features'],
+                    datasets: [{
+                        data: [5, 11, 14, 5, 5],
+                        backgroundColor: ['#0f766e', '#14b8a6', '#5eead4', '#cbd5e1', '#64748b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 12, font: { family: 'Inter' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed !== null) { label += context.parsed + ' Questions'; }
+                                    return label;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        } catch (e) {
+            console.error('Chart initialization error:', e);
+        }
     }
 
     function navigate(sectionId) {
@@ -460,7 +479,7 @@
 
     function getUserAnswer(qId) {
         const el = document.getElementById(qId);
-        if (el) return el.value.trim().toUpperCase();
+        if (el) return el.value.trim();
         
         const radios = document.getElementsByName(qId);
         if (radios.length > 0) {
@@ -472,6 +491,12 @@
     }
 
     async function showResults() {
+        // Dừng đồng hồ đếm ngược khi nộp bài
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
         let totalScore = 0;
         let p1Score = 0, p2Score = 0, p3Score = 0;
         let answersSubmitted = {};
@@ -483,18 +508,18 @@
             const qId = 'q' + i;
             const resSpan = document.getElementById('res-' + qId);
             const userAns = getUserAnswer(qId);
-            answersSubmitted[i] = userAns.toUpperCase();
-            // const userAns = getUserAnswer(qId).toLowerCase();
+            answersSubmitted[i] = userAns;
+            const userAnsLower = userAns.toLowerCase().trim();
             const correctAnswers = answerKey[qId].map(a => a.toLowerCase());
             
             let isCorrect = false;
             
             if (userAns !== "") {
-                if (correctAnswers.includes(userAns)) {
+                if (correctAnswers.includes(userAnsLower)) {
                     isCorrect = true;
                 } else {
                     for(let ans of correctAnswers) {
-                        if(userAns.includes(ans) && userAns.length <= ans.length + 4) {
+                        if(userAnsLower.includes(ans) && userAnsLower.length <= ans.length + 4) {
                             isCorrect = true; break;
                         }
                     }
@@ -510,7 +535,7 @@
                     else if (i <= 26) p2Score++;
                     else p3Score++;
                 } else {
-                    resSpan.innerHTML = ' &#10008; (Correct: ' + answerKey[qId][0].toUpperCase() + ')';
+                    resSpan.innerHTML = ' &#10008; (Đáp án: ' + answerKey[qId][0] + ')';
                     resSpan.className = 'ml-2 text-sm status-incorrect';
                 }
             }
@@ -521,12 +546,20 @@
         document.getElementById('score-p2').innerText = p2Score + '/13';
         document.getElementById('score-p3').innerText = p3Score + '/14';
 
+        // Hiển thị IELTS Band Score
+        const band = (totalScore / 40 * 9).toFixed(1);
+        const bandDisplay = document.getElementById('band-score-display');
+        const bandValue = document.getElementById('band-value');
+        if (bandDisplay && bandValue) {
+            bandDisplay.classList.remove('hidden');
+            bandValue.innerText = band;
+        }
+
         const saveStatus = document.getElementById('save-status');
         if (saveStatus) {
             saveStatus.innerText = "⏳ Đang lưu kết quả...";
             saveStatus.className = "text-sm text-yellow-600 font-bold mb-4";
             try {
-                const band = (totalScore / 40 * 9).toFixed(1);
                 await fetch(GOOGLE_SHEET_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -560,77 +593,20 @@
     };
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const possibleIds = ['overlay-name', 'student-name', 'studentName', 'ket-student-name', 'cand-name', 'candidateName'];
-    let nameInput = null;
-    for (let id of possibleIds) {
-        if (document.getElementById(id)) {
-            nameInput = document.getElementById(id);
-            break;
-        }
-    }
-    
-    // Also try finding by placeholder if ID not matched
-    if (!nameInput) {
-        const inputs = document.querySelectorAll('input[type="text"]');
-        for (let input of inputs) {
-            if (input.placeholder && input.placeholder.toLowerCase().includes('tên')) {
-                nameInput = input;
-                break;
-            }
-        }
-    }
-
-    if (nameInput && !document.getElementById('dynamic-location-select')) {
-        const select = document.createElement('select');
-        select.id = 'dynamic-location-select';
-        select.innerHTML = '<option value="Củ Chi">Củ Chi</option><option value="Tân Phú">Tân Phú</option><option value="Hóc Môn">Hóc Môn</option><option value="Online">Online</option>';
-        select.className = nameInput.className;
-        select.style.marginTop = '10px';
-        select.style.marginBottom = '10px';
-        nameInput.parentNode.insertBefore(select, nameInput.nextSibling);
-
-        const originalFetch = window.fetch;
-        window.fetch = function() {
-            if (arguments[0] && arguments[0].includes('script.google.com')) {
-                try {
-                    let opts = arguments[1];
-                    let bodyObj = JSON.parse(opts.body);
-                    let loc = select.value;
-                    for (let key in bodyObj) {
-                        if (key === 'name' || key === 'student_name' || key === 'studentName') {
-                            // bodyObj[key] = bodyObj[key] + ' - ' + loc;
-                        }
-                    }
-                    bodyObj['location'] = loc;
-                    opts.body = JSON.stringify(bodyObj);
-                } catch(e) { console.error(e); }
-            }
-            return originalFetch.apply(this, arguments);
-        };
-    }
-
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    dateInputs.forEach(input => {
-        if (!input.value) {
-            const vnTime = new Date(new Date().getTime() + 7 * 3600 * 1000);
-            input.value = vnTime.toISOString().split('T')[0];
-        }
-    });
-});
-</script>
-
-<!-- Timer Logger Patch -->
+<!-- Unified Data Collection & Timer Logger Script -->
 <script>
 (function(){
-    if (window.timerPatchApplied) return;
-    window.timerPatchApplied = true;
+    if (window.unifiedPatchApplied) return;
+    window.unifiedPatchApplied = true;
     window.testStartTime = null;
 
+    // --- Theo dõi thời điểm bắt đầu bài thi ---
+    // Phát hiện nút "Begin Practice Test", "Bắt đầu", "Start", "Bắt đâu", "Submit", "Nộp bài"
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('button');
-        if (btn && (btn.innerText.toLowerCase().includes('bắt đầu') || btn.innerText.toLowerCase().includes('start') || btn.innerText.toLowerCase().includes('bắt đâu'))) {
+        if (!btn) return;
+        const btnText = btn.innerText.toLowerCase();
+        if (btnText.includes('begin') || btnText.includes('bắt đầu') || btnText.includes('start') || btnText.includes('bắt đâu') || btnText.includes('practice test')) {
             if (!window.testStartTime) {
                 window.testStartTime = new Date();
                 console.log("Test started at: " + window.testStartTime);
@@ -638,6 +614,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Tự động thêm dropdown chọn cơ sở ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const possibleIds = ['overlay-name', 'student-name', 'studentName', 'ket-student-name', 'cand-name', 'candidateName'];
+        let nameInput = null;
+        for (let id of possibleIds) {
+            if (document.getElementById(id)) {
+                nameInput = document.getElementById(id);
+                break;
+            }
+        }
+        if (!nameInput) {
+            const inputs = document.querySelectorAll('input[type="text"]');
+            for (let input of inputs) {
+                if (input.placeholder && input.placeholder.toLowerCase().includes('tên')) {
+                    nameInput = input;
+                    break;
+                }
+            }
+        }
+
+        if (nameInput && !document.getElementById('dynamic-location-select')) {
+            const select = document.createElement('select');
+            select.id = 'dynamic-location-select';
+            select.innerHTML = '<option value="Củ Chi">Củ Chi</option><option value="Tân Phú">Tân Phú</option><option value="Hóc Môn">Hóc Môn</option><option value="Online">Online</option>';
+            select.className = nameInput.className;
+            select.style.marginTop = '10px';
+            select.style.marginBottom = '10px';
+            nameInput.parentNode.insertBefore(select, nameInput.nextSibling);
+        }
+
+        // Tự động điền ngày hiện tại vào input[type="date"]
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        dateInputs.forEach(input => {
+            if (!input.value) {
+                const vnTime = new Date(new Date().getTime() + 7 * 3600 * 1000);
+                input.value = vnTime.toISOString().split('T')[0];
+            }
+        });
+    });
+
+    // --- Ghi đè fetch để bổ sung location, startTime, endTime, timeTaken ---
     const origFetch = window.fetch;
     window.fetch = function() {
         if (arguments[0] && arguments[0].includes('script.google.com')) {
@@ -645,9 +662,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 let opts = arguments[1];
                 if (opts && opts.body) {
                     let bodyObj = JSON.parse(opts.body);
+                    
+                    // Thêm location từ dropdown
+                    const locSelect = document.getElementById('dynamic-location-select');
+                    if (locSelect) {
+                        bodyObj['location'] = locSelect.value;
+                    }
+                    
+                    // Thêm thông tin thời gian
                     if (window.testStartTime) {
                         const endTime = new Date();
-                        // Định dạng dd/mm/yyyy hh:mm:ss
                         const formatDate = (d) => {
                             const pad = n => n<10?'0'+n:n;
                             return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
@@ -660,15 +684,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         const secs = diffSecs % 60;
                         bodyObj['timeTaken'] = `${mins} phút ${secs} giây`;
                     } else {
-                         bodyObj['timeTaken'] = "Không xác định";
+                        bodyObj['timeTaken'] = "Không xác định";
                     }
-                    // delete bodyObj.answers; // Tùy chọn: có thể ghi vào answers. Xin không xóa answers để không mất dữ liệu của học viên
                     
-                    // Để an toàn, ghi chú vào biến "timeTaken" để có thể gộp nếu Google sheet không map cột tự động
                     opts.body = JSON.stringify(bodyObj);
                     arguments[1] = opts;
                 }
-            } catch(e) { console.error("Timer Patch Error:", e); }
+            } catch(e) { console.error("Unified Patch Error:", e); }
         }
         return origFetch.apply(this, arguments);
     };
